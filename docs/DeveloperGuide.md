@@ -296,32 +296,181 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Use cases
 
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
-
-**Use case: Delete a person**
+**System:** GitMate  
+**Use case:** U1. Add a contact  
+**Actor:** User  
+**Precondition:** GitMate is running and ready to receive commands
 
 **MSS**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1.  User enters the add command.
+2.  User provides the person's name and phone number.
+3.  User optionally provides the person’s address, email, GitHub, LinkedIn, Telegram, group, or tags.
+4.  User submits command.
+5.  GitMate validates the command details.
+6.  GitMate adds the contact to the list.
+7.  GitMate displays a confirmation message.
 
     Use case ends.
 
 **Extensions**
 
-* 2a. The list is empty.
+* 5a. Phone number is invalid.
 
-  Use case ends.
+    * 5a1. GitMate shows: “Please give a valid phone number”.
 
-* 3a. The given index is invalid.
+    * 5a2. Use case resumes at step 2.
 
-    * 3a1. AddressBook shows an error message.
+* 5b. Name is missing.
 
-      Use case resumes at step 2.
+    * 5b1. GitMate shows: “Contact requires a name”.
 
-*{More to be added}*
+    * 5b2. Use case resumes at step 2.
+
+* 5c. Phone number already in use.
+
+    * 5c1. GitMate shows: “Phone number is already in use”.
+
+    * 5c2. Use case resumes at step 2.
+
+**System:** GitMate  
+**Use case:** U2. Delete a contact  
+**Actor:** User  
+**Precondition:** GitMate is running and ready to receive commands
+
+**MSS**
+
+1.  User enters delete command.
+2.  User provides the person's name.
+3.  User optionally provides the person's phone number.
+4.  User submits the command. 
+5.  GitMate validates the command details. 
+6.  GitMate identifies the contact. 
+7.  GitMate deletes the contact. 
+8.  GitMate displays a confirmation message.
+
+    Use case ends.
+
+**Extensions**
+
+* 5a. Name not provided.
+
+    * 5a1. GitMate shows: “Name is required”.
+
+    * 5a2. Use case resumes at step 2.
+
+* 6a. Name does not exist.
+
+    * 6a1. GitMate shows: “Name does not exist”.
+
+    * 6a2. Use case resumes at step 2.
+
+* 6b. Multiple persons have the same name.
+
+    * 6b1. GitMate shows: "Multiple contacts found! Specify a number".
+
+    * 6b2. Use case resumes at step 2.
+ 
+**System:** GitMate  
+**Use case:** U3. Find a contact  
+**Actor:** User  
+**Precondition:** GitMate is running and ready to receive commands
+
+**MSS**
+
+1.  User enters a find command.
+2.  User provides one or more search fields.
+3.  User submits the command. 
+4.  GitMate validates the command details. 
+5.  GitMate searches the contact list. 
+6.  GitMate displays all matching contacts.
+
+    Use case ends.
+
+**Extensions**
+
+* 4a. Search tags is not provided.
+
+    * 4a1. GitMate shows: “Please provide a valid flag”.
+
+    * 4a2. Use case resumes at step 2.
+
+* 4b. Unsupported flag provided.
+
+    * 4b1. GitMate shows: “Please provide a valid flag”.
+
+    * 4b2. Use case resumes at step 2.
+
+* 4c. Search field value not provided.
+
+    * 4c1. GitMate shows: “Please provide a flag to search for”.
+
+    * 4c2. Use case resumes at step 2.
+
+* 5a. No matching contacts found.
+
+    * 5a1. GitMate shows: “No contact was found”.
+
+    * 5a2. Use case ends.
+
+**System:** GitMate  
+**Use case:** U4. View help  
+**Actor:** User  
+**Precondition:** GitMate is running and ready to receive commands
+
+**MSS**
+
+1.  User enters help command.
+2.  User submits the command.
+3.  GitMate displays the available commands, flags and examples.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User selects the help button instead.
+
+    * 1a1. GitMate opens the help window.
+
+    * 1a2. Help window displays the available commands, flags and examples.
+
+    * 1a3. Use case ends.
+
+**System:** GitMate  
+**Use case:** U5. Receive help suggestions for an invalid command  
+**Actor:** User  
+**Precondition:** GitMate is running and ready to receive commands
+
+**MSS**
+
+1.  User enters a command.
+2.  User submits command.
+3.  GitMate detects that the command or its syntax is invalid.
+4.  GitMate identifies the likely error in the command.
+5.  GitMate displays a detailed error message.
+6.  GitMate displays the correct command format, required parameters, and an example.
+7.  User corrects and re-enters the command.
+
+    Use case ends.
+
+**Extensions**
+
+* 3a. The user enters a compulsory flag without a value.
+
+    * 3a1. GitMate informs the user that a value is required for the flag.
+
+    * 3a2. GitMate displays the correct command format and an example.
+
+    * 3a3. Use case resumes at Step 7.
+
+
+* 3b. The user enters a command without any flags.
+
+    * 3b1. GitMate informs the user that the command format is invalid.
+
+    * 3b2. GitMate displays the required flags and an example command.
+
+    * 3b3. Use case resumes at step 2.
 
 ### Non-Functional Requirements
 
