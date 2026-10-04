@@ -275,7 +275,7 @@ _{Explain here how the data archiving feature will be implemented}_
 * can type fast and prefers typing commands for quick lookups and updates
 * is reasonably comfortable using command-line interfaces to manage contacts efficiently
 
-**Value proposition**: Helps NUS students rapidly track and access group project teammates' details through an intuitive command interface tailored for fast typists.
+**Value proposition**: Helps NUS students rapidly track and access group project groupmates details through an intuitive command interface tailored for fast typists.
 
 
 ### User stories
