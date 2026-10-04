@@ -282,16 +282,25 @@ _{Explain here how the data archiving feature will be implemented}_
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …                                    | I want to …                 | So that I can…                                                        |
-|----------|--------------------------------------------|------------------------------|------------------------------------------------------------------------|
-| `* * *`  | new user                                   | see usage instructions       | refer to instructions when I forget how to use the App                 |
-| `* * *`  | user                                       | add a new person             |                                                                        |
-| `* * *`  | user                                       | delete a person              | remove entries that I no longer need                                   |
-| `* * *`  | user                                       | find a person by name        | locate details of persons without having to go through the entire list |
-| `* *`    | user                                       | hide private contact details | minimize chance of someone else seeing them by accident                |
-| `*`      | user with many persons in the address book | sort persons by name         | locate a person easily                                                 |
-
-*{More to be added}*
+| Priority | Scope | As a … | I want to … | So that I can …                                                                     |
+|:---------| :- | :- | :- |:------------------------------------------------------------------------------------|
+| `***`    | MVP | New user | See sample data upon launching the app | Immediately understand how a populated contact list looks and functions             |
+| `***`    | MVP | New user | Clear the sample data | Start populating the app with my own data                                           |
+| `***`    | MVP | New user | See instructions for commands | Quickly learn how to use the app and know what command formats are accepted         |
+| `***`    | MVP | User | Add my groupmate’s contacts | Keep track of their contact information for project collaboration                   |
+| `***`    | MVP | User | Delete my groupmate’s contact | Remove groupmates who I do not keep in contact with anymore                         |
+| `***`    | MVP | User | List all my contacts | See an overview of all my current group project contacts                            |
+| `***`    | MVP | User | Find my contacts | Quickly retrieve specific contact details without searching through the entire list |
+| `**`     | MVP | Second-time user | Receive clear, non-destructive error messages when I mistype a command | Correct my input without losing my progress                                         |
+| `**`     | MVP | 10th time user | To see my previous commands autofilled when I click the up arrow key | Quickly repeat or correct recent commands without having to retype them             |
+| `***`    | Beyond MVP | User | Edit my groupmate's contact details | Update outdated contact information without deleting and re-adding them             |
+| `**`     | Beyond MVP | User | Autocomplete commands by pressing Tab | Input commands faster with fewer keystrokes                                         |
+| `**`     | Beyond MVP | 10th time user | Add events for contacts under the same group | Keep track of project meetings and deadlines together.                              |
+| `**`     | Beyond MVP | 10th time user | View events for contacts under the same group | Check my group’s upcoming schedule and availability.                                |
+| `**`     | Beyond MVP | 10th time user | Edit events for contacts under the same group | Update meeting times or details when plans change.                                  |
+| `**`     | Beyond MVP | 10th time user | Delete events for contacts under the same group | Remove cancelled or outdated meetings from our schedule.                            |
+| `*`      | Beyond MVP | Experienced User | Pin contacts to appear at the top | Access important contacts quickly                                                   |
+| `*`      | Beyond MVP | Experienced User | Assign custom keyboard shortcuts to commands | Perform frequent tasks faster and tailor the application to my workflow             |
 
 ### Use cases
 
