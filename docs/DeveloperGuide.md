@@ -435,9 +435,19 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Glossary
 
-* **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
-
+* **MVP (Minimum Viable Product)**: The smallest set of features that makes GitMate usable, i.e. the features marked MVP in the user stories.
+* **Valid command**: A command that follows an accepted command format, with all required parameters present and correctly formatted.
+* **Core contact management features**: Our MVP commands of 'add', 'delete', 'find', 'help' and the sample data.
+* **Duplicate contact**: A contact whose phone number is already associated with another contact. Two contacts may share the same name, so a matching name alone does not make a duplicate.
+* **Mandatory field**: A contact detail that must be provided when adding a contact (name and phone number); the command is rejected if either is missing.
+* **CCA (Co-Curricular Activity)**: A student club, committee or organisation at NUS that a user may belong to outside their modules.
+* **Group**: A named set of groupmates, such as a module project team or a CCA committee (such contacts can be organised under the `g/` field).
+* **Groupmate**: A student collaborator assigned to the same project team or CCA as the user, whose contact details are managed within the application.
+* **Tag**: A label describing a contact's trait or project role (e.g. "frontend"), added with the `t/` field.
+* **Event**: A scheduled meeting or deadline linked to a group (e.g. a project meeting).
+* **Fast typist**: A user who types at least 60 words per minute.
+* **Local storage**: The data file on the user's own computer where GitMate saves contacts, so no internet connection or server is needed.
+* **Mainstream OS**: Windows, Linux, and macOS.
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Appendix: Instructions for manual testing**
