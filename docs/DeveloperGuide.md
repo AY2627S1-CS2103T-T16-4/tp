@@ -296,32 +296,131 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Use cases
 
-(For all use cases below, the **System** is the `AddressBook` and the **Actor** is the `user`, unless specified otherwise)
-
-**Use case: Delete a person**
+**System:** GitMate (GM)  
+**Use case:** U1. Add a contact  
+**Actor:** User  
+**Precondition:** GM is running and ready to receive commands
 
 **MSS**
 
-1.  User requests to list persons
-2.  AddressBook shows a list of persons
-3.  User requests to delete a specific person in the list
-4.  AddressBook deletes the person
+1.  User enters the add command with contact details. 
+2.  GM adds the contact to the list. 
+3.  GM displays a confirmation message.
 
     Use case ends.
 
 **Extensions**
 
-* 2a. The list is empty.
+* 1a. GM detects missing mandatory fields or invalid format in the entered data.
 
-  Use case ends.
+    * 1a1. GM displays an error message with the correct format.
 
-* 3a. The given index is invalid.
+    * Use case ends.
 
-    * 3a1. AddressBook shows an error message.
+* 1b. GM detects that contact already exists.
 
-      Use case resumes at step 2.
+    * 1b1. GM informs user of the duplicate contact.
 
-*{More to be added}*
+    * Use case ends.
+
+**System:** GitMate (GM)  
+**Use case:** U2. Delete a contact  
+**Actor:** User  
+**Precondition:** GM is running and ready to receive commands
+
+**MSS**
+
+1.  User enters delete command with contact details. 
+2.  GM deletes the contact. 
+3.  GM displays a confirmation message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. GM detects an invalid command format.
+
+    * 1a1. GM displays an error message with the correct format.
+
+    * Use case ends.
+
+* 1b. GM detects that the contact does not exist.
+
+    * 1b1. GM informs the user that the contact does not exist.
+
+    * Use case ends.
+
+* 1c. GM detects multiple contacts matching the identifier.
+
+    * 1c1. GM prompts the user to specify further details to resolve ambiguity.
+
+    * Use case ends.
+ 
+**System:** GitMate (GM)  
+**Use case:** U3. Find a contact  
+**Actor:** User  
+**Precondition:** GM is running and ready to receive commands
+
+**MSS**
+
+1.  User enters a find command with search details. 
+2.  GM displays all matching contacts.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. GM detects an invalid command format.
+
+    * 1a1. GM displays an error message with the correct format.
+
+    * Use case ends.
+
+* 1b. GM detects that there are no matching contacts.
+
+    * 1b1. GM displays an empty list and informs user that there are no matching contacts.
+
+    * Use case ends.
+
+**System:** GitMate (GM)  
+**Use case:** U4. View help  
+**Actor:** User  
+**Precondition:** GM is running and ready to receive commands
+
+**MSS**
+
+1.  User enters help command. 
+2.  GM displays a list of available commands, flags and examples.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User selects the help button instead.
+
+    * 1a1. GM opens the help window, displaying the available commands, flags and examples.
+
+    * Use case ends.
+
+**System:** GitMate (GM)  
+**Use case:** U5. List all contacts  
+**Actor:** User  
+**Precondition:** GM is running and ready to receive commands
+
+**MSS**
+
+1.  User enters the list command.
+2.  GM displays a list of all stored contacts.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. GM detects that stored contact list in GM is empty.
+
+    * 1a1. GM displays an empty list and informs user that contact list is empty.
+
+    * Use case ends.
 
 ### Non-Functional Requirements
 
