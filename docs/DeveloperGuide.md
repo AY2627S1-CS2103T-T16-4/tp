@@ -270,13 +270,12 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Target user profile**:
 
-* has a need to manage a significant number of contacts
-* prefers desktop apps over other types of applications
-* can type fast
-* prefers typing to mouse interactions
-* is reasonably comfortable using CLI apps
+* has a need to manage a significant number of teammate and peer contacts across multiple concurrent group projects and school activities
+* prefers fast, command-driven interfaces over mouse interactions and visual dashboards
+* can type fast and prefers typing commands for quick lookups and updates
+* is reasonably comfortable using command-line interfaces to manage contacts efficiently
 
-**Value proposition**: Manage contacts faster than with a typical mouse-driven GUI application.
+**Value proposition**: Helps NUS students rapidly track and access group project groupmates details through an intuitive command interface tailored for fast typists.
 
 
 ### User stories
