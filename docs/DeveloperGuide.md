@@ -296,133 +296,101 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 ### Use cases
 
-**System:** GitMate  
+**System:** GitMate (GM)  
 **Use case:** U1. Add a contact  
 **Actor:** User  
-**Precondition:** GitMate is running and ready to receive commands
+**Precondition:** GM is running and ready to receive commands
 
 **MSS**
 
-1.  User enters the add command.
-2.  User provides the person's name and phone number.
-3.  User optionally provides the person’s address, email, GitHub, LinkedIn, Telegram, group, or tags.
-4.  User submits command.
-5.  GitMate validates the command details.
-6.  GitMate adds the contact to the list.
-7.  GitMate displays a confirmation message.
+1.  User enters the add command with contact details. 
+2.  GM adds the contact to the list. 
+3.  GM displays a confirmation message.
 
     Use case ends.
 
 **Extensions**
 
-* 5a. Phone number is invalid.
+* 1a. GM detects missing mandatory fields or invalid format in the entered data.
 
-    * 5a1. GitMate shows: “Please give a valid phone number”.
+    * 1a1. GM displays an error message with the correct format.
 
-    * 5a2. Use case resumes at step 2.
+    * Use case ends.
 
-* 5b. Name is missing.
+* 1b. GM detects that contact already exists.
 
-    * 5b1. GitMate shows: “Contact requires a name”.
+    * 1b1. GM informs user of the duplicate contact.
 
-    * 5b2. Use case resumes at step 2.
+    * Use case ends.
 
-* 5c. Phone number already in use.
-
-    * 5c1. GitMate shows: “Phone number is already in use”.
-
-    * 5c2. Use case resumes at step 2.
-
-**System:** GitMate  
+**System:** GitMate (GM)  
 **Use case:** U2. Delete a contact  
 **Actor:** User  
-**Precondition:** GitMate is running and ready to receive commands
+**Precondition:** GM is running and ready to receive commands
 
 **MSS**
 
-1.  User enters delete command.
-2.  User provides the person's name.
-3.  User optionally provides the person's phone number.
-4.  User submits the command. 
-5.  GitMate validates the command details. 
-6.  GitMate identifies the contact. 
-7.  GitMate deletes the contact. 
-8.  GitMate displays a confirmation message.
+1.  User enters delete command with contact details. 
+2.  GM deletes the contact. 
+3.  GM displays a confirmation message.
 
     Use case ends.
 
 **Extensions**
 
-* 5a. Name not provided.
+* 1a. GM detects an invalid command format.
 
-    * 5a1. GitMate shows: “Name is required”.
+    * 1a1. GM displays an error message with the correct format.
 
-    * 5a2. Use case resumes at step 2.
+    * Use case ends.
 
-* 6a. Name does not exist.
+* 1b. GM detects that the contact does not exist.
 
-    * 6a1. GitMate shows: “Name does not exist”.
+    * 1b1. GM informs the user that the contact does not exist.
 
-    * 6a2. Use case resumes at step 2.
+    * Use case ends.
 
-* 6b. Multiple persons have the same name.
+* 1c. GM detects multiple contacts matching the identifier.
 
-    * 6b1. GitMate shows: "Multiple contacts found! Specify a number".
+    * 1c1. GM prompts the user to specify further details to resolve ambiguity.
 
-    * 6b2. Use case resumes at step 2.
+    * Use case ends.
  
-**System:** GitMate  
+**System:** GitMate (GM)  
 **Use case:** U3. Find a contact  
 **Actor:** User  
-**Precondition:** GitMate is running and ready to receive commands
+**Precondition:** GM is running and ready to receive commands
 
 **MSS**
 
-1.  User enters a find command.
-2.  User provides one or more search fields.
-3.  User submits the command. 
-4.  GitMate validates the command details. 
-5.  GitMate searches the contact list. 
-6.  GitMate displays all matching contacts.
+1.  User enters a find command with search details. 
+2.  GM displays all matching contacts.
 
     Use case ends.
 
 **Extensions**
 
-* 4a. Search tags is not provided.
+* 1a. GM detects an invalid command format.
 
-    * 4a1. GitMate shows: “Please provide a valid flag”.
+    * 1a1. GM displays an error message with the correct format.
 
-    * 4a2. Use case resumes at step 2.
+    * Use case ends.
 
-* 4b. Unsupported flag provided.
+* 1b. GM detects that there are no matching contacts.
 
-    * 4b1. GitMate shows: “Please provide a valid flag”.
+    * 1b1. GM displays an empty list and informs user that there are no matching contacts.
 
-    * 4b2. Use case resumes at step 2.
+    * Use case ends.
 
-* 4c. Search field value not provided.
-
-    * 4c1. GitMate shows: “Please provide a flag to search for”.
-
-    * 4c2. Use case resumes at step 2.
-
-* 5a. No matching contacts found.
-
-    * 5a1. GitMate shows: “No contact was found”.
-
-    * 5a2. Use case ends.
-
-**System:** GitMate  
+**System:** GitMate (GM)  
 **Use case:** U4. View help  
 **Actor:** User  
-**Precondition:** GitMate is running and ready to receive commands
+**Precondition:** GM is running and ready to receive commands
 
 **MSS**
 
-1.  User enters help command.
-2.  User submits the command.
-3.  GitMate displays the available commands, flags and examples.
+1.  User enters help command. 
+2.  GM displays a list of available commands, flags and examples.
 
     Use case ends.
 
@@ -430,47 +398,29 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 1a. User selects the help button instead.
 
-    * 1a1. GitMate opens the help window.
+    * 1a1. GM opens the help window, displaying the available commands, flags and examples.
 
-    * 1a2. Help window displays the available commands, flags and examples.
+    * Use case ends.
 
-    * 1a3. Use case ends.
-
-**System:** GitMate  
-**Use case:** U5. Receive help suggestions for an invalid command  
+**System:** GitMate (GM)  
+**Use case:** U5. List all contacts  
 **Actor:** User  
-**Precondition:** GitMate is running and ready to receive commands
+**Precondition:** GM is running and ready to receive commands
 
 **MSS**
 
-1.  User enters a command.
-2.  User submits command.
-3.  GitMate detects that the command or its syntax is invalid.
-4.  GitMate identifies the likely error in the command.
-5.  GitMate displays a detailed error message.
-6.  GitMate displays the correct command format, required parameters, and an example.
-7.  User corrects and re-enters the command.
+1.  User enters the list command.
+2.  GM displays a list of all stored contacts.
 
     Use case ends.
 
 **Extensions**
 
-* 3a. The user enters a compulsory flag without a value.
+* 1a. GM detects that stored contact list in GM is empty.
 
-    * 3a1. GitMate informs the user that a value is required for the flag.
+    * 1a1. GM displays an empty list and informs user that contact list is empty.
 
-    * 3a2. GitMate displays the correct command format and an example.
-
-    * 3a3. Use case resumes at Step 7.
-
-
-* 3b. The user enters a command without any flags.
-
-    * 3b1. GitMate informs the user that the command format is invalid.
-
-    * 3b2. GitMate displays the required flags and an example command.
-
-    * 3b3. Use case resumes at step 2.
+    * Use case ends.
 
 ### Non-Functional Requirements
 
