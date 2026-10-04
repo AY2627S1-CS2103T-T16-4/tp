@@ -30,7 +30,7 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ### Ho Wei Xian
 
-<img src="images/github_riomaker.png.jpg" width="200px">
+<img src="images/Rio-maker.png" width="200px">
 
 [[github](http://github.com/Rio-maker)] 
 
