@@ -326,10 +326,13 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 ### Non-Functional Requirements
 
 1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-2.  Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
-
-*{More to be added}*
+2.  The system should respond to any valid user command within two seconds when storing a contact list of up to 1,000 entries.
+3.  A user who can type at least 60 words per minute should be able to complete routine contact management tasks (adding, searching, deleting) faster using keyboard commands than performing the equivalent operations via GUI mouse interactions.
+4.  The application should be fully functional for all core contact management features without requiring an active internet connection after initial installation.
+5.  The user interface should have a clear, consistent layout with readable text and sufficient contrast between text and backgrounds.
+6.  Error messages and help descriptions should use clear, simple language that users can understand without technical knowledge.
+7.  All contact data should persist automatically across application sessions, saving to local storage upon the completion of any add, edit, or delete action.
+8.  A first-time user should be able to add, find, edit, and delete contacts within 15 minutes of completing setup, using only the application’s help messages and user guide for guidance.
 
 ### Glossary
 
