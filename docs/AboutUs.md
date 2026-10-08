@@ -11,51 +11,46 @@ You can reach us at the email `seer[at]comp.nus.edu.sg`
 
 ## Project team
 
-### John Doe
+### Keith Tang
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/mannymacman.png" width="200px">
 
-[[homepage](http://www.comp.nus.edu.sg/~damithch)]
-[[github](https://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](https://github.com/mannymacman)]
 
 * Role: Project Advisor
 
-### Jane Doe
+### Jonas Koh
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/jonaskke.png" width="200px">
 
-[[github](http://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](http://github.com/JONASKKE)]
 
 * Role: Team Lead
 * Responsibilities: UI
 
-### Johnny Doe
+### Ho Wei Xian
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/rio-maker.png" width="200px">
 
-[[github](http://github.com/johndoe)] [[portfolio](team/johndoe.md)]
+[[github](http://github.com/Rio-maker)] 
 
 * Role: Developer
 * Responsibilities: Data
 
-### Jean Doe
+### Lim Jun Han
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/junh4nn.png" width="200px">
 
-[[github](http://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](http://github.com/junh4nn)]
 
 * Role: Developer
 * Responsibilities: Dev Ops + Threading
 
-### James Doe
+### Sanjith Gunasekaran
 
-<img src="images/johndoe.png" width="200px">
+<img src="images/sanjith-gunasekaran.png" width="200px">
 
-[[github](http://github.com/johndoe)]
-[[portfolio](team/johndoe.md)]
+[[github](https://github.com/Sanjith-Gunasekaran)]
 
 * Role: Developer
 * Responsibilities: UI
