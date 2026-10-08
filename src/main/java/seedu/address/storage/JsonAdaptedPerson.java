@@ -12,9 +12,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import seedu.address.commons.exceptions.IllegalValueException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Group;
+import seedu.address.model.person.Github;
+import seedu.address.model.person.Linkedin;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.person.Telegram;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -28,6 +32,10 @@ class JsonAdaptedPerson {
     private final String phone;
     private final String email;
     private final String address;
+    private final String group;
+    private final String github;
+    private final String linkedin;
+    private final String telegram;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
 
     /**
@@ -36,14 +44,26 @@ class JsonAdaptedPerson {
     @JsonCreator
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
+            @JsonProperty("group") String group, @JsonProperty("github") String github,
+            @JsonProperty("linkedin") String linkedin, @JsonProperty("telegram") String telegram,
             @JsonProperty("tags") List<JsonAdaptedTag> tags) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
+        this.group = group;
+        this.github = github;
+        this.linkedin = linkedin;
+        this.telegram = telegram;
         if (tags != null) {
             this.tags.addAll(tags);
         }
+    }
+
+    /** Compatibility constructor for JSON data that predates the optional contact fields. */
+    public JsonAdaptedPerson(String name, String phone, String email, String address,
+            List<JsonAdaptedTag> tags) {
+        this(name, phone, email, address, null, null, null, null, tags);
     }
 
     /**
@@ -54,6 +74,10 @@ class JsonAdaptedPerson {
         phone = source.getPhone().value;
         email = source.getEmail().value;
         address = source.getAddress().value;
+        group = source.getGroup().value;
+        github = source.getGithub().value;
+        linkedin = source.getLinkedin().value;
+        telegram = source.getTelegram().value;
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
@@ -86,24 +110,49 @@ class JsonAdaptedPerson {
         }
         final Phone modelPhone = new Phone(phone);
 
-        if (email == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, Email.class.getSimpleName()));
+        String emailValue = email;
+        if (emailValue == null) {
+            emailValue = "";
         }
-        if (!Email.isValidEmail(email)) {
+        if (!Email.isValidEmail(emailValue)) {
             throw new IllegalValueException(Email.MESSAGE_CONSTRAINTS);
         }
-        final Email modelEmail = new Email(email);
+        final Email modelEmail = new Email(emailValue);
 
-        if (address == null) {
-            throw new IllegalValueException(String.format(MISSING_FIELD_MESSAGE_FORMAT, Address.class.getSimpleName()));
+        String addressValue = address;
+        if (addressValue == null) {
+            addressValue = "";
         }
-        if (!Address.isValidAddress(address)) {
+        if (!Address.isValidAddress(addressValue)) {
             throw new IllegalValueException(Address.MESSAGE_CONSTRAINTS);
         }
-        final Address modelAddress = new Address(address);
+        final Address modelAddress = new Address(addressValue);
+
+        String groupValue = group;
+        if (groupValue == null) {
+            groupValue = "";
+        }
+        String githubValue = github;
+        if (githubValue == null) {
+            githubValue = "";
+        }
+        String linkedinValue = linkedin;
+        if (linkedinValue == null) {
+            linkedinValue = "";
+        }
+        String telegramValue = telegram;
+        if (telegramValue == null) {
+            telegramValue = "";
+        }
+
+        final Group modelGroup = new Group(groupValue);
+        final Github modelGithub = new Github(githubValue);
+        final Linkedin modelLinkedin = new Linkedin(linkedinValue);
+        final Telegram modelTelegram = new Telegram(telegramValue);
 
         final Set<Tag> modelTags = new HashSet<>(personTags);
-        return new Person(modelName, modelPhone, modelEmail, modelAddress, modelTags);
+        return new Person(modelName, modelPhone, modelEmail, modelAddress,
+                modelGroup, modelGithub, modelLinkedin, modelTelegram, modelTags);
     }
 
 }
