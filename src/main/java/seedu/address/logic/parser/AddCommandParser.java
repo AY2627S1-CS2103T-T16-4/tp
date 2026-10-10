@@ -43,11 +43,11 @@ public class AddCommandParser implements Parser<AddCommand> {
                         PREFIX_GROUP, PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM, PREFIX_TAG);
 
         if (!argMultimap.getValue(PREFIX_NAME).isPresent()) {
-            throw new ParseException("Contact requires a name");
+            throw new ParseException(AddCommand.MESSAGE_MISSING_NAME);
         }
 
         if (!argMultimap.getValue(PREFIX_PHONE).isPresent()) {
-            throw new ParseException("Please give a valid phone number");
+            throw new ParseException(Phone.MESSAGE_CONSTRAINTS);
         }
 
         if (!argMultimap.getPreamble().isEmpty()) {
@@ -66,7 +66,7 @@ public class AddCommandParser implements Parser<AddCommand> {
         Group group = new Group(argMultimap.getValue(PREFIX_GROUP).orElse(""));
         Github github = new Github(argMultimap.getValue(PREFIX_GITHUB).orElse(""));
         Linkedin linkedin = new Linkedin(argMultimap.getValue(PREFIX_LINKEDIN).orElse(""));
-        Telegram telegram = new Telegram(argMultimap.getValue(PREFIX_TELEGRAM).orElse(""));
+        Telegram telegram = ParserUtil.parseTelegram(argMultimap.getValue(PREFIX_TELEGRAM).orElse(""));
 
         Person person = new Person(name, phone, email, address, group, github, linkedin, telegram, tagList);
 

@@ -12,7 +12,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Person;
@@ -50,6 +49,7 @@ public class AddCommand extends Command {
 
     public static final String MESSAGE_SUCCESS = "New contact added";
     public static final String MESSAGE_DUPLICATE_PERSON = "Phone number is already in use";
+    public static final String MESSAGE_MISSING_NAME = "Contact requires a name";
 
     private final Person toAdd;
 
