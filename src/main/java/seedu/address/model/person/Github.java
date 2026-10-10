@@ -6,6 +6,11 @@ import static java.util.Objects.requireNonNull;
 public class Github {
     public final String value;
 
+    /**
+     * Constructs an {@code Github}.
+     *
+     * @param github A valid Github username.
+     */
     public Github(String github) {
         requireNonNull(github);
         value = github;

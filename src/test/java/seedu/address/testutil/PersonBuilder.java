@@ -5,8 +5,8 @@ import java.util.Set;
 
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
-import seedu.address.model.person.Group;
 import seedu.address.model.person.Github;
+import seedu.address.model.person.Group;
 import seedu.address.model.person.Linkedin;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
@@ -105,21 +105,33 @@ public class PersonBuilder {
         return this;
     }
 
+    /**
+     * Sets the {@code Group} of the {@code Person} that we are building.
+     */
     public PersonBuilder withGroup(String group) {
         this.group = new Group(group);
         return this;
     }
 
+    /**
+     * Sets the {@code Github} of the {@code Person} that we are building.
+     */
     public PersonBuilder withGithub(String github) {
         this.github = new Github(github);
         return this;
     }
 
+    /**
+     * Sets the {@code Linkedin} of the {@code Person} that we are building.
+     */
     public PersonBuilder withLinkedin(String linkedin) {
         this.linkedin = new Linkedin(linkedin);
         return this;
     }
 
+    /**
+     * Sets the {@code Telegram} of the {@code Person} that we are building.
+     */
     public PersonBuilder withTelegram(String telegram) {
         this.telegram = new Telegram(telegram);
         return this;

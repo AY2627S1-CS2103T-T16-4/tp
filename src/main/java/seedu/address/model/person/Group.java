@@ -6,6 +6,11 @@ import static java.util.Objects.requireNonNull;
 public class Group {
     public final String value;
 
+    /**
+     * Constructs an {@code Group}.
+     *
+     * @param group A valid group.
+     */
     public Group(String group) {
         requireNonNull(group);
         value = group.toLowerCase();

@@ -10,6 +10,11 @@ public class Telegram {
 
     public final String value;
 
+    /**
+     * Constructs an {@code Telegram}.
+     *
+     * @param telegram A valid Telegram handle.
+     */
     public Telegram(String telegram) {
         requireNonNull(telegram);
         checkArgument(isValidTelegram(telegram), MESSAGE_CONSTRAINTS);

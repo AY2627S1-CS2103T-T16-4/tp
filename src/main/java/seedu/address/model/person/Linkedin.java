@@ -6,6 +6,11 @@ import static java.util.Objects.requireNonNull;
 public class Linkedin {
     public final String value;
 
+    /**
+     * Constructs an {@code Linkedin}.
+     *
+     * @param linkedin A valid Linkedin profile name.
+     */
     public Linkedin(String linkedin) {
         requireNonNull(linkedin);
         value = linkedin.toLowerCase();
