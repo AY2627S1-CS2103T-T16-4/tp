@@ -23,18 +23,28 @@ public class Person {
 
     // Data fields
     private final Address address;
+    private final Group group;
+    private final Github github;
+    private final Linkedin linkedin;
+    private final Telegram telegram;
     private final Set<Tag> tags = new HashSet<>();
 
     /**
      * Every field must be present and not null.
      */
-    public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags) {
-        requireAllNonNull(name, phone, email, address, tags);
+    public Person(Name name, Phone phone, Email email, Address address, Group group,
+                  Github github, Linkedin linkedin, Telegram telegram, Set<Tag> tags) {
+        requireAllNonNull(name, phone, email, address, group, github, linkedin, telegram, tags);
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
+        this.group = group;
+        this.github = github;
+        this.linkedin = linkedin;
+        this.telegram = telegram;
         this.tags.addAll(tags);
+
     }
 
     public Name getName() {
@@ -51,6 +61,22 @@ public class Person {
 
     public Address getAddress() {
         return address;
+    }
+
+    public Group getGroup() {
+        return group;
+    }
+
+    public Github getGithub() {
+        return github;
+    }
+
+    public Linkedin getLinkedin() {
+        return linkedin;
+    }
+
+    public Telegram getTelegram() {
+        return telegram;
     }
 
     /**
@@ -71,7 +97,7 @@ public class Person {
         }
 
         return otherPerson != null
-                && otherPerson.getName().equals(getName());
+                && otherPerson.getPhone().equals(getPhone());
     }
 
     /**
@@ -93,13 +119,17 @@ public class Person {
                 && phone.equals(otherPerson.phone)
                 && email.equals(otherPerson.email)
                 && address.equals(otherPerson.address)
+                && group.equals(otherPerson.group)
+                && github.equals(otherPerson.github)
+                && linkedin.equals(otherPerson.linkedin)
+                && telegram.equals(otherPerson.telegram)
                 && tags.equals(otherPerson.tags);
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, tags);
+        return Objects.hash(name, phone, email, address, group, github, linkedin, telegram, tags);
     }
 
     @Override
@@ -109,6 +139,10 @@ public class Person {
                 .add("phone", phone)
                 .add("email", email)
                 .add("address", address)
+                .add("group", group)
+                .add("github", github)
+                .add("linkedin", linkedin)
+                .add("telegram", telegram)
                 .add("tags", tags)
                 .toString();
     }
