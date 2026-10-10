@@ -1,6 +1,8 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 
 import java.util.List;
 
@@ -19,9 +21,12 @@ public class DeleteCommand extends Command {
     public static final String COMMAND_WORD = "delete";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Deletes the person identified by the index number used in the displayed person list.\n"
-            + "Parameters: INDEX (must be a positive integer)\n"
-            + "Example: " + COMMAND_WORD + " 1";
+            + ": Deletes the person identified by their name.\n"
+            + "Parameters: "
+            + PREFIX_NAME + "NAME "
+            + "[" + PREFIX_PHONE + "PHONE_NUMBER ]\n"
+            + String.format("Example 1: %s %sJohn Doe\n", COMMAND_WORD, PREFIX_NAME)
+            + String.format("Example 2: %s %sJohn Doe %s81231234", COMMAND_WORD, PREFIX_NAME, PREFIX_PHONE);
 
     public static final String MESSAGE_DELETE_PERSON_SUCCESS = "Deleted person: %1$s";
 
