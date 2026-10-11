@@ -6,10 +6,9 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Name;
@@ -31,7 +30,15 @@ public class DeleteCommand extends Command {
             + String.format("Example 1: %s %sJohn Doe\n", COMMAND_WORD, PREFIX_NAME)
             + String.format("Example 2: %s %sJohn Doe %s81231234", COMMAND_WORD, PREFIX_NAME, PREFIX_PHONE);
 
-    public static final String MESSAGE_DELETE_PERSON_SUCCESS = "Deleted person: %1$s";
+    public static final String MESSAGE_PERSON_NOT_FOUND =
+            "No contact matches the supplied name and phone number.";
+
+    public static final String MESSAGE_AMBIGUOUS_PERSON =
+            "Multiple contacts match:\n%1$s\n"
+                    + "Please specify a phone number using p/PHONE_NUMBER.";
+
+    public static final String MESSAGE_DELETE_PERSON_SUCCESS =
+            "Deleted person: %1$s, Phone: %2$s";
 
     private final Name targetName;
     private final Optional<Phone> targetPhone;
@@ -45,15 +52,34 @@ public class DeleteCommand extends Command {
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> lastShownList = model.getFilteredPersonList();
+        List<Person> matches = model.getAddressBook().getPersonList().stream()
+                .filter(person -> person.getName().equals(targetName))
+                .filter(person -> targetPhone
+                        .map(phone -> person.getPhone().equals(phone))
+                        .orElse(true))
+                .toList();
 
-        if (targetIndex.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
+        if (matches.isEmpty()) {
+            throw new CommandException(MESSAGE_PERSON_NOT_FOUND);
         }
 
-        Person personToDelete = lastShownList.get(targetIndex.getZeroBased());
+        if (matches.size() > 1) {
+            String matchingContacts = matches.stream()
+                    .map(person -> String.format("%s, Phone: %s",
+                            person.getName(), person.getPhone()))
+                    .collect(Collectors.joining("\n"));
+
+            throw new CommandException(
+                    String.format(MESSAGE_AMBIGUOUS_PERSON, matchingContacts));
+        }
+
+        Person personToDelete = matches.getFirst();
         model.deletePerson(personToDelete);
-        return new CommandResult(String.format(MESSAGE_DELETE_PERSON_SUCCESS, Messages.format(personToDelete)));
+
+        return new CommandResult(String.format(
+                MESSAGE_DELETE_PERSON_SUCCESS,
+                personToDelete.getName(),
+                personToDelete.getPhone()));
     }
 
     @Override
@@ -67,13 +93,15 @@ public class DeleteCommand extends Command {
             return false;
         }
 
-        return targetIndex.equals(otherDeleteCommand.targetIndex);
+        return targetName.equals(otherDeleteCommand.targetName)
+                && targetPhone.equals(otherDeleteCommand.targetPhone);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .add("targetIndex", targetIndex)
+                .add("targetName", targetName)
+                .add("targetPhone", targetPhone)
                 .toString();
     }
 }
