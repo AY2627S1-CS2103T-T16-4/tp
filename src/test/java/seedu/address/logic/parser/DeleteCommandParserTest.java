@@ -1,13 +1,21 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
-import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.DeleteCommand;
+import seedu.address.model.person.Name;
+import seedu.address.model.person.Phone;
+
+
 
 /**
  * As we are only doing white-box testing, our test cases do not cover path variations
@@ -21,12 +29,77 @@ public class DeleteCommandParserTest {
     private DeleteCommandParser parser = new DeleteCommandParser();
 
     @Test
-    public void parse_validArgs_returnsDeleteCommand() {
-        assertParseSuccess(parser, "1", new DeleteCommand(INDEX_FIRST_PERSON));
+    public void parse_nameOnly_returnsDeleteCommand() {
+        assertParseSuccess(parser, " n/John Doe",
+                new DeleteCommand(new Name("John Doe"), Optional.empty()));
     }
 
     @Test
-    public void parse_invalidArgs_throwsParseException() {
-        assertParseFailure(parser, "a", String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE));
+    public void parse_nameAndPhone_returnsDeleteCommand() {
+        assertParseSuccess(parser, " n/John Doe p/81231234",
+                new DeleteCommand(new Name("John Doe"),
+                        Optional.of(new Phone("81231234"))));
+    }
+
+    @Test
+    public void parse_reversedPrefixOrder_returnsDeleteCommand() {
+        assertParseSuccess(parser, " p/81231234 n/John Doe",
+                new DeleteCommand(new Name("John Doe"),
+                        Optional.of(new Phone("81231234"))));
+    }
+
+    @Test
+    public void parse_surroundingWhitespace_returnsDeleteCommand() {
+        assertParseSuccess(parser, "   n/  John Doe   p/  81231234   ",
+                new DeleteCommand(new Name("John Doe"),
+                        Optional.of(new Phone("81231234"))));
+    }
+
+    @Test
+    public void parse_missingName_throwsParseException() {
+        String expectedMessage = String.format(
+                MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE);
+
+        assertParseFailure(parser, "", expectedMessage);
+        assertParseFailure(parser, "   ", expectedMessage);
+        assertParseFailure(parser, " p/81231234", expectedMessage);
+    }
+
+    @Test
+    public void parse_oldIndexSyntax_throwsParseException() {
+        assertParseFailure(parser, "1", String.format(
+                MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_nonEmptyPreamble_throwsParseException() {
+        assertParseFailure(parser, " unexpected n/John Doe", String.format(
+                MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_invalidName_throwsParseException() {
+        assertParseFailure(parser, " n/", Name.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " n/   ", Name.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " n/John&", Name.MESSAGE_CONSTRAINTS);
+    }
+
+    @Test
+    public void parse_invalidPhone_throwsParseException() {
+        assertParseFailure(parser, " n/John Doe p/", Phone.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " n/John Doe p/abc", Phone.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " n/John Doe p/12", Phone.MESSAGE_CONSTRAINTS);
+    }
+
+    @Test
+    public void parse_duplicateNamePrefix_throwsParseException() {
+        assertParseFailure(parser, " n/John Doe n/Jane Doe",
+                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NAME));
+    }
+
+    @Test
+    public void parse_duplicatePhonePrefix_throwsParseException() {
+        assertParseFailure(parser, " n/John Doe p/81231234 p/91234567",
+                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_PHONE));
     }
 }
