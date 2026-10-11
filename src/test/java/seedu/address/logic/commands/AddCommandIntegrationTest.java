@@ -7,7 +7,6 @@ import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import seedu.address.logic.Messages;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
@@ -34,8 +33,28 @@ public class AddCommandIntegrationTest {
         expectedModel.addPerson(validPerson);
 
         assertCommandSuccess(new AddCommand(validPerson), model,
-                String.format(AddCommand.MESSAGE_SUCCESS, Messages.format(validPerson)),
+                AddCommand.MESSAGE_SUCCESS,
                 expectedModel);
+    }
+
+    @Test
+    public void execute_samePhoneNumber_throwsCommandException() {
+        Person existingPerson = new PersonBuilder()
+                .withName("Tom Tan")
+                .withPhone("91234567")
+                .build();
+
+        Person newPerson = new PersonBuilder()
+                .withName("Alice Tan")
+                .withPhone("91234567")
+                .build();
+
+        model.addPerson(existingPerson);
+
+        assertCommandFailure(
+                new AddCommand(newPerson),
+                model,
+                AddCommand.MESSAGE_DUPLICATE_PERSON);
     }
 
     @Test
