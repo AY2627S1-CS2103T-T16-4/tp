@@ -94,6 +94,7 @@ Examples:
 ### Listing all persons: `list`
 
 Shows a list of all persons in the address book.
+* Empty list while using list command outputs "Your contact list is empty."; 
 
 Format: `list`
 
