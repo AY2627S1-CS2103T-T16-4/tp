@@ -43,7 +43,12 @@ public class DeleteCommand extends Command {
     private final Name targetName;
     private final Optional<Phone> targetPhone;
 
-
+    /**
+     * Creates a DeleteCommand to delete a person by name and optional phone number.
+     *
+     * @param targetName Full name of the person to delete.
+     * @param targetPhone Phone number to match, or {@code Optional.empty()} to match by name only.
+     */
     public DeleteCommand(Name targetName, Optional<Phone> targetPhone) {
         this.targetName = requireNonNull(targetName);
         this.targetPhone = requireNonNull(targetPhone);
