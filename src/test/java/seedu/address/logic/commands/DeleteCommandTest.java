@@ -147,12 +147,19 @@ public class DeleteCommandTest {
     }
 
     @Test
-    public void execute_differentNameCase_throwsCommandException() {
+    public void execute_differentNameCase_success() {
         DeleteCommand deleteCommand =
                 new DeleteCommand(new Name("alice pauline"), Optional.empty());
 
-        assertCommandFailure(
-                deleteCommand, model, DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
+        String expectedMessage = String.format(
+                DeleteCommand.MESSAGE_DELETE_PERSON_SUCCESS,
+                ALICE.getName(), ALICE.getPhone());
+
+        Model expectedModel =
+                new ModelManager(model.getAddressBook(), new UserPrefs());
+        expectedModel.deletePerson(ALICE);
+
+        assertCommandSuccess(deleteCommand, model, expectedMessage, expectedModel);
     }
 
     @Test
