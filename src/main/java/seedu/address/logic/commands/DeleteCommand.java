@@ -5,13 +5,16 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 
 import java.util.List;
+import java.util.Optional;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
+import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.Phone;
 
 /**
  * Deletes a person identified using its displayed index from the address book.
@@ -30,10 +33,13 @@ public class DeleteCommand extends Command {
 
     public static final String MESSAGE_DELETE_PERSON_SUCCESS = "Deleted person: %1$s";
 
-    private final Index targetIndex;
+    private final Name targetName;
+    private final Optional<Phone> targetPhone;
 
-    public DeleteCommand(Index targetIndex) {
-        this.targetIndex = targetIndex;
+
+    public DeleteCommand(Name targetName, Optional<Phone> targetPhone) {
+        this.targetName = requireNonNull(targetName);
+        this.targetPhone = requireNonNull(targetPhone);
     }
 
     @Override
