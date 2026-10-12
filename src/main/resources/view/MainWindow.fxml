@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <fx:root type="javafx.stage.Stage" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
-         title="Address App" minWidth="450" minHeight="600" onCloseRequest="#handleExit">
+         title="GitMate" minWidth="820" minHeight="600" onCloseRequest="#handleExit">
   <icons>
     <Image url="@/images/address_book_32.png" />
   </icons>
@@ -21,9 +21,13 @@
       <stylesheets>
         <URL value="@DarkTheme.css" />
         <URL value="@Extensions.css" />
+        <URL value="@GitMateTheme.css" />
       </stylesheets>
 
-      <VBox>
+      <VBox styleClass="gitmate-window" spacing="10">
+        <padding>
+          <Insets top="8" right="12" bottom="8" left="12" />
+        </padding>
         <MenuBar fx:id="menuBar" VBox.vgrow="NEVER">
           <Menu mnemonicParsing="false" text="File">
             <MenuItem mnemonicParsing="false" onAction="#handleExit" text="Exit" />
@@ -40,18 +44,16 @@
         </StackPane>
 
         <StackPane VBox.vgrow="NEVER" fx:id="resultDisplayPlaceholder" styleClass="pane-with-border"
-                   minHeight="100" prefHeight="100" maxHeight="100">
+                   minHeight="88" prefHeight="88" maxHeight="88">
           <padding>
             <Insets top="5" right="10" bottom="5" left="10" />
           </padding>
         </StackPane>
 
-        <VBox fx:id="personList" styleClass="pane-with-border" minWidth="340" prefWidth="340" VBox.vgrow="ALWAYS">
-          <padding>
-            <Insets top="10" right="10" bottom="10" left="10" />
-          </padding>
-          <StackPane fx:id="personListPanelPlaceholder" VBox.vgrow="ALWAYS"/>
-        </VBox>
+        <SplitPane styleClass="contacts-split" dividerPositions="0.48" VBox.vgrow="ALWAYS">
+          <StackPane fx:id="personListPanelPlaceholder" styleClass="contact-pane" minWidth="280" />
+          <StackPane fx:id="personDetailsPanelPlaceholder" styleClass="contact-pane" minWidth="340" />
+        </SplitPane>
 
         <StackPane fx:id="statusbarPlaceholder" VBox.vgrow="NEVER" />
       </VBox>

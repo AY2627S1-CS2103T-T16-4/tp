@@ -1,16 +1,14 @@
 package seedu.address.ui;
 
-import java.util.Comparator;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import seedu.address.model.person.Person;
 
 /**
- * A UI component that displays information of a {@code Person}.
+ * A compact contact row showing a person's name and optional team.
  */
 public class PersonCard extends UiPart<Region> {
 
@@ -27,19 +25,15 @@ public class PersonCard extends UiPart<Region> {
     public final Person person;
 
     @FXML
-    private HBox cardPane;
+    private Label initials;
     @FXML
     private Label name;
     @FXML
     private Label id;
     @FXML
-    private Label phone;
+    private Label team;
     @FXML
-    private Label address;
-    @FXML
-    private Label email;
-    @FXML
-    private FlowPane tags;
+    private HBox teamSection;
 
     /**
      * Creates a {@code PersonCard} with the given {@code Person} and index to display.
@@ -49,11 +43,19 @@ public class PersonCard extends UiPart<Region> {
         this.person = person;
         id.setText(displayedIndex + ". ");
         name.setText(person.getName().fullName);
-        phone.setText(person.getPhone().value);
-        address.setText(person.getAddress().value);
-        email.setText(person.getEmail().value);
-        person.getTags().stream()
-                .sorted(Comparator.comparing(tag -> tag.tagName))
-                .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
+        name.setTooltip(new Tooltip(person.getName().fullName));
+        initials.setText(getInitials(person));
+        team.setText(person.getGroup().value);
+        team.setTooltip(new Tooltip(person.getGroup().value));
+        team.setVisible(!person.getGroup().value.isBlank());
+        team.setManaged(team.isVisible());
+        teamSection.setVisible(team.isVisible());
+        teamSection.setManaged(team.isVisible());
+    }
+
+    static String getInitials(Person person) {
+        String[] words = person.getName().fullName.trim().split("\\s+");
+        String firstInitial = words[0].substring(0, 1);
+        return words.length == 1 ? firstInitial : firstInitial + words[words.length - 1].substring(0, 1);
     }
 }
