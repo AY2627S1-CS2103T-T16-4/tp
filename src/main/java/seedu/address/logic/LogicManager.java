@@ -7,8 +7,14 @@ import java.util.logging.Logger;
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
+import seedu.address.logic.commands.AddCommand;
+import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.CommandResult;
+import seedu.address.logic.commands.DeleteCommand;
+import seedu.address.logic.commands.EditCommand;
+import seedu.address.logic.commands.FindCommand;
+import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -44,9 +50,8 @@ public class LogicManager implements Logic {
     public CommandResult execute(String commandText) throws CommandException, ParseException {
         logger.info("----------------[USER COMMAND][" + commandText + "]");
 
-        CommandResult commandResult;
         Command command = addressBookParser.parseCommand(commandText);
-        commandResult = command.execute(model);
+        CommandResult commandResult = command.execute(model);
 
         try {
             storage.saveAddressBook(model.getAddressBook());
@@ -56,7 +61,21 @@ public class LogicManager implements Logic {
             throw new CommandException(String.format(FILE_OPS_ERROR_FORMAT, ioe.getMessage()), ioe);
         }
 
-        return commandResult;
+        return new CommandResult(commandResult.getFeedbackToUser(), commandResult.isShowHelp(), commandResult.isExit(),
+                shouldResetContactSelection(command));
+    }
+
+    /**
+     * Returns whether executing {@code command} should select the first visible contact.
+     * Contact-view commands belong here so their selection policy is kept in one place.
+     */
+    private static boolean shouldResetContactSelection(Command command) {
+        return command instanceof AddCommand
+                || command instanceof ClearCommand
+                || command instanceof DeleteCommand
+                || command instanceof EditCommand
+                || command instanceof FindCommand
+                || command instanceof ListCommand;
     }
 
     @Override

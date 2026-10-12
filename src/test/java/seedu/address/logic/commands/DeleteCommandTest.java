@@ -44,7 +44,7 @@ public class DeleteCommandTest {
         expectedModel.deletePerson(personToDelete);
 
         assertCommandSuccess(deleteCommand, model,
-                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
+                expectedMessage, expectedModel);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class DeleteCommandTest {
                 BENSON.getName(), BENSON.getPhone());
 
         assertCommandSuccess(deleteCommand, model,
-                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
+                expectedMessage, expectedModel);
     }
 
     @Test
@@ -90,7 +90,7 @@ public class DeleteCommandTest {
         expectedModel.deletePerson(ALICE);
 
         assertCommandSuccess(deleteCommand, model,
-                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
+                expectedMessage, expectedModel);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class DeleteCommandTest {
         showNoPerson(expectedModel);
 
         assertCommandSuccess(deleteCommand, model,
-                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
+                expectedMessage, expectedModel);
     }
 
     @Test
@@ -164,7 +164,7 @@ public class DeleteCommandTest {
         expectedModel.deletePerson(ALICE);
 
         assertCommandSuccess(deleteCommand, model,
-                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
+                expectedMessage, expectedModel);
     }
 
     @Test

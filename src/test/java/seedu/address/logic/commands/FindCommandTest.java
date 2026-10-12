@@ -77,7 +77,7 @@ public class FindCommandTest {
         FindCommand command = new FindCommand(predicate, List.of(PREFIX_NAME));
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model,
-                new CommandResult(FindCommand.MESSAGE_SUCCESS).withContactSelectionReset(), expectedModel);
+                FindCommand.MESSAGE_SUCCESS, expectedModel);
         assertEquals(List.of(ALICE), model.getFilteredPersonList());
     }
 
@@ -87,7 +87,7 @@ public class FindCommandTest {
         FindCommand command = new FindCommand(predicate, List.of(PREFIX_GROUP));
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model,
-                new CommandResult(FindCommand.MESSAGE_SUCCESS).withContactSelectionReset(), expectedModel);
+                FindCommand.MESSAGE_SUCCESS, expectedModel);
         assertEquals(List.of(ALICE, BOB), model.getFilteredPersonList());
     }
 
@@ -100,7 +100,7 @@ public class FindCommandTest {
         FindCommand command = new FindCommand(predicate, List.of(PREFIX_GROUP, PREFIX_TAG));
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model,
-                new CommandResult(FindCommand.MESSAGE_SUCCESS).withContactSelectionReset(), expectedModel);
+                FindCommand.MESSAGE_SUCCESS, expectedModel);
         assertEquals(List.of(BOB), model.getFilteredPersonList());
     }
 
@@ -115,7 +115,7 @@ public class FindCommandTest {
         String expectedMessage = String.format(FindCommand.MESSAGE_NOT_FOUND, "gh/ g/");
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model,
-                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
+                expectedMessage, expectedModel);
         assertEquals(List.of(), model.getFilteredPersonList());
     }
 

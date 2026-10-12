@@ -58,7 +58,7 @@ public class AddCommand extends Command {
         }
 
         model.addPerson(toAdd);
-        return new CommandResult(MESSAGE_SUCCESS).withContactSelectionReset();
+        return new CommandResult(MESSAGE_SUCCESS);
     }
 
     @Override

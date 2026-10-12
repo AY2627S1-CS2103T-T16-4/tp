@@ -36,9 +36,9 @@ public class PersonListPanel extends UiPart<Region> {
     }
 
     /**
-     * Returns the contact currently selected by mouse, keyboard, or a command.
+     * Returns the read-only property containing the currently selected contact.
      */
-    public ReadOnlyObjectProperty<Person> selectedPersonProperty() {
+    public ReadOnlyObjectProperty<Person> getSelectedPersonProperty() {
         return personListView.getSelectionModel().selectedItemProperty();
     }
 
@@ -58,10 +58,10 @@ public class PersonListPanel extends UiPart<Region> {
      */
     class PersonListViewCell extends ListCell<Person> {
         @Override
-        protected void updateItem(Person person, boolean empty) {
-            super.updateItem(person, empty);
+        protected void updateItem(Person person, boolean isEmpty) {
+            super.updateItem(person, isEmpty);
 
-            if (empty || person == null) {
+            if (isEmpty || person == null) {
                 setGraphic(null);
                 setText(null);
             } else {

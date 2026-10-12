@@ -33,7 +33,7 @@ public class AddCommandIntegrationTest {
         expectedModel.addPerson(validPerson);
 
         assertCommandSuccess(new AddCommand(validPerson), model,
-                new CommandResult(AddCommand.MESSAGE_SUCCESS).withContactSelectionReset(),
+                AddCommand.MESSAGE_SUCCESS,
                 expectedModel);
     }
 

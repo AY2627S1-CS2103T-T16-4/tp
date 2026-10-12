@@ -18,7 +18,7 @@ public class ClearCommandTest {
         Model expectedModel = new ModelManager();
 
         assertCommandSuccess(new ClearCommand(), model,
-                new CommandResult(ClearCommand.MESSAGE_SUCCESS).withContactSelectionReset(), expectedModel);
+                ClearCommand.MESSAGE_SUCCESS, expectedModel);
     }
 
     @Test
@@ -28,7 +28,7 @@ public class ClearCommandTest {
         expectedModel.setAddressBook(new AddressBook());
 
         assertCommandSuccess(new ClearCommand(), model,
-                new CommandResult(ClearCommand.MESSAGE_SUCCESS).withContactSelectionReset(), expectedModel);
+                ClearCommand.MESSAGE_SUCCESS, expectedModel);
     }
 
 }

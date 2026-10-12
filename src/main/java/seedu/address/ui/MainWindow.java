@@ -123,7 +123,7 @@ public class MainWindow extends UiPart<Stage> {
 
         personListPanel = new PersonListPanel(logic.getFilteredPersonList());
         personListPanelPlaceholder.getChildren().add(personListPanel.getRoot());
-        personListPanel.selectedPersonProperty().addListener((observable, oldPerson, newPerson) ->
+        personListPanel.getSelectedPersonProperty().addListener((observable, oldPerson, newPerson) ->
                 personDetailsPanel.showPerson(newPerson));
         personListPanel.selectFirstContact();
 
@@ -192,7 +192,7 @@ public class MainWindow extends UiPart<Stage> {
             logger.info("Result: " + commandResult.getFeedbackToUser());
             resultDisplay.setFeedbackToUser(commandResult.getFeedbackToUser());
 
-            if (commandResult.isResetContactSelection()) {
+            if (commandResult.shouldResetContactSelection()) {
                 personListPanel.selectFirstContact();
             }
 

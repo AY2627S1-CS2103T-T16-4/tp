@@ -47,7 +47,7 @@ public class EditCommandTest {
         expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
 
         assertCommandSuccess(editCommand, model,
-                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
+                expectedMessage, expectedModel);
     }
 
     @Test
@@ -69,7 +69,7 @@ public class EditCommandTest {
         expectedModel.setPerson(lastPerson, editedPerson);
 
         assertCommandSuccess(editCommand, model,
-                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
+                expectedMessage, expectedModel);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class EditCommandTest {
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
 
         assertCommandSuccess(editCommand, model,
-                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
+                expectedMessage, expectedModel);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class EditCommandTest {
         expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
 
         assertCommandSuccess(editCommand, model,
-                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
+                expectedMessage, expectedModel);
     }
 
     @Test

@@ -1,6 +1,8 @@
 package seedu.address.logic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
@@ -12,6 +14,7 @@ import static seedu.address.testutil.TypicalPersons.AMY;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,9 +23,12 @@ import org.junit.jupiter.api.io.TempDir;
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteCommand;
+import seedu.address.logic.commands.ExitCommand;
+import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
@@ -69,6 +75,42 @@ public class LogicManagerTest {
     public void execute_validCommand_success() throws Exception {
         String listCommand = ListCommand.COMMAND_WORD;
         assertCommandSuccess(listCommand, ListCommand.MESSAGE_EMPTY, model);
+    }
+
+    @Test
+    public void execute_contactCommands_requestsSelectionReset() throws Exception {
+        List<String> contactCommands = List.of("add n/Bob p/92345678", "edit 1 n/Alicia", "delete n/Alice",
+                "clear", "find n/Alice", "find g/Missing", "list");
+
+        for (String command : contactCommands) {
+            model.setAddressBook(new AddressBook());
+            model.updateFilteredPersonList(Model.PREDICATE_SHOW_ALL_PERSONS);
+            model.addPerson(new PersonBuilder().withName("Alice").withPhone("91234567").build());
+
+            CommandResult result = logic.execute(command);
+
+            assertTrue(result.shouldResetContactSelection(), command);
+        }
+    }
+
+    @Test
+    public void execute_help_requestsHelpWithoutSelectionReset() throws Exception {
+        CommandResult result = logic.execute(HelpCommand.COMMAND_WORD);
+
+        assertFalse(result.shouldResetContactSelection());
+        assertTrue(result.isShowHelp());
+        assertFalse(result.isExit());
+        assertEquals(HelpCommand.SHOWING_HELP_MESSAGE, result.getFeedbackToUser());
+    }
+
+    @Test
+    public void execute_exit_requestsExitWithoutSelectionReset() throws Exception {
+        CommandResult result = logic.execute(ExitCommand.COMMAND_WORD);
+
+        assertFalse(result.shouldResetContactSelection());
+        assertFalse(result.isShowHelp());
+        assertTrue(result.isExit());
+        assertEquals(ExitCommand.MESSAGE_EXIT_ACKNOWLEDGEMENT, result.getFeedbackToUser());
     }
 
     @Test
