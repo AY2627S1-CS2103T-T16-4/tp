@@ -43,7 +43,8 @@ public class DeleteCommandTest {
         ModelManager expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedModel.deletePerson(personToDelete);
 
-        assertCommandSuccess(deleteCommand, model, expectedMessage, expectedModel);
+        assertCommandSuccess(deleteCommand, model,
+                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
     }
 
     @Test
@@ -71,7 +72,8 @@ public class DeleteCommandTest {
                 DeleteCommand.MESSAGE_DELETE_PERSON_SUCCESS,
                 BENSON.getName(), BENSON.getPhone());
 
-        assertCommandSuccess(deleteCommand, model, expectedMessage, expectedModel);
+        assertCommandSuccess(deleteCommand, model,
+                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
     }
 
     @Test
@@ -87,7 +89,8 @@ public class DeleteCommandTest {
                 new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedModel.deletePerson(ALICE);
 
-        assertCommandSuccess(deleteCommand, model, expectedMessage, expectedModel);
+        assertCommandSuccess(deleteCommand, model,
+                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
     }
 
     @Test
@@ -124,7 +127,8 @@ public class DeleteCommandTest {
         expectedModel.deletePerson(ALICE);
         showNoPerson(expectedModel);
 
-        assertCommandSuccess(deleteCommand, model, expectedMessage, expectedModel);
+        assertCommandSuccess(deleteCommand, model,
+                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
     }
 
     @Test
@@ -159,7 +163,8 @@ public class DeleteCommandTest {
                 new ModelManager(model.getAddressBook(), new UserPrefs());
         expectedModel.deletePerson(ALICE);
 
-        assertCommandSuccess(deleteCommand, model, expectedMessage, expectedModel);
+        assertCommandSuccess(deleteCommand, model,
+                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
     }
 
     @Test

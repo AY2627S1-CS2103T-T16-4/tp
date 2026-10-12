@@ -68,9 +68,9 @@ public class FindCommand extends Command {
         model.updateFilteredPersonList(predicate);
         if (model.getFilteredPersonList().isEmpty()) {
             String flags = usedPrefixes.stream().map(Prefix::toString).collect(Collectors.joining(" "));
-            return new CommandResult(String.format(MESSAGE_NOT_FOUND, flags));
+            return new CommandResult(String.format(MESSAGE_NOT_FOUND, flags)).withContactSelectionReset();
         }
-        return new CommandResult(MESSAGE_SUCCESS);
+        return new CommandResult(MESSAGE_SUCCESS).withContactSelectionReset();
     }
 
     @Override

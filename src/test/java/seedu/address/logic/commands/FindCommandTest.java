@@ -76,7 +76,8 @@ public class FindCommandTest {
         PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setName(new Name("Alice Pauline")));
         FindCommand command = new FindCommand(predicate, List.of(PREFIX_NAME));
         expectedModel.updateFilteredPersonList(predicate);
-        assertCommandSuccess(command, model, FindCommand.MESSAGE_SUCCESS, expectedModel);
+        assertCommandSuccess(command, model,
+                new CommandResult(FindCommand.MESSAGE_SUCCESS).withContactSelectionReset(), expectedModel);
         assertEquals(List.of(ALICE), model.getFilteredPersonList());
     }
 
@@ -85,7 +86,8 @@ public class FindCommandTest {
         PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setGroup(new Group("t09")));
         FindCommand command = new FindCommand(predicate, List.of(PREFIX_GROUP));
         expectedModel.updateFilteredPersonList(predicate);
-        assertCommandSuccess(command, model, FindCommand.MESSAGE_SUCCESS, expectedModel);
+        assertCommandSuccess(command, model,
+                new CommandResult(FindCommand.MESSAGE_SUCCESS).withContactSelectionReset(), expectedModel);
         assertEquals(List.of(ALICE, BOB), model.getFilteredPersonList());
     }
 
@@ -97,7 +99,8 @@ public class FindCommandTest {
         });
         FindCommand command = new FindCommand(predicate, List.of(PREFIX_GROUP, PREFIX_TAG));
         expectedModel.updateFilteredPersonList(predicate);
-        assertCommandSuccess(command, model, FindCommand.MESSAGE_SUCCESS, expectedModel);
+        assertCommandSuccess(command, model,
+                new CommandResult(FindCommand.MESSAGE_SUCCESS).withContactSelectionReset(), expectedModel);
         assertEquals(List.of(BOB), model.getFilteredPersonList());
     }
 
@@ -111,7 +114,8 @@ public class FindCommandTest {
         FindCommand command = new FindCommand(predicate, List.of(PREFIX_GITHUB, PREFIX_GROUP));
         String expectedMessage = String.format(FindCommand.MESSAGE_NOT_FOUND, "gh/ g/");
         expectedModel.updateFilteredPersonList(predicate);
-        assertCommandSuccess(command, model, expectedMessage, expectedModel);
+        assertCommandSuccess(command, model,
+                new CommandResult(expectedMessage).withContactSelectionReset(), expectedModel);
         assertEquals(List.of(), model.getFilteredPersonList());
     }
 

@@ -33,6 +33,9 @@ public class CommandResultTest {
 
         // different exit value -> returns false
         assertFalse(commandResult.equals(new CommandResult("feedback", false, true)));
+
+        // different selection behaviour -> returns false
+        assertFalse(commandResult.equals(new CommandResult("feedback").withContactSelectionReset()));
     }
 
     @Test
@@ -50,6 +53,22 @@ public class CommandResultTest {
 
         // different exit value -> returns different hashcode
         assertNotEquals(commandResult.hashCode(), new CommandResult("feedback", false, true).hashCode());
+
+        // different selection behaviour -> returns different hashcode
+        assertNotEquals(commandResult.hashCode(), new CommandResult("feedback").withContactSelectionReset().hashCode());
+    }
+
+    @Test
+    public void withContactSelectionReset_preservesOtherFields() {
+        CommandResult original = new CommandResult("feedback", true, true);
+        CommandResult result = original.withContactSelectionReset();
+
+        assertFalse(original.isResetContactSelection());
+        assertTrue(result.isResetContactSelection());
+        assertEquals(original.getFeedbackToUser(), result.getFeedbackToUser());
+        assertEquals(original.isShowHelp(), result.isShowHelp());
+        assertEquals(original.isExit(), result.isExit());
+        assertEquals(result, result.withContactSelectionReset());
     }
 
     @Test
@@ -57,7 +76,8 @@ public class CommandResultTest {
         CommandResult commandResult = new CommandResult("feedback");
         String expected = CommandResult.class.getCanonicalName() + "{feedbackToUser="
                 + commandResult.getFeedbackToUser() + ", showHelp=" + commandResult.isShowHelp()
-                + ", exit=" + commandResult.isExit() + "}";
+                + ", exit=" + commandResult.isExit()
+                + ", resetContactSelection=" + commandResult.isResetContactSelection() + "}";
         assertEquals(expected, commandResult.toString());
     }
 }

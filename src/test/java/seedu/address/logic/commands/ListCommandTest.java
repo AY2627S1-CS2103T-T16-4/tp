@@ -29,13 +29,15 @@ public class ListCommandTest {
 
     @Test
     public void execute_listIsNotFiltered_showsSameList() {
-        assertCommandSuccess(new ListCommand(), model, ListCommand.MESSAGE_SUCCESS, expectedModel);
+        assertCommandSuccess(new ListCommand(), model,
+                new CommandResult(ListCommand.MESSAGE_SUCCESS).withContactSelectionReset(), expectedModel);
     }
 
     @Test
     public void execute_listIsFiltered_showsEverything() {
         showPersonAtIndex(model, INDEX_FIRST_PERSON);
-        assertCommandSuccess(new ListCommand(), model, ListCommand.MESSAGE_SUCCESS, expectedModel);
+        assertCommandSuccess(new ListCommand(), model,
+                new CommandResult(ListCommand.MESSAGE_SUCCESS).withContactSelectionReset(), expectedModel);
     }
 
     @Test
@@ -43,7 +45,8 @@ public class ListCommandTest {
         model = new ModelManager();
         expectedModel = new ModelManager();
 
-        assertCommandSuccess(new ListCommand(), model, ListCommand.MESSAGE_EMPTY, expectedModel);
+        assertCommandSuccess(new ListCommand(), model,
+                new CommandResult(ListCommand.MESSAGE_EMPTY).withContactSelectionReset(), expectedModel);
     }
 
     @Test
@@ -51,6 +54,7 @@ public class ListCommandTest {
         model.updateFilteredPersonList(person -> false);
         assertTrue(model.getFilteredPersonList().isEmpty());
 
-        assertCommandSuccess(new ListCommand(), model, ListCommand.MESSAGE_SUCCESS, expectedModel);
+        assertCommandSuccess(new ListCommand(), model,
+                new CommandResult(ListCommand.MESSAGE_SUCCESS).withContactSelectionReset(), expectedModel);
     }
 }

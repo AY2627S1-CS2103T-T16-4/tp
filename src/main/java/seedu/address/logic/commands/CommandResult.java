@@ -19,13 +19,21 @@ public class CommandResult {
     /** The application should exit. */
     private final boolean exit;
 
+    /** The UI should select the first contact in the resulting list. */
+    private final boolean resetContactSelection;
+
     /**
      * Constructs a {@code CommandResult} with the specified fields.
      */
     public CommandResult(String feedbackToUser, boolean showHelp, boolean exit) {
+        this(feedbackToUser, showHelp, exit, false);
+    }
+
+    private CommandResult(String feedbackToUser, boolean showHelp, boolean exit, boolean resetContactSelection) {
         this.feedbackToUser = requireNonNull(feedbackToUser);
         this.showHelp = showHelp;
         this.exit = exit;
+        this.resetContactSelection = resetContactSelection;
     }
 
     /**
@@ -48,6 +56,17 @@ public class CommandResult {
         return exit;
     }
 
+    public boolean isResetContactSelection() {
+        return resetContactSelection;
+    }
+
+    /**
+     * Returns a copy of this result requesting selection of the first visible contact.
+     */
+    public CommandResult withContactSelectionReset() {
+        return new CommandResult(feedbackToUser, showHelp, exit, true);
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other == this) {
@@ -61,12 +80,13 @@ public class CommandResult {
 
         return feedbackToUser.equals(otherCommandResult.feedbackToUser)
                 && showHelp == otherCommandResult.showHelp
-                && exit == otherCommandResult.exit;
+                && exit == otherCommandResult.exit
+                && resetContactSelection == otherCommandResult.resetContactSelection;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(feedbackToUser, showHelp, exit);
+        return Objects.hash(feedbackToUser, showHelp, exit, resetContactSelection);
     }
 
     @Override
@@ -75,6 +95,7 @@ public class CommandResult {
                 .add("feedbackToUser", feedbackToUser)
                 .add("showHelp", showHelp)
                 .add("exit", exit)
+                .add("resetContactSelection", resetContactSelection)
                 .toString();
     }
 
