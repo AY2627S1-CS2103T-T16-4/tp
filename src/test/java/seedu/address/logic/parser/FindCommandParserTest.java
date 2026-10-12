@@ -66,6 +66,36 @@ public class FindCommandParserTest {
     }
 
     @Test
+    public void parse_unknownFlagAfterValidFlag_throwsParseException() {
+        // in the middle
+        assertParseFailure(parser, " n/Alice x/foo g/T09", MESSAGE_INVALID_FORMAT);
+
+        // at the end
+        assertParseFailure(parser, " n/Alice g/T09 x/foo", MESSAGE_INVALID_FORMAT);
+
+        // longer flag
+        assertParseFailure(parser, " n/Alice ph/91234567", MESSAGE_INVALID_FORMAT);
+
+        // flags are case-sensitive
+        assertParseFailure(parser, " g/T09 N/Alice", MESSAGE_INVALID_FORMAT);
+
+        // takes priority over a blank value and other value errors
+        assertParseFailure(parser, " n/ x/foo", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, " p/1234 x/foo", MESSAGE_INVALID_FORMAT);
+    }
+
+    @Test
+    public void parse_slashInsideValue_returnsFindCommand() {
+        // a slash that does not follow a word, so it is not mistaken for a flag
+        assertParseSuccess(parser, " a/123/4 Clementi Ave",
+                commandWith(List.of(PREFIX_ADDRESS), d -> d.setAddress(new Address("123/4 Clementi Ave"))));
+
+        // a slash that is not preceded by whitespace
+        assertParseSuccess(parser, " li/in/alice",
+                commandWith(List.of(PREFIX_LINKEDIN), d -> d.setLinkedin(new Linkedin("in/alice"))));
+    }
+
+    @Test
     public void parse_blankValue_throwsParseException() {
         assertParseFailure(parser, " n/", String.format(MESSAGE_EMPTY_FLAG_VALUE, PREFIX_NAME));
         assertParseFailure(parser, " p/", String.format(MESSAGE_EMPTY_FLAG_VALUE, PREFIX_PHONE));

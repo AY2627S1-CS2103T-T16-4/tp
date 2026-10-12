@@ -13,6 +13,8 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -31,6 +33,9 @@ public class FindCommandParser implements Parser<FindCommand> {
     private static final List<Prefix> SEARCHABLE_PREFIXES = List.of(PREFIX_NAME, PREFIX_PHONE, PREFIX_ADDRESS,
             PREFIX_EMAIL, PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM, PREFIX_GROUP, PREFIX_TAG);
 
+    /** Matches a word followed by '/' that starts after whitespace, i.e. something that looks like a flag. */
+    private static final Pattern FLAG_LIKE_TOKEN = Pattern.compile("(?<=\\s)[A-Za-z]+/");
+
     /**
      * Parses the given {@code String} of arguments in the context of the FindCommand
      * and returns a FindCommand object for execution.
@@ -44,7 +49,7 @@ public class FindCommandParser implements Parser<FindCommand> {
                 .filter(prefix -> !argMultimap.getAllValues(prefix).isEmpty())
                 .toList();
 
-        if (!argMultimap.getPreamble().isEmpty() || usedPrefixes.isEmpty()) {
+        if (!argMultimap.getPreamble().isEmpty() || usedPrefixes.isEmpty() || containsUnknownFlag(args)) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
         }
 
@@ -86,6 +91,22 @@ public class FindCommandParser implements Parser<FindCommand> {
         descriptor.setTags(ParserUtil.parseTags(argMultimap.getAllValues(PREFIX_TAG)));
 
         return new FindCommand(new PersonMatchesFlagsPredicate(descriptor), usedPrefixes);
+    }
+
+    /**
+     * Returns true if {@code args} contains a flag-like token (e.g. {@code x/}) that is not one of the flags
+     * accepted by {@code find}. The tokenizer does not split on such tokens, so they would otherwise be
+     * absorbed into the value of the preceding flag.
+     */
+    private static boolean containsUnknownFlag(String args) {
+        Matcher matcher = FLAG_LIKE_TOKEN.matcher(args);
+        while (matcher.find()) {
+            String token = matcher.group();
+            if (SEARCHABLE_PREFIXES.stream().noneMatch(prefix -> prefix.getPrefix().equals(token))) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
