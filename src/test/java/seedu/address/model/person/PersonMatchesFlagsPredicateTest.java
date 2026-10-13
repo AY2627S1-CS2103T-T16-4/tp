@@ -5,6 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.testutil.TypicalPersons.ALICE;
+import static seedu.address.testutil.TypicalPersons.BENSON;
+import static seedu.address.testutil.TypicalPersons.CARL;
+import static seedu.address.testutil.TypicalPersons.GEORGE;
+import static seedu.address.testutil.TypicalPersons.JACK;
+import static seedu.address.testutil.TypicalPersons.KATE;
 
 import java.util.Set;
 import java.util.function.Consumer;
@@ -12,14 +18,8 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.model.tag.Tag;
-import seedu.address.testutil.PersonBuilder;
 
 public class PersonMatchesFlagsPredicateTest {
-
-    private final Person alice = new PersonBuilder().withName("Alice Pauline").withPhone("91234567")
-            .withEmail("alice@example.com").withAddress("123 Clementi Ave").withGroup("T09")
-            .withGithub("AliceGh").withLinkedin("alice-li").withTelegram("alicetg")
-            .withTags("friend", "classmate").build();
 
     @Test
     public void constructor_nullDescriptor_throwsNullPointerException() {
@@ -28,132 +28,141 @@ public class PersonMatchesFlagsPredicateTest {
 
     @Test
     public void test_noFieldsSet_returnsTrue() {
-        assertTrue(new PersonMatchesFlagsPredicate(new FindPersonDescriptor()).test(alice));
+        assertTrue(new PersonMatchesFlagsPredicate(new FindPersonDescriptor()).test(ALICE));
     }
 
     @Test
     public void test_name_matchesExactNameIgnoringCase() {
         // exact name -> returns true
-        assertTrue(predicateWith(d -> d.setName(new Name("Alice Pauline"))).test(alice));
+        assertTrue(predicateWith(d -> d.setName(ALICE.getName())).test(ALICE));
 
         // different case -> returns true (names are stored as block letters)
-        assertTrue(predicateWith(d -> d.setName(new Name("alice pauline"))).test(alice));
+        assertTrue(predicateWith(d -> d.setName(new Name(ALICE.getName().fullName.toLowerCase()))).test(ALICE));
 
         // partial name -> returns false
-        assertFalse(predicateWith(d -> d.setName(new Name("Alice"))).test(alice));
+        assertFalse(predicateWith(d -> d.setName(new Name(ALICE.getName().fullName.split(" ")[0]))).test(ALICE));
 
         // different name -> returns false
-        assertFalse(predicateWith(d -> d.setName(new Name("Bob Lee"))).test(alice));
+        assertFalse(predicateWith(d -> d.setName(BENSON.getName())).test(ALICE));
     }
 
     @Test
     public void test_phone() {
-        assertTrue(predicateWith(d -> d.setPhone(new Phone("91234567"))).test(alice));
-        assertFalse(predicateWith(d -> d.setPhone(new Phone("81234567"))).test(alice));
+        assertTrue(predicateWith(d -> d.setPhone(ALICE.getPhone())).test(ALICE));
+        assertFalse(predicateWith(d -> d.setPhone(BENSON.getPhone())).test(ALICE));
     }
 
     @Test
     public void test_email_caseInsensitive() {
-        assertTrue(predicateWith(d -> d.setEmail(new Email("alice@example.com"))).test(alice));
-        assertTrue(predicateWith(d -> d.setEmail(new Email("ALICE@Example.COM"))).test(alice));
-        assertFalse(predicateWith(d -> d.setEmail(new Email("bob@example.com"))).test(alice));
+        assertTrue(predicateWith(d -> d.setEmail(ALICE.getEmail())).test(ALICE));
+        assertTrue(predicateWith(d -> d.setEmail(new Email(ALICE.getEmail().value.toUpperCase()))).test(ALICE));
+        assertFalse(predicateWith(d -> d.setEmail(BENSON.getEmail())).test(ALICE));
     }
 
     @Test
     public void test_address_caseInsensitive() {
-        assertTrue(predicateWith(d -> d.setAddress(new Address("123 Clementi Ave"))).test(alice));
-        assertTrue(predicateWith(d -> d.setAddress(new Address("123 CLEMENTI AVE"))).test(alice));
+        assertTrue(predicateWith(d -> d.setAddress(ALICE.getAddress())).test(ALICE));
+        assertTrue(predicateWith(d -> d.setAddress(new Address(ALICE.getAddress().value.toUpperCase())))
+                .test(ALICE));
 
         // partial address -> returns false
-        assertFalse(predicateWith(d -> d.setAddress(new Address("Clementi"))).test(alice));
+        String address = ALICE.getAddress().value;
+        assertFalse(predicateWith(d -> d.setAddress(new Address(address.substring(0, address.length() / 2))))
+                .test(ALICE));
     }
 
     @Test
     public void test_group_caseInsensitive() {
-        assertTrue(predicateWith(d -> d.setGroup(new Group("T09"))).test(alice));
-        assertTrue(predicateWith(d -> d.setGroup(new Group("t09"))).test(alice));
-        assertFalse(predicateWith(d -> d.setGroup(new Group("T10"))).test(alice));
+        assertTrue(predicateWith(d -> d.setGroup(ALICE.getGroup())).test(ALICE));
+        assertTrue(predicateWith(d -> d.setGroup(new Group(ALICE.getGroup().value.toUpperCase()))).test(ALICE));
+        assertFalse(predicateWith(d -> d.setGroup(CARL.getGroup())).test(ALICE));
     }
 
     @Test
     public void test_github_caseSensitive() {
-        assertTrue(predicateWith(d -> d.setGithub(new Github("AliceGh"))).test(alice));
-        assertFalse(predicateWith(d -> d.setGithub(new Github("alicegh"))).test(alice));
-        assertFalse(predicateWith(d -> d.setGithub(new Github("bobgh"))).test(alice));
+        assertTrue(predicateWith(d -> d.setGithub(ALICE.getGithub())).test(ALICE));
+
+        // differs from ALICE's github only by case -> returns false
+        assertFalse(predicateWith(d -> d.setGithub(JACK.getGithub())).test(ALICE));
+
+        assertFalse(predicateWith(d -> d.setGithub(BENSON.getGithub())).test(ALICE));
     }
 
     @Test
     public void test_linkedin_caseInsensitive() {
-        assertTrue(predicateWith(d -> d.setLinkedin(new Linkedin("alice-li"))).test(alice));
-        assertTrue(predicateWith(d -> d.setLinkedin(new Linkedin("ALICE-LI"))).test(alice));
-        assertFalse(predicateWith(d -> d.setLinkedin(new Linkedin("bob-li"))).test(alice));
+        assertTrue(predicateWith(d -> d.setLinkedin(ALICE.getLinkedin())).test(ALICE));
+        assertTrue(predicateWith(d -> d.setLinkedin(new Linkedin(ALICE.getLinkedin().value.toUpperCase())))
+                .test(ALICE));
+        assertFalse(predicateWith(d -> d.setLinkedin(BENSON.getLinkedin())).test(ALICE));
     }
 
     @Test
     public void test_telegram_caseInsensitive() {
-        assertTrue(predicateWith(d -> d.setTelegram(new Telegram("alicetg"))).test(alice));
-        assertTrue(predicateWith(d -> d.setTelegram(new Telegram("AliceTG"))).test(alice));
-        assertFalse(predicateWith(d -> d.setTelegram(new Telegram("bobtg"))).test(alice));
+        assertTrue(predicateWith(d -> d.setTelegram(ALICE.getTelegram())).test(ALICE));
+        assertTrue(predicateWith(d -> d.setTelegram(new Telegram(ALICE.getTelegram().value.toUpperCase())))
+                .test(ALICE));
+        assertFalse(predicateWith(d -> d.setTelegram(CARL.getTelegram())).test(ALICE));
     }
 
     @Test
     public void test_tags_allSearchedTagsMustBePresent() {
-        // single tag the person has -> returns true
-        assertTrue(predicateWith(d -> d.setTags(Set.of(new Tag("friend")))).test(alice));
+        // single tag the person has -> returns true (ALICE's only tag is also one of KATE's tags)
+        assertTrue(predicateWith(d -> d.setTags(ALICE.getTags())).test(KATE));
 
         // different case -> returns true (tags are stored in lowercase)
-        assertTrue(predicateWith(d -> d.setTags(Set.of(new Tag("FRIEND")))).test(alice));
+        String aliceTagName = ALICE.getTags().iterator().next().tagName;
+        assertTrue(predicateWith(d -> d.setTags(Set.of(new Tag(aliceTagName.toUpperCase())))).test(KATE));
 
         // all of several tags -> returns true
-        assertTrue(predicateWith(d -> d.setTags(Set.of(new Tag("friend"), new Tag("classmate")))).test(alice));
+        assertTrue(predicateWith(d -> d.setTags(KATE.getTags())).test(KATE));
 
         // tag the person does not have -> returns false
-        assertFalse(predicateWith(d -> d.setTags(Set.of(new Tag("colleague")))).test(alice));
+        assertFalse(predicateWith(d -> d.setTags(JACK.getTags())).test(ALICE));
 
         // one matching and one missing tag -> returns false (AND)
-        assertFalse(predicateWith(d -> d.setTags(Set.of(new Tag("friend"), new Tag("colleague")))).test(alice));
+        assertFalse(predicateWith(d -> d.setTags(KATE.getTags())).test(ALICE));
     }
 
     @Test
     public void test_multipleFields_allMustMatch() {
         // all fields match -> returns true
         assertTrue(predicateWith(d -> {
-            d.setName(new Name("Alice Pauline"));
-            d.setGroup(new Group("T09"));
-            d.setTags(Set.of(new Tag("friend")));
-        }).test(alice));
+            d.setName(ALICE.getName());
+            d.setGroup(ALICE.getGroup());
+            d.setTags(ALICE.getTags());
+        }).test(ALICE));
 
         // one field does not match -> returns false
         assertFalse(predicateWith(d -> {
-            d.setName(new Name("Alice Pauline"));
-            d.setGroup(new Group("T10"));
-        }).test(alice));
+            d.setName(ALICE.getName());
+            d.setGroup(CARL.getGroup());
+        }).test(ALICE));
     }
 
     @Test
     public void test_unsetFieldOnPerson_doesNotMatchSearchedValue() {
-        Person noGithub = new PersonBuilder().build();
-        assertFalse(predicateWith(d -> d.setGithub(new Github("AliceGh"))).test(noGithub));
-        assertFalse(predicateWith(d -> d.setGroup(new Group("T09"))).test(noGithub));
-        assertFalse(predicateWith(d -> d.setTags(Set.of(new Tag("friend")))).test(noGithub));
+        // GEORGE has no group, github or tags
+        assertFalse(predicateWith(d -> d.setGithub(ALICE.getGithub())).test(GEORGE));
+        assertFalse(predicateWith(d -> d.setGroup(ALICE.getGroup())).test(GEORGE));
+        assertFalse(predicateWith(d -> d.setTags(ALICE.getTags())).test(GEORGE));
     }
 
     @Test
     public void constructor_defensiveCopyOfDescriptor() {
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
-        descriptor.setGroup(new Group("T09"));
+        descriptor.setGroup(ALICE.getGroup());
         PersonMatchesFlagsPredicate predicate = new PersonMatchesFlagsPredicate(descriptor);
 
-        descriptor.setGroup(new Group("T10"));
-        assertTrue(predicate.test(alice));
+        descriptor.setGroup(CARL.getGroup());
+        assertTrue(predicate.test(ALICE));
     }
 
     @Test
     public void equals() {
         FindPersonDescriptor firstDescriptor = new FindPersonDescriptor();
-        firstDescriptor.setName(new Name("Alice"));
+        firstDescriptor.setName(ALICE.getName());
         FindPersonDescriptor secondDescriptor = new FindPersonDescriptor();
-        secondDescriptor.setGroup(new Group("T09"));
+        secondDescriptor.setGroup(ALICE.getGroup());
 
         PersonMatchesFlagsPredicate firstPredicate = new PersonMatchesFlagsPredicate(firstDescriptor);
         PersonMatchesFlagsPredicate secondPredicate = new PersonMatchesFlagsPredicate(secondDescriptor);
@@ -177,7 +186,7 @@ public class PersonMatchesFlagsPredicateTest {
     @Test
     public void toStringMethod() {
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
-        descriptor.setGroup(new Group("T09"));
+        descriptor.setGroup(ALICE.getGroup());
         PersonMatchesFlagsPredicate predicate = new PersonMatchesFlagsPredicate(descriptor);
 
         String expected = PersonMatchesFlagsPredicate.class.getCanonicalName()
