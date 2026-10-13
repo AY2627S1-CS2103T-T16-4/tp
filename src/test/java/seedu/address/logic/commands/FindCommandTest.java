@@ -8,40 +8,32 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_GITHUB;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GROUP;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
+import static seedu.address.testutil.TypicalPersons.ALICE;
+import static seedu.address.testutil.TypicalPersons.BENSON;
+import static seedu.address.testutil.TypicalPersons.CARL;
+import static seedu.address.testutil.TypicalPersons.JACK;
+import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.parser.Prefix;
-import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.FindPersonDescriptor;
-import seedu.address.model.person.Github;
-import seedu.address.model.person.Group;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.PersonMatchesFlagsPredicate;
-import seedu.address.model.tag.Tag;
-import seedu.address.testutil.PersonBuilder;
 
 /**
  * Contains integration tests (interaction with the Model) for {@code FindCommand}.
  */
 public class FindCommandTest {
-    private static final Person ALICE = new PersonBuilder().withName("Alice Pauline").withPhone("91111111")
-            .withGroup("T09").withGithub("AliceGh").withTags("friend").build();
-    private static final Person BOB = new PersonBuilder().withName("Bob Choo").withPhone("92222222")
-            .withGroup("T09").withGithub("bobgh").withTags("friend", "classmate").build();
-    private static final Person CARL = new PersonBuilder().withName("Carl Kurz").withPhone("93333333")
-            .withGroup("T10").build();
-
-    private Model model = new ModelManager(getAddressBook(), new UserPrefs());
-    private Model expectedModel = new ModelManager(getAddressBook(), new UserPrefs());
+    private Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+    private Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
     @Test
     public void equals() {
@@ -73,43 +65,42 @@ public class FindCommandTest {
 
     @Test
     public void execute_singleFlagOneMatch_personFound() {
-        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setName(new Name("Alice Pauline")));
-        FindCommand command = new FindCommand(predicate, List.of(PREFIX_NAME));
-        expectedModel.updateFilteredPersonList(predicate);
-        assertCommandSuccess(command, model,
-                FindCommand.MESSAGE_SUCCESS, expectedModel);
-        assertEquals(List.of(ALICE), model.getFilteredPersonList());
+        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setName(ALICE.getName()));
+        assertFindSuccess(predicate, List.of(PREFIX_NAME), List.of(ALICE));
     }
 
     @Test
     public void execute_singleFlagMultipleMatches_allMatchesFound() {
-        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setGroup(new Group("t09")));
-        FindCommand command = new FindCommand(predicate, List.of(PREFIX_GROUP));
-        expectedModel.updateFilteredPersonList(predicate);
-        assertCommandSuccess(command, model,
-                FindCommand.MESSAGE_SUCCESS, expectedModel);
-        assertEquals(List.of(ALICE, BOB), model.getFilteredPersonList());
+        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setGroup(ALICE.getGroup()));
+        assertFindSuccess(predicate, List.of(PREFIX_GROUP), List.of(ALICE, BENSON, JACK));
+    }
+
+    @Test
+    public void execute_githubDifferingOnlyByCase_onlyExactCaseFound() {
+        // ALICE and JACK have github usernames that differ only by case
+        PersonMatchesFlagsPredicate alicePredicate = predicateWith(d -> d.setGithub(ALICE.getGithub()));
+        assertFindSuccess(alicePredicate, List.of(PREFIX_GITHUB), List.of(ALICE));
+
+        PersonMatchesFlagsPredicate jackPredicate = predicateWith(d -> d.setGithub(JACK.getGithub()));
+        assertFindSuccess(jackPredicate, List.of(PREFIX_GITHUB), List.of(JACK));
     }
 
     @Test
     public void execute_multipleFlags_onlyPersonsMatchingAllFlagsFound() {
+        // ALICE, BENSON and JACK share a group, but only JACK has the searched tag
         PersonMatchesFlagsPredicate predicate = predicateWith(d -> {
-            d.setGroup(new Group("T09"));
-            d.setTags(Set.of(new Tag("classmate")));
+            d.setGroup(JACK.getGroup());
+            d.setTags(JACK.getTags());
         });
-        FindCommand command = new FindCommand(predicate, List.of(PREFIX_GROUP, PREFIX_TAG));
-        expectedModel.updateFilteredPersonList(predicate);
-        assertCommandSuccess(command, model,
-                FindCommand.MESSAGE_SUCCESS, expectedModel);
-        assertEquals(List.of(BOB), model.getFilteredPersonList());
+        assertFindSuccess(predicate, List.of(PREFIX_GROUP, PREFIX_TAG), List.of(JACK));
     }
 
     @Test
     public void execute_noMatch_notFoundMessageNamesFlags() {
-        // GitHub usernames are case-sensitive
+        // each value is held by someone, but not by the same person
         PersonMatchesFlagsPredicate predicate = predicateWith(d -> {
-            d.setGithub(new Github("alicegh"));
-            d.setGroup(new Group("T09"));
+            d.setGithub(ALICE.getGithub());
+            d.setGroup(CARL.getGroup());
         });
         FindCommand command = new FindCommand(predicate, List.of(PREFIX_GITHUB, PREFIX_GROUP));
         String expectedMessage = String.format(FindCommand.MESSAGE_NOT_FOUND, "gh/ g/");
@@ -121,7 +112,7 @@ public class FindCommandTest {
 
     @Test
     public void toStringMethod() {
-        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setName(new Name("Alice")));
+        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setName(ALICE.getName()));
         List<Prefix> usedPrefixes = List.of(PREFIX_NAME);
         FindCommand findCommand = new FindCommand(predicate, usedPrefixes);
         String expected = FindCommand.class.getCanonicalName()
@@ -129,12 +120,17 @@ public class FindCommandTest {
         assertEquals(expected, findCommand.toString());
     }
 
-    private static AddressBook getAddressBook() {
-        AddressBook addressBook = new AddressBook();
-        addressBook.addPerson(ALICE);
-        addressBook.addPerson(BOB);
-        addressBook.addPerson(CARL);
-        return addressBook;
+    /**
+     * Executes a {@code FindCommand} with the given {@code predicate} and {@code usedPrefixes}, and asserts that it
+     * succeeds and leaves exactly {@code expectedPersons} in the filtered list, in order.
+     */
+    private void assertFindSuccess(PersonMatchesFlagsPredicate predicate, List<Prefix> usedPrefixes,
+            List<Person> expectedPersons) {
+        FindCommand command = new FindCommand(predicate, usedPrefixes);
+        expectedModel.updateFilteredPersonList(predicate);
+        assertCommandSuccess(command, model,
+                FindCommand.MESSAGE_SUCCESS, expectedModel);
+        assertEquals(expectedPersons, model.getFilteredPersonList());
     }
 
     private static PersonMatchesFlagsPredicate predicateWith(Consumer<FindPersonDescriptor> setup) {
