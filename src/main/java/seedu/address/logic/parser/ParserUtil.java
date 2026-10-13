@@ -11,6 +11,9 @@ import seedu.address.commons.util.StringUtil;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Github;
+import seedu.address.model.person.Group;
+import seedu.address.model.person.Linkedin;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Phone;
 import seedu.address.model.person.Telegram;
@@ -111,6 +114,33 @@ public class ParserUtil {
         }
 
         return new Telegram(trimmedTelegram);
+    }
+
+    /**
+     * Parses a {@code String github} into an {@code Github}.
+     * Leading and trailing whitespaces will be trimmed.
+     */
+    public static Github parseGithub(String github) {
+        requireNonNull(github);
+        return new Github(github.trim());
+    }
+
+    /**
+     * Parses a {@code String linkedin} into an {@code Linkedin}.
+     * Leading and trailing whitespaces will be trimmed.
+     */
+    public static Linkedin parseLinkedin(String linkedin) {
+        requireNonNull(linkedin);
+        return new Linkedin(linkedin.trim());
+    }
+
+    /**
+     * Parses a {@code String group} into an {@code Group}.
+     * Leading and trailing whitespaces will be trimmed.
+     */
+    public static Group parseGroup(String group) {
+        requireNonNull(group);
+        return new Group(group.trim());
     }
 
     /**
