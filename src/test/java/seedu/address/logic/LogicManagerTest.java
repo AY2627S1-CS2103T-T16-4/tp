@@ -94,11 +94,11 @@ public class LogicManagerTest {
     }
 
     @Test
-    public void execute_help_requestsHelpWithoutSelectionReset() throws Exception {
+    public void execute_help_returnsHelpTextWithoutSelectionReset() throws Exception {
         CommandResult result = logic.execute(HelpCommand.COMMAND_WORD);
 
         assertFalse(result.shouldResetContactSelection());
-        assertTrue(result.isShowHelp());
+        assertFalse(result.isShowHelp());
         assertFalse(result.isExit());
         assertEquals(HelpCommand.SHOWING_HELP_MESSAGE, result.getFeedbackToUser());
     }
