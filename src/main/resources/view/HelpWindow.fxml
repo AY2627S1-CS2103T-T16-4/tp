@@ -27,9 +27,9 @@
             </VBox.margin>
           </Label>
           <Button fx:id="copyButton" mnemonicParsing="false" onAction="#copyUrl" text="Copy URL">
-            <HBox.margin>
+            <VBox.margin>
               <Insets left="5.0" />
-            </HBox.margin>
+            </VBox.margin>
           </Button>
         </children>
         <opaqueInsets>
