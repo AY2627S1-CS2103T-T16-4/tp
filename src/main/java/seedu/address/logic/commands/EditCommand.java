@@ -1,11 +1,8 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
+import static seedu.address.logic.parser.CliSyntax.*;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_GROUP;
 import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 
 import java.util.Collections;
@@ -26,6 +23,10 @@ import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.person.Github;
+import seedu.address.model.person.Group;
+import seedu.address.model.person.Linkedin;
+import seedu.address.model.person.Telegram;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -41,8 +42,12 @@ public class EditCommand extends Command {
             + "Parameters: INDEX (must be a positive integer) "
             + "[" + PREFIX_NAME + "NAME] "
             + "[" + PREFIX_PHONE + "PHONE] "
-            + "[" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_ADDRESS + "ADDRESS] "
+            + "[" + PREFIX_EMAIL + "EMAIL] "
+            + "[" + PREFIX_GITHUB + "GITHUB] "
+            + "[" + PREFIX_LINKEDIN + "LINKEDIN] "
+            + "[" + PREFIX_TELEGRAM + "TELEGRAM] "
+            + "[" + PREFIX_GROUP + "GROUP] "
             + "[" + PREFIX_TAG + "TAG]...\n"
             + "Example: " + COMMAND_WORD + " 1 "
             + PREFIX_PHONE + "91234567 "
@@ -50,7 +55,7 @@ public class EditCommand extends Command {
 
     public static final String MESSAGE_EDIT_PERSON_SUCCESS = "Edited person: %1$s";
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
-    public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
+    public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book. No duplicate phone numbers!";
 
     private final Index index;
     private final EditPersonDescriptor editPersonDescriptor;
@@ -92,18 +97,22 @@ public class EditCommand extends Command {
      * Creates and returns a {@code Person} with the details of {@code personToEdit}
      * edited with {@code editPersonDescriptor}.
      */
-    private static Person createEditedPerson(Person personToEdit, EditPersonDescriptor editPersonDescriptor) {
+    private static Person createEditedPerson(
+            Person personToEdit, EditPersonDescriptor editPersonDescriptor) {
         assert personToEdit != null;
 
         Name updatedName = editPersonDescriptor.getName().orElse(personToEdit.getName());
         Phone updatedPhone = editPersonDescriptor.getPhone().orElse(personToEdit.getPhone());
         Email updatedEmail = editPersonDescriptor.getEmail().orElse(personToEdit.getEmail());
         Address updatedAddress = editPersonDescriptor.getAddress().orElse(personToEdit.getAddress());
+        Group updatedGroup = editPersonDescriptor.getGroup().orElse(personToEdit.getGroup());
+        Github updatedGithub = editPersonDescriptor.getGithub().orElse(personToEdit.getGithub());
+        Linkedin updatedLinkedin = editPersonDescriptor.getLinkedin().orElse(personToEdit.getLinkedin());
+        Telegram updatedTelegram = editPersonDescriptor.getTelegram().orElse(personToEdit.getTelegram());
         Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
 
         return new Person(updatedName, updatedPhone, updatedEmail, updatedAddress,
-                personToEdit.getGroup(), personToEdit.getGithub(), personToEdit.getLinkedin(),
-                personToEdit.getTelegram(), updatedTags);
+                updatedGroup, updatedGithub, updatedLinkedin, updatedTelegram, updatedTags);
     }
 
     @Override
@@ -130,14 +139,19 @@ public class EditCommand extends Command {
     }
 
     /**
-     * Stores the details to edit the person with. Each non-empty field value will replace the
-     * corresponding field value of the person.
+     * Stores the details to edit the person with.
+     * Each supplied field replaces the corresponding value.
+     * An empty value for an optional contact field clears that field.
      */
     public static class EditPersonDescriptor {
         private Name name;
         private Phone phone;
         private Email email;
         private Address address;
+        private Github github;
+        private Linkedin linkedin;
+        private Telegram telegram;
+        private Group group;
         private Set<Tag> tags;
 
         public EditPersonDescriptor() {}
@@ -151,6 +165,10 @@ public class EditCommand extends Command {
             setPhone(toCopy.phone);
             setEmail(toCopy.email);
             setAddress(toCopy.address);
+            setGroup(toCopy.group);
+            setGithub(toCopy.github);
+            setLinkedin(toCopy.linkedin);
+            setTelegram(toCopy.telegram);
             setTags(toCopy.tags);
         }
 
@@ -158,7 +176,8 @@ public class EditCommand extends Command {
          * Returns true if at least one field is edited.
          */
         public boolean isAnyFieldEdited() {
-            return CollectionUtil.isAnyNonNull(name, phone, email, address, tags);
+            return CollectionUtil.isAnyNonNull(
+                    name, phone, email, address, group, github, linkedin, telegram, tags);
         }
 
         public void setName(Name name) {
@@ -193,6 +212,38 @@ public class EditCommand extends Command {
             return Optional.ofNullable(address);
         }
 
+        public void setGroup(Group group) {
+            this.group = group;
+        }
+
+        public Optional<Group> getGroup() {
+            return Optional.ofNullable(group);
+        }
+
+        public void setGithub(Github github) {
+            this.github = github;
+        }
+
+        public Optional<Github> getGithub() {
+            return Optional.ofNullable(github);
+        }
+
+        public void setLinkedin(Linkedin linkedin) {
+            this.linkedin = linkedin;
+        }
+
+        public Optional<Linkedin> getLinkedin() {
+            return Optional.ofNullable(linkedin);
+        }
+
+        public void setTelegram(Telegram telegram) {
+            this.telegram = telegram;
+        }
+
+        public Optional<Telegram> getTelegram() {
+            return Optional.ofNullable(telegram);
+        }
+
         /**
          * Sets {@code tags} to this object's {@code tags}.
          * A defensive copy of {@code tags} is used internally.
@@ -225,6 +276,10 @@ public class EditCommand extends Command {
                     && Objects.equals(phone, otherEditPersonDescriptor.phone)
                     && Objects.equals(email, otherEditPersonDescriptor.email)
                     && Objects.equals(address, otherEditPersonDescriptor.address)
+                    && Objects.equals(group, otherEditPersonDescriptor.group)
+                    && Objects.equals(github, otherEditPersonDescriptor.github)
+                    && Objects.equals(linkedin, otherEditPersonDescriptor.linkedin)
+                    && Objects.equals(telegram, otherEditPersonDescriptor.telegram)
                     && Objects.equals(tags, otherEditPersonDescriptor.tags);
         }
 
@@ -235,6 +290,10 @@ public class EditCommand extends Command {
                     .add("phone", phone)
                     .add("email", email)
                     .add("address", address)
+                    .add("group", group)
+                    .add("github", github)
+                    .add("linkedin", linkedin)
+                    .add("telegram", telegram)
                     .add("tags", tags)
                     .toString();
         }

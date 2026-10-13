@@ -14,6 +14,9 @@ import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Phone;
 import seedu.address.model.person.Telegram;
+import seedu.address.model.person.Github;
+import seedu.address.model.person.Linkedin;
+import seedu.address.model.person.Group;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -111,6 +114,21 @@ public class ParserUtil {
         }
 
         return new Telegram(trimmedTelegram);
+    }
+
+    public static Github parseGithub(String github) {
+        requireNonNull(github);
+        return new Github(github.trim());
+    }
+
+    public static Linkedin parseLinkedin(String linkedin) {
+        requireNonNull(linkedin);
+        return new Linkedin(linkedin.trim());
+    }
+
+    public static Group parseGroup(String group) {
+        requireNonNull(group);
+        return new Group(group.trim());
     }
 
     /**
