@@ -5,42 +5,100 @@
     "phone" : "94351253",
     "email" : "alice@example.com",
     "address" : "123, Jurong West Ave 6, #08-111",
+    "group" : "t09",
+    "github" : "AliceGh",
+    "linkedin" : "alice-pauline",
+    "telegram" : "alicepauline",
     "tags" : [ "friends" ]
   }, {
     "name" : "Benson Meier",
     "phone" : "98765432",
     "email" : "johnd@example.com",
     "address" : "311, Clementi Ave 2, #02-25",
+    "group" : "t09",
+    "github" : "bensonm",
+    "linkedin" : "benson-meier",
+    "telegram" : "",
     "tags" : [ "owesMoney", "friends" ]
   }, {
     "name" : "Carl Kurz",
     "phone" : "95352563",
     "email" : "heinz@example.com",
     "address" : "wall street",
+    "group" : "t10",
+    "github" : "",
+    "linkedin" : "",
+    "telegram" : "carlk",
     "tags" : [ ]
   }, {
     "name" : "Daniel Meier",
     "phone" : "87652533",
     "email" : "cornelia@example.com",
     "address" : "10th street",
+    "group" : "t10",
+    "github" : "danielm",
+    "linkedin" : "daniel-meier",
+    "telegram" : "danielm",
     "tags" : [ "friends" ]
   }, {
     "name" : "Elle Meyer",
     "phone" : "94822244",
     "email" : "werner@example.com",
     "address" : "michegan ave",
+    "group" : "",
+    "github" : "ellem",
+    "linkedin" : "",
+    "telegram" : "ellem",
     "tags" : [ ]
   }, {
     "name" : "Fiona Kunz",
     "phone" : "94824277",
     "email" : "lydia@example.com",
     "address" : "little tokyo",
+    "group" : "t11",
+    "github" : "",
+    "linkedin" : "fiona-kunz",
+    "telegram" : "",
     "tags" : [ ]
   }, {
     "name" : "George Best",
     "phone" : "94824422",
     "email" : "anna@example.com",
     "address" : "4th street",
+    "group" : "",
+    "github" : "",
+    "linkedin" : "",
+    "telegram" : "",
+    "tags" : [ ]
+  }, {
+    "name" : "Jack Lim",
+    "phone" : "81111111",
+    "email" : "jack@example.com",
+    "address" : "20 Bishan Street 12",
+    "group" : "t09",
+    "github" : "alicegh",
+    "linkedin" : "jack-lim",
+    "telegram" : "jacklim",
+    "tags" : [ "colleagues" ]
+  }, {
+    "name" : "Kate Ong",
+    "phone" : "82222222",
+    "email" : "kate@example.com",
+    "address" : "7 Orchard Road",
+    "group" : "t11",
+    "github" : "kateong",
+    "linkedin" : "kate-ong",
+    "telegram" : "kateong",
+    "tags" : [ "friends", "colleagues" ]
+  }, {
+    "name" : "Daniel Meier",
+    "phone" : "83333333",
+    "email" : "twin@example.com",
+    "address" : "5 Pasir Ris Drive",
+    "group" : "",
+    "github" : "",
+    "linkedin" : "",
+    "telegram" : "",
     "tags" : [ ]
   } ]
 }
