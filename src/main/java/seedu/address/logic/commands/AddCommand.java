@@ -23,17 +23,18 @@ public class AddCommand extends Command {
 
     public static final String COMMAND_WORD = "add";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a person to the address book. "
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds a person to the address book.\n"
             + "Parameters: "
             + PREFIX_NAME + "NAME "
             + PREFIX_PHONE + "PHONE "
-            + "[" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_ADDRESS + "ADDRESS] "
-            + "[" + PREFIX_GROUP + "GROUP] "
+            + "[" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_GITHUB + "GITHUB] "
             + "[" + PREFIX_LINKEDIN + "LINKEDIN] "
             + "[" + PREFIX_TELEGRAM + "TELEGRAM] "
-            + "[" + PREFIX_TAG + "TAG]";
+            + "[" + PREFIX_GROUP + "GROUP] "
+            + "[" + PREFIX_TAG + "TAG]...\n"
+            + String.format("Example: %s %sJohn Doe %s81231234", COMMAND_WORD, PREFIX_NAME, PREFIX_PHONE);
 
     public static final String MESSAGE_SUCCESS = "New contact added";
     public static final String MESSAGE_DUPLICATE_PERSON = "Phone number is already in use";

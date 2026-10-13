@@ -31,7 +31,7 @@ public class FindCommand extends Command {
             + "all of the specified values and displays them as a list with index numbers.\n"
             + "Parameters: "
             + "[" + PREFIX_NAME + "NAME] "
-            + "[" + PREFIX_PHONE + "PHONE_NUMBER] "
+            + "[" + PREFIX_PHONE + "PHONE] "
             + "[" + PREFIX_ADDRESS + "ADDRESS] "
             + "[" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_GITHUB + "GITHUB] "
