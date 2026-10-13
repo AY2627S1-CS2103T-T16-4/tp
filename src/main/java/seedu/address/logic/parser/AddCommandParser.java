@@ -41,18 +41,17 @@ public class AddCommandParser implements Parser<AddCommand> {
                 ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS,
                         PREFIX_GROUP, PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM, PREFIX_TAG);
 
+        if (args.isBlank() || !argMultimap.getPreamble().isEmpty()) {
+            throw new ParseException(
+                    String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE));
+        }
+
         if (!argMultimap.getValue(PREFIX_NAME).isPresent()) {
             throw new ParseException(AddCommand.MESSAGE_MISSING_NAME);
         }
 
         if (!argMultimap.getValue(PREFIX_PHONE).isPresent()) {
             throw new ParseException(Phone.MESSAGE_CONSTRAINTS);
-        }
-
-        if (!argMultimap.getPreamble().isEmpty()) {
-            throw new ParseException(
-                    String.format(MESSAGE_INVALID_COMMAND_FORMAT,
-                            AddCommand.MESSAGE_USAGE));
         }
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL,

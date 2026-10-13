@@ -26,7 +26,7 @@ public class DeleteCommand extends Command {
             + ": Deletes the person identified by their name.\n"
             + "Parameters: "
             + PREFIX_NAME + "NAME "
-            + "[" + PREFIX_PHONE + "PHONE_NUMBER ]\n"
+            + "[" + PREFIX_PHONE + "PHONE_NUMBER]\n"
             + String.format("Example 1: %s %sJohn Doe\n", COMMAND_WORD, PREFIX_NAME)
             + String.format("Example 2: %s %sJohn Doe %s81231234", COMMAND_WORD, PREFIX_NAME, PREFIX_PHONE);
 
