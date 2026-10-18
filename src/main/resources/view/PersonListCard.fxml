@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -18,9 +19,6 @@
       </Label>
       <Label fx:id="name" styleClass="contact-name" minWidth="0" maxWidth="Infinity" HBox.hgrow="ALWAYS" />
     </HBox>
-    <HBox fx:id="teamSection" alignment="CENTER_LEFT" spacing="6" minWidth="0">
-      <Label text="Team" styleClass="team-caption" />
-      <Label fx:id="team" styleClass="team-badge" minWidth="0" maxWidth="Infinity" />
-    </HBox>
+    <FlowPane fx:id="groups" hgap="6" vgap="6" alignment="CENTER_LEFT" minWidth="0" />
   </VBox>
 </HBox>

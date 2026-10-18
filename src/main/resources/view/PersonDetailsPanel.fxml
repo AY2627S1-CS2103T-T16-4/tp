@@ -18,9 +18,9 @@
                minWidth="64" prefWidth="64" maxWidth="64" minHeight="64" prefHeight="64" maxHeight="64" />
         <Label fx:id="name" styleClass="details-name" wrapText="true" alignment="CENTER"
                minWidth="0" maxWidth="Infinity" />
-        <VBox fx:id="teamSection" alignment="CENTER" spacing="6">
-          <Label text="Team" styleClass="detail-key" />
-          <Label fx:id="team" styleClass="team-badge" wrapText="true" minWidth="0" />
+        <VBox fx:id="groupsSection" alignment="CENTER" spacing="6">
+          <Label text="Groups" styleClass="detail-key" />
+          <FlowPane fx:id="groups" hgap="6" vgap="6" alignment="CENTER" />
         </VBox>
       </VBox>
       <GridPane hgap="16" vgap="10" minWidth="0">

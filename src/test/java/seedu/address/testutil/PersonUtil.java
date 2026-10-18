@@ -14,6 +14,7 @@ import java.util.Set;
 
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
+import seedu.address.model.person.Group;
 import seedu.address.model.person.Person;
 import seedu.address.model.tag.Tag;
 
@@ -53,7 +54,18 @@ public class PersonUtil {
         descriptor.getPhone().ifPresent(phone -> sb.append(PREFIX_PHONE).append(phone.value).append(" "));
         descriptor.getEmail().ifPresent(email -> sb.append(PREFIX_EMAIL).append(email.value).append(" "));
         descriptor.getAddress().ifPresent(address -> sb.append(PREFIX_ADDRESS).append(address.value).append(" "));
-        descriptor.getGroup().ifPresent(group -> sb.append(PREFIX_GROUP).append(group.value).append(" "));
+        if (descriptor.getGroups().isPresent()) {
+            Set<Group> groups = descriptor.getGroups().get();
+
+            if (groups.isEmpty()) {
+                sb.append(PREFIX_GROUP);
+            } else {
+                groups.forEach(group ->
+                        sb.append(PREFIX_GROUP)
+                                .append(group.value)
+                                .append(" "));
+            }
+        }
         descriptor.getGithub().ifPresent(github -> sb.append(PREFIX_GITHUB).append(github.value).append(" "));
         descriptor.getLinkedin().ifPresent(linkedin -> sb.append(PREFIX_LINKEDIN).append(linkedin.value).append(" "));
         descriptor.getTelegram().ifPresent(telegram -> sb.append(PREFIX_TELEGRAM).append(telegram.value).append(" "));

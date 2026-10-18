@@ -23,7 +23,7 @@ public class Person {
 
     // Data fields
     private final Address address;
-    private final Group group;
+    private final Set<Group> groups = new HashSet<>();
     private final Github github;
     private final Linkedin linkedin;
     private final Telegram telegram;
@@ -32,14 +32,14 @@ public class Person {
     /**
      * Every field must be present and not null.
      */
-    public Person(Name name, Phone phone, Email email, Address address, Group group,
+    public Person(Name name, Phone phone, Email email, Address address, Set<Group> groups,
                   Github github, Linkedin linkedin, Telegram telegram, Set<Tag> tags) {
-        requireAllNonNull(name, phone, email, address, group, github, linkedin, telegram, tags);
+        requireAllNonNull(name, phone, email, address, groups, github, linkedin, telegram, tags);
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
-        this.group = group;
+        this.groups.addAll(groups);
         this.github = github;
         this.linkedin = linkedin;
         this.telegram = telegram;
@@ -63,8 +63,12 @@ public class Person {
         return address;
     }
 
-    public Group getGroup() {
-        return group;
+    /**
+     * Returns an immutable group set, which throws {@code UnsupportedOperationException}
+     * if modification is attempted.
+     */
+    public Set<Group> getGroups() {
+        return Collections.unmodifiableSet(groups);
     }
 
     public Github getGithub() {
@@ -119,7 +123,7 @@ public class Person {
                 && phone.equals(otherPerson.phone)
                 && email.equals(otherPerson.email)
                 && address.equals(otherPerson.address)
-                && group.equals(otherPerson.group)
+                && groups.equals(otherPerson.groups)
                 && github.equals(otherPerson.github)
                 && linkedin.equals(otherPerson.linkedin)
                 && telegram.equals(otherPerson.telegram)
@@ -129,7 +133,7 @@ public class Person {
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, group, github, linkedin, telegram, tags);
+        return Objects.hash(name, phone, email, address, groups, github, linkedin, telegram, tags);
     }
 
     @Override
@@ -139,7 +143,7 @@ public class Person {
                 .add("phone", phone)
                 .add("email", email)
                 .add("address", address)
-                .add("group", group)
+                .add("groups", groups)
                 .add("github", github)
                 .add("linkedin", linkedin)
                 .add("telegram", telegram)

@@ -113,14 +113,14 @@ public class EditCommand extends Command {
         Phone updatedPhone = editPersonDescriptor.getPhone().orElse(personToEdit.getPhone());
         Email updatedEmail = editPersonDescriptor.getEmail().orElse(personToEdit.getEmail());
         Address updatedAddress = editPersonDescriptor.getAddress().orElse(personToEdit.getAddress());
-        Group updatedGroup = editPersonDescriptor.getGroup().orElse(personToEdit.getGroup());
+        Set<Group> updatedGroups = editPersonDescriptor.getGroups().orElse(personToEdit.getGroups());
         Github updatedGithub = editPersonDescriptor.getGithub().orElse(personToEdit.getGithub());
         Linkedin updatedLinkedin = editPersonDescriptor.getLinkedin().orElse(personToEdit.getLinkedin());
         Telegram updatedTelegram = editPersonDescriptor.getTelegram().orElse(personToEdit.getTelegram());
         Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
 
         return new Person(updatedName, updatedPhone, updatedEmail, updatedAddress,
-                updatedGroup, updatedGithub, updatedLinkedin, updatedTelegram, updatedTags);
+                updatedGroups, updatedGithub, updatedLinkedin, updatedTelegram, updatedTags);
     }
 
     @Override
@@ -159,7 +159,7 @@ public class EditCommand extends Command {
         private Github github;
         private Linkedin linkedin;
         private Telegram telegram;
-        private Group group;
+        private Set<Group> groups;
         private Set<Tag> tags;
 
         public EditPersonDescriptor() {}
@@ -173,7 +173,7 @@ public class EditCommand extends Command {
             setPhone(toCopy.phone);
             setEmail(toCopy.email);
             setAddress(toCopy.address);
-            setGroup(toCopy.group);
+            setGroups(toCopy.groups);
             setGithub(toCopy.github);
             setLinkedin(toCopy.linkedin);
             setTelegram(toCopy.telegram);
@@ -185,7 +185,7 @@ public class EditCommand extends Command {
          */
         public boolean isAnyFieldEdited() {
             return CollectionUtil.isAnyNonNull(
-                    name, phone, email, address, group, github, linkedin, telegram, tags);
+                    name, phone, email, address, groups, github, linkedin, telegram, tags);
         }
 
         public void setName(Name name) {
@@ -220,12 +220,21 @@ public class EditCommand extends Command {
             return Optional.ofNullable(address);
         }
 
-        public void setGroup(Group group) {
-            this.group = group;
+        /**
+         * Sets {@code groups} to this object's {@code groups}.
+         * A defensive copy of {@code groups} is used internally.
+         */
+        public void setGroups(Set<Group> groups) {
+            this.groups = (groups != null) ? new HashSet<>(groups) : null;
         }
 
-        public Optional<Group> getGroup() {
-            return Optional.ofNullable(group);
+        /**
+         * Returns an unmodifiable tag set, which throws {@code UnsupportedOperationException}
+         * if modification is attempted.
+         * Returns {@code Optional#empty()} if {@code groups} is null.
+         */
+        public Optional<Set<Group>> getGroups() {
+            return (groups != null) ? Optional.of(Collections.unmodifiableSet(groups)) : Optional.empty();
         }
 
         public void setGithub(Github github) {
@@ -284,7 +293,7 @@ public class EditCommand extends Command {
                     && Objects.equals(phone, otherEditPersonDescriptor.phone)
                     && Objects.equals(email, otherEditPersonDescriptor.email)
                     && Objects.equals(address, otherEditPersonDescriptor.address)
-                    && Objects.equals(group, otherEditPersonDescriptor.group)
+                    && Objects.equals(groups, otherEditPersonDescriptor.groups)
                     && Objects.equals(github, otherEditPersonDescriptor.github)
                     && Objects.equals(linkedin, otherEditPersonDescriptor.linkedin)
                     && Objects.equals(telegram, otherEditPersonDescriptor.telegram)
@@ -298,7 +307,7 @@ public class EditCommand extends Command {
                     .add("phone", phone)
                     .add("email", email)
                     .add("address", address)
-                    .add("group", group)
+                    .add("groups", groups)
                     .add("github", github)
                     .add("linkedin", linkedin)
                     .add("telegram", telegram)

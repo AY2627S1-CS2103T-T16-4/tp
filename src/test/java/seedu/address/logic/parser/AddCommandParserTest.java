@@ -150,6 +150,21 @@ public class AddCommandParserTest {
     }
 
     @Test
+    public void parse_multipleGroups_success() {
+        Person expectedPerson = new PersonBuilder(AMY)
+                .withGroups(GROUP_DESC_AMY, GROUP_DESC_BOB)
+                .build();
+
+        assertParseSuccess(
+                parser,
+                NAME_DESC_AMY
+                        + PHONE_DESC_AMY
+                        + GROUP_DESC_AMY
+                        + GROUP_DESC_BOB,
+                new AddCommand(expectedPerson));
+    }
+
+    @Test
     public void parse_invalidValue_failure() {
         // invalid name
         assertParseFailure(parser, INVALID_NAME_DESC + PHONE_DESC_BOB + EMAIL_DESC_BOB + ADDRESS_DESC_BOB

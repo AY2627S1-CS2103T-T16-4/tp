@@ -65,31 +65,31 @@ public class TypicalPersons {
 
     public static final Person ALICE = new PersonBuilder().withName("Alice Pauline")
             .withAddress("123, Jurong West Ave 6, #08-111").withEmail("alice@example.com")
-            .withPhone("94351253").withGroup("t09").withGithub("AliceGh").withLinkedin("alice-pauline")
+            .withPhone("94351253").withGroups("t09").withGithub("AliceGh").withLinkedin("alice-pauline")
             .withTelegram("alicepauline").withTags("friends").build();
     public static final Person BENSON = new PersonBuilder().withName("Benson Meier")
             .withAddress("311, Clementi Ave 2, #02-25")
-            .withEmail("johnd@example.com").withPhone("98765432").withGroup("t09").withGithub("bensonm")
+            .withEmail("johnd@example.com").withPhone("98765432").withGroups("t09").withGithub("bensonm")
             .withLinkedin("benson-meier").withTags("owesMoney", "friends").build();
     public static final Person CARL = new PersonBuilder().withName("Carl Kurz").withPhone("95352563")
-            .withEmail("heinz@example.com").withAddress("wall street").withGroup("t10")
+            .withEmail("heinz@example.com").withAddress("wall street").withGroups("t10")
             .withTelegram("carlk").build();
     public static final Person DANIEL = new PersonBuilder().withName("Daniel Meier").withPhone("87652533")
-            .withEmail("cornelia@example.com").withAddress("10th street").withGroup("t10").withGithub("danielm")
+            .withEmail("cornelia@example.com").withAddress("10th street").withGroups("t10").withGithub("danielm")
             .withLinkedin("daniel-meier").withTelegram("danielm").withTags("friends").build();
     public static final Person ELLE = new PersonBuilder().withName("Elle Meyer").withPhone("94822244")
             .withEmail("werner@example.com").withAddress("michegan ave").withGithub("ellem")
             .withTelegram("ellem").build();
     public static final Person FIONA = new PersonBuilder().withName("Fiona Kunz").withPhone("94824277")
-            .withEmail("lydia@example.com").withAddress("little tokyo").withGroup("t11")
+            .withEmail("lydia@example.com").withAddress("little tokyo").withGroups("t11")
             .withLinkedin("fiona-kunz").build();
     public static final Person GEORGE = new PersonBuilder().withName("George Best").withPhone("94824422")
             .withEmail("anna@example.com").withAddress("4th street").build();
     public static final Person JACK = new PersonBuilder().withName("Jack Lim").withPhone("81111111")
-            .withEmail("jack@example.com").withAddress("20 Bishan Street 12").withGroup("t09")
+            .withEmail("jack@example.com").withAddress("20 Bishan Street 12").withGroups("t09")
             .withGithub("alicegh").withLinkedin("jack-lim").withTelegram("jacklim").withTags("colleagues").build();
     public static final Person KATE = new PersonBuilder().withName("Kate Ong").withPhone("82222222")
-            .withEmail("kate@example.com").withAddress("7 Orchard Road").withGroup("t11").withGithub("kateong")
+            .withEmail("kate@example.com").withAddress("7 Orchard Road").withGroups("t11").withGithub("kateong")
             .withLinkedin("kate-ong").withTelegram("kateong").withTags("friends", "colleagues").build();
     // Same name as DANIEL but a different phone
     public static final Person DANIEL_TWIN = new PersonBuilder().withName("Daniel Meier").withPhone("83333333")
@@ -97,19 +97,19 @@ public class TypicalPersons {
 
     // Manually added
     public static final Person HOON = new PersonBuilder().withName("Hoon Meier").withPhone("84824244")
-            .withEmail("stefan@example.com").withAddress("little india").withGroup("t12").withGithub("hoonm")
+            .withEmail("stefan@example.com").withAddress("little india").withGroups("t12").withGithub("hoonm")
             .withLinkedin("hoon-meier").withTelegram("hoonm").build();
     public static final Person IDA = new PersonBuilder().withName("Ida Mueller").withPhone("84821311")
-            .withEmail("hans@example.com").withAddress("chicago ave").withGroup("t12").withGithub("idam")
+            .withEmail("hans@example.com").withAddress("chicago ave").withGroups("t12").withGithub("idam")
             .withLinkedin("ida-mueller").withTelegram("idam").build();
 
     // Manually added - Person's details found in {@code CommandTestUtil}
     public static final Person AMY = new PersonBuilder().withName(VALID_NAME_AMY).withPhone(VALID_PHONE_AMY)
-            .withEmail(VALID_EMAIL_AMY).withAddress(VALID_ADDRESS_AMY).withGroup(VALID_GROUP_AMY)
+            .withEmail(VALID_EMAIL_AMY).withAddress(VALID_ADDRESS_AMY).withGroups(VALID_GROUP_AMY)
             .withGithub(VALID_GITHUB_AMY).withLinkedin(VALID_LINKEDIN_AMY).withTelegram(VALID_TELEGRAM_AMY)
             .withTags(VALID_TAG_FRIEND).build();
     public static final Person BOB = new PersonBuilder().withName(VALID_NAME_BOB).withPhone(VALID_PHONE_BOB)
-            .withEmail(VALID_EMAIL_BOB).withAddress(VALID_ADDRESS_BOB).withGroup(VALID_GROUP_BOB)
+            .withEmail(VALID_EMAIL_BOB).withAddress(VALID_ADDRESS_BOB).withGroups(VALID_GROUP_BOB)
             .withGithub(VALID_GITHUB_BOB).withLinkedin(VALID_LINKEDIN_BOB).withTelegram(VALID_TELEGRAM_BOB)
             .withTags(VALID_TAG_HUSBAND, VALID_TAG_FRIEND).build();
 

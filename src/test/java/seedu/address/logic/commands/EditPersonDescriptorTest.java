@@ -85,7 +85,7 @@ public class EditPersonDescriptorTest {
                 + editPersonDescriptor.getPhone().orElse(null) + ", email="
                 + editPersonDescriptor.getEmail().orElse(null) + ", address="
                 + editPersonDescriptor.getAddress().orElse(null) + ", group="
-                + editPersonDescriptor.getGroup().orElse(null) + ", github="
+                + editPersonDescriptor.getGroups().orElse(null) + ", github="
                 + editPersonDescriptor.getGithub().orElse(null) + ", linkedin="
                 + editPersonDescriptor.getLinkedin().orElse(null) + ", telegram="
                 + editPersonDescriptor.getTelegram().orElse(null) + ", tags="

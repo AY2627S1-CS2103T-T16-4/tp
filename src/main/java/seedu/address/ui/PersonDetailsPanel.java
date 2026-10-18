@@ -27,9 +27,9 @@ public class PersonDetailsPanel extends UiPart<Region> {
     @FXML
     private Label name;
     @FXML
-    private Label team;
+    private VBox groupsSection;
     @FXML
-    private VBox teamSection;
+    private FlowPane groups;
     @FXML
     private Label phone;
     @FXML
@@ -70,11 +70,16 @@ public class PersonDetailsPanel extends UiPart<Region> {
 
         initials.setText(PersonCard.getInitials(person));
         name.setText(person.getName().fullName);
-        team.setText(person.getGroup().value);
-        team.setVisible(!person.getGroup().value.isBlank());
-        team.setManaged(team.isVisible());
-        teamSection.setVisible(team.isVisible());
-        teamSection.setManaged(team.isVisible());
+        groups.getChildren().clear();
+        person.getGroups().stream()
+                .sorted(Comparator.comparing(group -> group.value))
+                .forEach(group -> {
+                    Label badge = new Label(group.value);
+                    badge.getStyleClass().add("team-badge");
+                    groups.getChildren().add(badge);
+                });
+        groupsSection.setVisible(!person.getGroups().isEmpty());
+        groupsSection.setManaged(groupsSection.isVisible());
         setDetail(phone, person.getPhone().value);
         setDetail(email, person.getEmail().value);
         setDetail(address, person.getAddress().value);

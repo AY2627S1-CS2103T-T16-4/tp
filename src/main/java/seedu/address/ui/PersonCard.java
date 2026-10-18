@@ -1,9 +1,11 @@
 package seedu.address.ui;
 
+import java.util.Comparator;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Region;
 import seedu.address.model.person.Person;
 
@@ -31,9 +33,7 @@ public class PersonCard extends UiPart<Region> {
     @FXML
     private Label id;
     @FXML
-    private Label team;
-    @FXML
-    private HBox teamSection;
+    private FlowPane groups;
 
     /**
      * Creates a {@code PersonCard} with the given {@code Person} and index to display.
@@ -45,12 +45,13 @@ public class PersonCard extends UiPart<Region> {
         name.setText(person.getName().fullName);
         name.setTooltip(new Tooltip(person.getName().fullName));
         initials.setText(getInitials(person));
-        team.setText(person.getGroup().value);
-        team.setTooltip(new Tooltip(person.getGroup().value));
-        team.setVisible(!person.getGroup().value.isBlank());
-        team.setManaged(team.isVisible());
-        teamSection.setVisible(team.isVisible());
-        teamSection.setManaged(team.isVisible());
+        person.getGroups().stream()
+                .sorted(Comparator.comparing(group -> group.value))
+                .forEach(group -> {
+                    Label badge = new Label(group.value);
+                    badge.getStyleClass().add("team-badge");
+                    groups.getChildren().add(badge);
+                });
     }
 
     static String getInitials(Person person) {

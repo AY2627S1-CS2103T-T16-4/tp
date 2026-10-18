@@ -55,18 +55,18 @@ public class AddCommandParser implements Parser<AddCommand> {
         }
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL,
-                PREFIX_ADDRESS, PREFIX_GROUP, PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM);
+                PREFIX_ADDRESS, PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM);
         Name name = ParserUtil.parseName(argMultimap.getValue(PREFIX_NAME).get().toUpperCase());
         Phone phone = ParserUtil.parsePhone(argMultimap.getValue(PREFIX_PHONE).get());
         Email email = ParserUtil.parseEmail(argMultimap.getValue(PREFIX_EMAIL).orElse(""));
         Address address = ParserUtil.parseAddress(argMultimap.getValue(PREFIX_ADDRESS).orElse(""));
         Set<Tag> tagList = ParserUtil.parseTags(argMultimap.getAllValues(PREFIX_TAG));
-        Group group = new Group(argMultimap.getValue(PREFIX_GROUP).orElse(""));
-        Github github = new Github(argMultimap.getValue(PREFIX_GITHUB).orElse(""));
-        Linkedin linkedin = new Linkedin(argMultimap.getValue(PREFIX_LINKEDIN).orElse(""));
+        Set<Group> groupList = ParserUtil.parseGroups(argMultimap.getAllValues(PREFIX_GROUP));
+        Github github = ParserUtil.parseGithub(argMultimap.getValue(PREFIX_GITHUB).orElse(""));
+        Linkedin linkedin = ParserUtil.parseLinkedin(argMultimap.getValue(PREFIX_LINKEDIN).orElse(""));
         Telegram telegram = ParserUtil.parseTelegram(argMultimap.getValue(PREFIX_TELEGRAM).orElse(""));
 
-        Person person = new Person(name, phone, email, address, group, github, linkedin, telegram, tagList);
+        Person person = new Person(name, phone, email, address, groupList, github, linkedin, telegram, tagList);
 
         return new AddCommand(person);
     }
