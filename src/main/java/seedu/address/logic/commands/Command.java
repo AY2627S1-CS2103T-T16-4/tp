@@ -17,4 +17,11 @@ public abstract class Command {
      */
     public abstract CommandResult execute(Model model) throws CommandException;
 
+    /**
+     * Returns whether this command changes the address book and can be undone.
+     */
+    public boolean isUndoable() {
+        return false;
+    }
+
 }

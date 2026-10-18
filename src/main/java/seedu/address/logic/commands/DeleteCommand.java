@@ -103,6 +103,11 @@ public class DeleteCommand extends Command {
     }
 
     @Override
+    public boolean isUndoable() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .add("targetName", targetName)

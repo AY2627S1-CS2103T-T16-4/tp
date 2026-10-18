@@ -3,6 +3,8 @@ package seedu.address.model;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -19,6 +21,7 @@ public class ModelManager implements Model {
     private static final Logger logger = LogsCenter.getLogger(ModelManager.class);
 
     private final AddressBook addressBook;
+    private final Deque<AddressBook> undoHistory = new ArrayDeque<>();
     private final UserPrefs userPrefs;
     private final FilteredList<Person> filteredPersons;
 
@@ -124,6 +127,25 @@ public class ModelManager implements Model {
         return addressBook.equals(otherModelManager.addressBook)
                 && userPrefs.equals(otherModelManager.userPrefs)
                 && filteredPersons.equals(otherModelManager.filteredPersons);
+    }
+
+    //=========== Undo ======================================================================================
+
+    @Override
+    public void saveStateForUndo(ReadOnlyAddressBook state) {
+        requireNonNull(state);
+        undoHistory.push(new AddressBook(state));
+    }
+
+    @Override
+    public boolean undo() {
+        if (undoHistory.isEmpty()) {
+            return false;
+        }
+
+        addressBook.resetData(undoHistory.pop());
+        updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        return true;
     }
 
 }

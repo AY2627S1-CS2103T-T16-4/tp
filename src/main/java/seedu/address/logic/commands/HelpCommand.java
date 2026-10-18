@@ -19,6 +19,7 @@ public class HelpCommand extends Command {
             FindCommand.MESSAGE_USAGE,
             "list: Shows all contacts.\nExample: list",
             "clear: Deletes all contacts.\nExample: clear",
+            UndoCommand.MESSAGE_USAGE,
             MESSAGE_USAGE,
             "exit: Closes the application.\nExample: exit");
 
