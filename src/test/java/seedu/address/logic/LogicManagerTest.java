@@ -30,6 +30,7 @@ import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.AddressBook;
@@ -132,6 +133,28 @@ public class LogicManagerTest {
     @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> logic.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void execute_addDeleteUndo_restoresDeletedContact() throws Exception {
+        String addCommand = AddCommand.COMMAND_WORD
+                + NAME_DESC_AMY
+                + PHONE_DESC_AMY
+                + EMAIL_DESC_AMY
+                + ADDRESS_DESC_AMY
+                + GROUP_DESC_AMY
+                + GITHUB_DESC_AMY
+                + LINKEDIN_DESC_AMY
+                + TELEGRAM_DESC_AMY;
+
+        logic.execute(addCommand);
+        logic.execute(DeleteCommand.COMMAND_WORD + NAME_DESC_AMY);
+
+        CommandResult result = logic.execute(UndoCommand.COMMAND_WORD);
+
+        assertEquals(UndoCommand.MESSAGE_SUCCESS, result.getFeedbackToUser());
+        assertEquals(1, logic.getFilteredPersonList().size());
+        assertEquals(AMY.getName(), logic.getFilteredPersonList().get(0).getName());
     }
 
     /**

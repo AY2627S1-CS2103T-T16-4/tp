@@ -73,6 +73,43 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void saveStateForUndo_thenUndo_restoresPreviousState() {
+        modelManager.addPerson(ALICE);
+        modelManager.saveStateForUndo(new AddressBook(modelManager.getAddressBook()));
+        modelManager.deletePerson(ALICE);
+
+        assertTrue(modelManager.undo());
+        assertTrue(modelManager.hasPerson(ALICE));
+    }
+
+    @Test
+    public void undo_withoutSavedState_returnsFalse() {
+        assertFalse(modelManager.undo());
+    }
+
+    @Test
+    public void undo_multipleTimes_restoresStatesInReverseOrder() {
+        modelManager.addPerson(ALICE);
+        modelManager.saveStateForUndo(new AddressBook(modelManager.getAddressBook()));
+        modelManager.addPerson(BENSON);
+        modelManager.saveStateForUndo(new AddressBook(modelManager.getAddressBook()));
+        modelManager.deletePerson(BENSON);
+
+        assertTrue(modelManager.undo());
+        assertTrue(modelManager.hasPerson(ALICE));
+        assertTrue(modelManager.hasPerson(BENSON));
+
+        assertTrue(modelManager.undo());
+        assertTrue(modelManager.hasPerson(ALICE));
+        assertFalse(modelManager.hasPerson(BENSON));
+    }
+
+    @Test
+    public void saveStateForUndo_nullState_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> modelManager.saveStateForUndo(null));
+    }
+
+    @Test
     public void equals() {
         AddressBook addressBook = new AddressBookBuilder().withPerson(ALICE).withPerson(BENSON).build();
         AddressBook differentAddressBook = new AddressBook();
