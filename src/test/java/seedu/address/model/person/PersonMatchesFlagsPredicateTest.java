@@ -47,7 +47,7 @@ public class PersonMatchesFlagsPredicateTest {
         // different case -> returns true (names are stored as block letters)
         assertTrue(predicateWith(d -> d.setName("aLiCe pAuLiNe")).test(ALICE));
 
-        // name only contained in another person's name -> returns false
+        // another person's name -> returns false
         assertFalse(predicateWith(d -> d.setName("Benson")).test(ALICE));
 
         // search longer than the name -> returns false
