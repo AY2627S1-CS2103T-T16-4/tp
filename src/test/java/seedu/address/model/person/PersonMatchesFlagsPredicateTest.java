@@ -14,6 +14,7 @@ import static seedu.address.testutil.TypicalPersons.KATE;
 
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -73,9 +74,15 @@ public class PersonMatchesFlagsPredicateTest {
 
     @Test
     public void test_group_caseInsensitive() {
-        assertTrue(predicateWith(d -> d.setGroup(ALICE.getGroup())).test(ALICE));
-        assertTrue(predicateWith(d -> d.setGroup(new Group(ALICE.getGroup().value.toUpperCase()))).test(ALICE));
-        assertFalse(predicateWith(d -> d.setGroup(CARL.getGroup())).test(ALICE));
+        assertTrue(predicateWith(d -> d.setGroups(ALICE.getGroups())).test(ALICE));
+        assertTrue(
+                predicateWith(d -> d.setGroups(
+                        ALICE.getGroups().stream()
+                                .map(group -> new Group(group.value.toUpperCase()))
+                                .collect(Collectors.toSet())
+                )).test(ALICE)
+        );
+        assertFalse(predicateWith(d -> d.setGroups(CARL.getGroups())).test(ALICE));
     }
 
     @Test
@@ -128,14 +135,14 @@ public class PersonMatchesFlagsPredicateTest {
         // all fields match -> returns true
         assertTrue(predicateWith(d -> {
             d.setName(ALICE.getName());
-            d.setGroup(ALICE.getGroup());
+            d.setGroups(ALICE.getGroups());
             d.setTags(ALICE.getTags());
         }).test(ALICE));
 
         // one field does not match -> returns false
         assertFalse(predicateWith(d -> {
             d.setName(ALICE.getName());
-            d.setGroup(CARL.getGroup());
+            d.setGroups(CARL.getGroups());
         }).test(ALICE));
     }
 
@@ -143,17 +150,17 @@ public class PersonMatchesFlagsPredicateTest {
     public void test_unsetFieldOnPerson_doesNotMatchSearchedValue() {
         // GEORGE has no group, github or tags
         assertFalse(predicateWith(d -> d.setGithub(ALICE.getGithub())).test(GEORGE));
-        assertFalse(predicateWith(d -> d.setGroup(ALICE.getGroup())).test(GEORGE));
+        assertFalse(predicateWith(d -> d.setGroups(ALICE.getGroups())).test(GEORGE));
         assertFalse(predicateWith(d -> d.setTags(ALICE.getTags())).test(GEORGE));
     }
 
     @Test
     public void constructor_defensiveCopyOfDescriptor() {
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
-        descriptor.setGroup(ALICE.getGroup());
+        descriptor.setGroups(ALICE.getGroups());
         PersonMatchesFlagsPredicate predicate = new PersonMatchesFlagsPredicate(descriptor);
 
-        descriptor.setGroup(CARL.getGroup());
+        descriptor.setGroups(CARL.getGroups());
         assertTrue(predicate.test(ALICE));
     }
 
@@ -162,7 +169,7 @@ public class PersonMatchesFlagsPredicateTest {
         FindPersonDescriptor firstDescriptor = new FindPersonDescriptor();
         firstDescriptor.setName(ALICE.getName());
         FindPersonDescriptor secondDescriptor = new FindPersonDescriptor();
-        secondDescriptor.setGroup(ALICE.getGroup());
+        secondDescriptor.setGroups(ALICE.getGroups());
 
         PersonMatchesFlagsPredicate firstPredicate = new PersonMatchesFlagsPredicate(firstDescriptor);
         PersonMatchesFlagsPredicate secondPredicate = new PersonMatchesFlagsPredicate(secondDescriptor);
@@ -186,7 +193,7 @@ public class PersonMatchesFlagsPredicateTest {
     @Test
     public void toStringMethod() {
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
-        descriptor.setGroup(ALICE.getGroup());
+        descriptor.setGroups(ALICE.getGroups());
         PersonMatchesFlagsPredicate predicate = new PersonMatchesFlagsPredicate(descriptor);
 
         String expected = PersonMatchesFlagsPredicate.class.getCanonicalName()

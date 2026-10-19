@@ -82,7 +82,7 @@ public class EditPersonDescriptorBuilder {
     /**
      * Sets the {@code Group} of the {@code EditPersonDescriptor} that we are building.
      */
-    public EditPersonDescriptorBuilder withGroup(String... groups) {
+    public EditPersonDescriptorBuilder withGroups(String... groups) {
         Set<Group> groupSet = Stream.of(groups).map(Group::new).collect(Collectors.toSet());
         descriptor.setGroups(groupSet);
         return this;

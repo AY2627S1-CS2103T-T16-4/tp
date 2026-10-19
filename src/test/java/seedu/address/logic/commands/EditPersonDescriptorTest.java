@@ -69,7 +69,7 @@ public class EditPersonDescriptorTest {
         assertFalse(DESC_AMY.equals(editedAmy));
 
         // different group -> returns false
-        editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withGroup(VALID_GROUP_BOB).build();
+        editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withGroups(VALID_GROUP_BOB).build();
         assertFalse(DESC_AMY.equals(editedAmy));
 
         // different tags -> returns false
@@ -84,7 +84,7 @@ public class EditPersonDescriptorTest {
                 + editPersonDescriptor.getName().orElse(null) + ", phone="
                 + editPersonDescriptor.getPhone().orElse(null) + ", email="
                 + editPersonDescriptor.getEmail().orElse(null) + ", address="
-                + editPersonDescriptor.getAddress().orElse(null) + ", group="
+                + editPersonDescriptor.getAddress().orElse(null) + ", groups="
                 + editPersonDescriptor.getGroups().orElse(null) + ", github="
                 + editPersonDescriptor.getGithub().orElse(null) + ", linkedin="
                 + editPersonDescriptor.getLinkedin().orElse(null) + ", telegram="

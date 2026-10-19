@@ -19,9 +19,6 @@ import java.util.regex.Pattern;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.FindPersonDescriptor;
-import seedu.address.model.person.Github;
-import seedu.address.model.person.Group;
-import seedu.address.model.person.Linkedin;
 import seedu.address.model.person.PersonMatchesFlagsPredicate;
 
 /**
@@ -61,7 +58,7 @@ public class FindCommandParser implements Parser<FindCommand> {
         }
 
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_ADDRESS, PREFIX_EMAIL,
-                PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM, PREFIX_GROUP);
+                PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM);
 
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
         if (argMultimap.getValue(PREFIX_NAME).isPresent()) {
@@ -77,16 +74,16 @@ public class FindCommandParser implements Parser<FindCommand> {
             descriptor.setEmail(ParserUtil.parseEmail(argMultimap.getValue(PREFIX_EMAIL).get()));
         }
         if (argMultimap.getValue(PREFIX_GITHUB).isPresent()) {
-            descriptor.setGithub(new Github(argMultimap.getValue(PREFIX_GITHUB).get()));
+            descriptor.setGithub(ParserUtil.parseGithub(argMultimap.getValue(PREFIX_GITHUB).get()));
         }
         if (argMultimap.getValue(PREFIX_LINKEDIN).isPresent()) {
-            descriptor.setLinkedin(new Linkedin(argMultimap.getValue(PREFIX_LINKEDIN).get()));
+            descriptor.setLinkedin(ParserUtil.parseLinkedin(argMultimap.getValue(PREFIX_LINKEDIN).get()));
         }
         if (argMultimap.getValue(PREFIX_TELEGRAM).isPresent()) {
             descriptor.setTelegram(ParserUtil.parseTelegram(argMultimap.getValue(PREFIX_TELEGRAM).get()));
         }
         if (argMultimap.getValue(PREFIX_GROUP).isPresent()) {
-            descriptor.setGroup(new Group(argMultimap.getValue(PREFIX_GROUP).get()));
+            descriptor.setGroups(ParserUtil.parseGroups(argMultimap.getAllValues(PREFIX_GROUP)));
         }
         descriptor.setTags(ParserUtil.parseTags(argMultimap.getAllValues(PREFIX_TAG)));
 

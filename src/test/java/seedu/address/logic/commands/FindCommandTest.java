@@ -71,7 +71,7 @@ public class FindCommandTest {
 
     @Test
     public void execute_singleFlagMultipleMatches_allMatchesFound() {
-        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setGroup(ALICE.getGroup()));
+        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setGroups(ALICE.getGroups()));
         assertFindSuccess(predicate, List.of(PREFIX_GROUP), List.of(ALICE, BENSON, JACK));
     }
 
@@ -89,7 +89,7 @@ public class FindCommandTest {
     public void execute_multipleFlags_onlyPersonsMatchingAllFlagsFound() {
         // ALICE, BENSON and JACK share a group, but only JACK has the searched tag
         PersonMatchesFlagsPredicate predicate = predicateWith(d -> {
-            d.setGroup(JACK.getGroup());
+            d.setGroups(JACK.getGroups());
             d.setTags(JACK.getTags());
         });
         assertFindSuccess(predicate, List.of(PREFIX_GROUP, PREFIX_TAG), List.of(JACK));
@@ -100,7 +100,7 @@ public class FindCommandTest {
         // each value is held by someone, but not by the same person
         PersonMatchesFlagsPredicate predicate = predicateWith(d -> {
             d.setGithub(ALICE.getGithub());
-            d.setGroup(CARL.getGroup());
+            d.setGroups(CARL.getGroups());
         });
         FindCommand command = new FindCommand(predicate, List.of(PREFIX_GITHUB, PREFIX_GROUP));
         String expectedMessage = String.format(FindCommand.MESSAGE_NOT_FOUND, "gh/ g/");
