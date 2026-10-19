@@ -21,6 +21,7 @@ import seedu.address.commons.core.index.Index;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.person.Group;
 import seedu.address.model.tag.Tag;
 
 /**
@@ -50,7 +51,7 @@ public class EditCommandParser implements Parser<EditCommand> {
 
         argMultimap.verifyNoDuplicatePrefixesFor(
                 PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS,
-                PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM, PREFIX_GROUP);
+                PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM);
 
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
 
@@ -82,10 +83,8 @@ public class EditCommandParser implements Parser<EditCommand> {
             editPersonDescriptor.setTelegram(
                     ParserUtil.parseTelegram(argMultimap.getValue(PREFIX_TELEGRAM).get()));
         }
-        if (argMultimap.getValue(PREFIX_GROUP).isPresent()) {
-            editPersonDescriptor.setGroup(
-                    ParserUtil.parseGroup(argMultimap.getValue(PREFIX_GROUP).get()));
-        }
+
+        parseGroupsForEdit(argMultimap.getAllValues(PREFIX_GROUP)).ifPresent(editPersonDescriptor::setGroups);
 
         parseTagsForEdit(argMultimap.getAllValues(PREFIX_TAG)).ifPresent(editPersonDescriptor::setTags);
 
@@ -109,6 +108,25 @@ public class EditCommandParser implements Parser<EditCommand> {
         }
         Collection<String> tagSet = tags.size() == 1 && tags.contains("") ? Collections.emptySet() : tags;
         return Optional.of(ParserUtil.parseTags(tagSet));
+    }
+
+    /**
+     * Parses {@code Collection<String> groups} into a {@code Set<Group>} if {@code groups} is non-empty.
+     * If {@code groups} contains only one empty string, it is parsed into an empty group set.
+     */
+    private Optional<Set<Group>> parseGroupsForEdit(Collection<String> groups) {
+        assert groups != null;
+
+        if (groups.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Collection<String> groupSet =
+                groups.size() == 1 && groups.contains("")
+                        ? Collections.emptySet()
+                        : groups;
+
+        return Optional.of(ParserUtil.parseGroups(groupSet));
     }
 
 }

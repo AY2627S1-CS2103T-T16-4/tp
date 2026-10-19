@@ -84,7 +84,7 @@ public class PersonTest {
     @Test
     public void toStringMethod() {
         String expected = Person.class.getCanonicalName() + "{name=" + ALICE.getName() + ", phone=" + ALICE.getPhone()
-                + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress() + ", group=" + ALICE.getGroup()
+                + ", email=" + ALICE.getEmail() + ", address=" + ALICE.getAddress() + ", groups=" + ALICE.getGroups()
                 + ", github=" + ALICE.getGithub() + ", linkedin=" + ALICE.getLinkedin()
                 + ", telegram=" + ALICE.getTelegram() + ", tags=" + ALICE.getTags() + "}";
 

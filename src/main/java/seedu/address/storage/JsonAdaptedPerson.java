@@ -32,7 +32,7 @@ class JsonAdaptedPerson {
     private final String phone;
     private final String email;
     private final String address;
-    private final String group;
+    private final List<JsonAdaptedGroup> groups = new ArrayList<>();
     private final String github;
     private final String linkedin;
     private final String telegram;
@@ -44,14 +44,16 @@ class JsonAdaptedPerson {
     @JsonCreator
     public JsonAdaptedPerson(@JsonProperty("name") String name, @JsonProperty("phone") String phone,
             @JsonProperty("email") String email, @JsonProperty("address") String address,
-            @JsonProperty("group") String group, @JsonProperty("github") String github,
+            @JsonProperty("groups") List<JsonAdaptedGroup> groups, @JsonProperty("github") String github,
             @JsonProperty("linkedin") String linkedin, @JsonProperty("telegram") String telegram,
             @JsonProperty("tags") List<JsonAdaptedTag> tags) {
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
-        this.group = group;
+        if (groups != null) {
+            this.groups.addAll(groups);
+        }
         this.github = github;
         this.linkedin = linkedin;
         this.telegram = telegram;
@@ -74,7 +76,9 @@ class JsonAdaptedPerson {
         phone = source.getPhone().value;
         email = source.getEmail().value;
         address = source.getAddress().value;
-        group = source.getGroup().value;
+        groups.addAll(source.getGroups().stream()
+                .map(JsonAdaptedGroup::new)
+                .collect(Collectors.toList()));
         github = source.getGithub().value;
         linkedin = source.getLinkedin().value;
         telegram = source.getTelegram().value;
@@ -136,12 +140,12 @@ class JsonAdaptedPerson {
 
         final Address modelAddress = new Address(addressValue);
 
-        String groupValue = group;
-        if (groupValue == null) {
-            groupValue = "";
+        final List<Group> personGroups = new ArrayList<>();
+        for (JsonAdaptedGroup group : groups) {
+            personGroups.add(group.toModelType());
         }
 
-        final Group modelGroup = new Group(groupValue);
+        final Set<Group> modelGroup = new HashSet<>(personGroups);
 
         String githubValue = github;
         if (githubValue == null) {

@@ -27,7 +27,7 @@ public class PersonMatchesFlagsPredicate implements Predicate<Person> {
                 && descriptor.getPhone().map(person.getPhone()::equals).orElse(true)
                 && descriptor.getEmail().map(person.getEmail()::equals).orElse(true)
                 && descriptor.getAddress().map(person.getAddress()::equals).orElse(true)
-                && descriptor.getGroup().map(person.getGroup()::equals).orElse(true)
+                && person.getGroups().containsAll(descriptor.getGroups())
                 && descriptor.getGithub().map(person.getGithub()::equals).orElse(true)
                 && descriptor.getLinkedin().map(person.getLinkedin()::equals).orElse(true)
                 && descriptor.getTelegram().map(person.getTelegram()::equals).orElse(true)

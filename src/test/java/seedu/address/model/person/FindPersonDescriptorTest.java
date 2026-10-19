@@ -39,7 +39,7 @@ public class FindPersonDescriptorTest {
         assertTrue(descriptor.isAnyFieldSet());
 
         descriptor = new FindPersonDescriptor();
-        descriptor.setGroup(new Group("T09"));
+        descriptor.setGroups(Set.of(new Group("T09")));
         assertTrue(descriptor.isAnyFieldSet());
 
         descriptor = new FindPersonDescriptor();
@@ -66,7 +66,7 @@ public class FindPersonDescriptorTest {
         assertEquals(Optional.empty(), descriptor.getPhone());
         assertEquals(Optional.empty(), descriptor.getEmail());
         assertEquals(Optional.empty(), descriptor.getAddress());
-        assertEquals(Optional.empty(), descriptor.getGroup());
+        assertTrue(descriptor.getGroups().isEmpty());
         assertEquals(Optional.empty(), descriptor.getGithub());
         assertEquals(Optional.empty(), descriptor.getLinkedin());
         assertEquals(Optional.empty(), descriptor.getTelegram());
@@ -129,7 +129,7 @@ public class FindPersonDescriptorTest {
 
         // different group -> returns false
         other = new FindPersonDescriptor(descriptor);
-        other.setGroup(new Group("T09"));
+        other.setGroups(Set.of(new Group("T09")));
         assertNotEquals(descriptor, other);
 
         // different github -> returns false
@@ -160,7 +160,7 @@ public class FindPersonDescriptorTest {
                 + ", phone=" + null
                 + ", email=" + null
                 + ", address=" + null
-                + ", group=" + null
+                + ", groups=" + descriptor.getGroups()
                 + ", github=" + null
                 + ", linkedin=" + null
                 + ", telegram=" + null

@@ -133,7 +133,6 @@ public class FindCommandParserTest {
     @Test
     public void parse_duplicateSingleValuedFlag_throwsParseException() {
         assertParseFailure(parser, " n/Alice n/Bob", getErrorMessageForDuplicatePrefixes(PREFIX_NAME));
-        assertParseFailure(parser, " g/T09 g/T10", getErrorMessageForDuplicatePrefixes(PREFIX_GROUP));
         assertParseFailure(parser, " gh/alice gh/bob", getErrorMessageForDuplicatePrefixes(PREFIX_GITHUB));
     }
 
@@ -154,7 +153,7 @@ public class FindCommandParserTest {
         assertParseSuccess(parser, " tg/alicetg",
                 commandWith(List.of(PREFIX_TELEGRAM), d -> d.setTelegram(new Telegram("alicetg"))));
         assertParseSuccess(parser, " g/T09",
-                commandWith(List.of(PREFIX_GROUP), d -> d.setGroup(new Group("T09"))));
+                commandWith(List.of(PREFIX_GROUP), d -> d.setGroups(Set.of(new Group("T09")))));
         assertParseSuccess(parser, " t/friend",
                 commandWith(List.of(PREFIX_TAG), d -> d.setTags(Set.of(new Tag("friend")))));
     }
@@ -169,7 +168,7 @@ public class FindCommandParserTest {
         assertParseSuccess(parser, " e/Alice@Example.COM",
                 commandWith(List.of(PREFIX_EMAIL), d -> d.setEmail(new Email("alice@example.com"))));
         assertParseSuccess(parser, " g/t09",
-                commandWith(List.of(PREFIX_GROUP), d -> d.setGroup(new Group("T09"))));
+                commandWith(List.of(PREFIX_GROUP), d -> d.setGroups(Set.of(new Group("T09")))));
         assertParseSuccess(parser, " t/FRIEND",
                 commandWith(List.of(PREFIX_TAG), d -> d.setTags(Set.of(new Tag("friend")))));
     }
@@ -179,7 +178,7 @@ public class FindCommandParserTest {
         assertParseSuccess(parser, " \n n/  Alice Pauline  \t g/  T09 \n",
                 commandWith(List.of(PREFIX_NAME, PREFIX_GROUP), d -> {
                     d.setName(new Name("Alice Pauline"));
-                    d.setGroup(new Group("T09"));
+                    d.setGroups(Set.of(new Group("T09")));
                 }));
     }
 
@@ -187,7 +186,7 @@ public class FindCommandParserTest {
     public void parse_multipleFlags_returnsFindCommand() {
         FindCommand expectedCommand = commandWith(List.of(PREFIX_NAME, PREFIX_GROUP), d -> {
             d.setName(new Name("Lim Jun Han"));
-            d.setGroup(new Group("T09"));
+            d.setGroups(Set.of(new Group("T09")));
         });
         assertParseSuccess(parser, " n/Lim Jun Han g/T09", expectedCommand);
     }
@@ -196,7 +195,7 @@ public class FindCommandParserTest {
     public void parse_flagsInDifferentOrder_returnsSameFindCommand() {
         FindCommand expectedCommand = commandWith(List.of(PREFIX_NAME, PREFIX_GROUP), d -> {
             d.setName(new Name("Lim Jun Han"));
-            d.setGroup(new Group("T09"));
+            d.setGroups(Set.of(new Group("T09")));
         });
         assertParseSuccess(parser, " g/T09 n/Lim Jun Han", expectedCommand);
     }
@@ -221,7 +220,7 @@ public class FindCommandParserTest {
                     d.setGithub(new Github("AliceGh"));
                     d.setLinkedin(new Linkedin("alice-li"));
                     d.setTelegram(new Telegram("alicetg"));
-                    d.setGroup(new Group("T09"));
+                    d.setGroups(Set.of(new Group("T09")));
                     d.setTags(Set.of(new Tag("friend")));
                 });
         assertParseSuccess(parser, " t/friend g/T09 tg/alicetg li/alice-li gh/AliceGh e/alice@example.com"

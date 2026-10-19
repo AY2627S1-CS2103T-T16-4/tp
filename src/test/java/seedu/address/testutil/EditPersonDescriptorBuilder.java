@@ -40,7 +40,7 @@ public class EditPersonDescriptorBuilder {
         descriptor.setPhone(person.getPhone());
         descriptor.setEmail(person.getEmail());
         descriptor.setAddress(person.getAddress());
-        descriptor.setGroup(person.getGroup());
+        descriptor.setGroups(person.getGroups());
         descriptor.setGithub(person.getGithub());
         descriptor.setLinkedin(person.getLinkedin());
         descriptor.setTelegram(person.getTelegram());
@@ -82,8 +82,9 @@ public class EditPersonDescriptorBuilder {
     /**
      * Sets the {@code Group} of the {@code EditPersonDescriptor} that we are building.
      */
-    public EditPersonDescriptorBuilder withGroup(String group) {
-        descriptor.setGroup(new Group(group));
+    public EditPersonDescriptorBuilder withGroups(String... groups) {
+        Set<Group> groupSet = Stream.of(groups).map(Group::new).collect(Collectors.toSet());
+        descriptor.setGroups(groupSet);
         return this;
     }
 

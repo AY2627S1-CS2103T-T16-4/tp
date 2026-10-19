@@ -18,7 +18,7 @@ public class FindPersonDescriptor {
     private Phone phone;
     private Email email;
     private Address address;
-    private Group group;
+    private final Set<Group> groups = new HashSet<>();
     private Github github;
     private Linkedin linkedin;
     private Telegram telegram;
@@ -35,7 +35,7 @@ public class FindPersonDescriptor {
         setPhone(toCopy.phone);
         setEmail(toCopy.email);
         setAddress(toCopy.address);
-        setGroup(toCopy.group);
+        setGroups(toCopy.groups);
         setGithub(toCopy.github);
         setLinkedin(toCopy.linkedin);
         setTelegram(toCopy.telegram);
@@ -46,8 +46,8 @@ public class FindPersonDescriptor {
      * Returns true if at least one field to search for is set.
      */
     public boolean isAnyFieldSet() {
-        return CollectionUtil.isAnyNonNull(name, phone, email, address, group, github, linkedin, telegram)
-                || !tags.isEmpty();
+        return CollectionUtil.isAnyNonNull(name, phone, email, address, github, linkedin, telegram)
+                || !tags.isEmpty() || !groups.isEmpty();
     }
 
     public void setName(Name name) {
@@ -82,12 +82,21 @@ public class FindPersonDescriptor {
         return Optional.ofNullable(address);
     }
 
-    public void setGroup(Group group) {
-        this.group = group;
+    /**
+     * Replaces the groups to search for with {@code groups}.
+     * A defensive copy of {@code groups} is used internally.
+     */
+    public void setGroups(Set<Group> groups) {
+        this.groups.clear();
+        this.groups.addAll(groups);
     }
 
-    public Optional<Group> getGroup() {
-        return Optional.ofNullable(group);
+    /**
+     * Returns an unmodifiable group set, which throws {@code UnsupportedOperationException}
+     * if modification is attempted.
+     */
+    public Set<Group> getGroups() {
+        return Collections.unmodifiableSet(groups);
     }
 
     public void setGithub(Github github) {
@@ -146,7 +155,7 @@ public class FindPersonDescriptor {
                 && getPhone().equals(otherDescriptor.getPhone())
                 && getEmail().equals(otherDescriptor.getEmail())
                 && getAddress().equals(otherDescriptor.getAddress())
-                && getGroup().equals(otherDescriptor.getGroup())
+                && getGroups().equals(otherDescriptor.getGroups())
                 && getGithub().equals(otherDescriptor.getGithub())
                 && getLinkedin().equals(otherDescriptor.getLinkedin())
                 && getTelegram().equals(otherDescriptor.getTelegram())
@@ -160,7 +169,7 @@ public class FindPersonDescriptor {
                 .add("phone", phone)
                 .add("email", email)
                 .add("address", address)
-                .add("group", group)
+                .add("groups", groups)
                 .add("github", github)
                 .add("linkedin", linkedin)
                 .add("telegram", telegram)

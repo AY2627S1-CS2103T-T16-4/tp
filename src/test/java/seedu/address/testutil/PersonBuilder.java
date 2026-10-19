@@ -29,7 +29,7 @@ public class PersonBuilder {
     private Phone phone;
     private Email email;
     private Address address;
-    private Group group;
+    private Set<Group> groups;
     private Github github;
     private Linkedin linkedin;
     private Telegram telegram;
@@ -43,7 +43,7 @@ public class PersonBuilder {
         phone = new Phone(DEFAULT_PHONE);
         email = new Email(DEFAULT_EMAIL);
         address = new Address(DEFAULT_ADDRESS);
-        group = new Group("");
+        groups = new HashSet<>();
         github = new Github("");
         linkedin = new Linkedin("");
         telegram = new Telegram("");
@@ -58,7 +58,7 @@ public class PersonBuilder {
         phone = personToCopy.getPhone();
         email = personToCopy.getEmail();
         address = personToCopy.getAddress();
-        group = personToCopy.getGroup();
+        groups = new HashSet<>(personToCopy.getGroups());
         github = personToCopy.getGithub();
         linkedin = personToCopy.getLinkedin();
         telegram = personToCopy.getTelegram();
@@ -108,8 +108,8 @@ public class PersonBuilder {
     /**
      * Sets the {@code Group} of the {@code Person} that we are building.
      */
-    public PersonBuilder withGroup(String group) {
-        this.group = new Group(group);
+    public PersonBuilder withGroups(String ... groups) {
+        this.groups = SampleDataUtil.getGroupSet(groups);
         return this;
     }
 
@@ -138,7 +138,7 @@ public class PersonBuilder {
     }
 
     public Person build() {
-        return new Person(name, phone, email, address, group, github, linkedin, telegram, tags);
+        return new Person(name, phone, email, address, groups, github, linkedin, telegram, tags);
     }
 
 }
