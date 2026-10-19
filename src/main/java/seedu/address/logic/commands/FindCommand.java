@@ -20,8 +20,8 @@ import seedu.address.model.Model;
 import seedu.address.model.person.PersonMatchesFlagsPredicate;
 
 /**
- * Finds and lists all persons in the address book whose fields match every given flag value.
- * Matching is exact, and is case-sensitive only for GitHub usernames.
+ * Finds and lists all persons in the address book whose fields start with every given flag value.
+ * Matching is by prefix, and is case-sensitive only for GitHub usernames.
  */
 public class FindCommand extends Command {
 

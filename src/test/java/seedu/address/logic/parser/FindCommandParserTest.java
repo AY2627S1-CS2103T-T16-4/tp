@@ -22,17 +22,8 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.FindCommand;
-import seedu.address.model.person.Address;
-import seedu.address.model.person.Email;
 import seedu.address.model.person.FindPersonDescriptor;
-import seedu.address.model.person.Github;
-import seedu.address.model.person.Group;
-import seedu.address.model.person.Linkedin;
-import seedu.address.model.person.Name;
 import seedu.address.model.person.PersonMatchesFlagsPredicate;
-import seedu.address.model.person.Phone;
-import seedu.address.model.person.Telegram;
-import seedu.address.model.tag.Tag;
 
 public class FindCommandParserTest {
 
@@ -88,11 +79,11 @@ public class FindCommandParserTest {
     public void parse_slashInsideValue_returnsFindCommand() {
         // a slash that does not follow a word, so it is not mistaken for a flag
         assertParseSuccess(parser, " a/123/4 Clementi Ave",
-                commandWith(List.of(PREFIX_ADDRESS), d -> d.setAddress(new Address("123/4 Clementi Ave"))));
+                commandWith(List.of(PREFIX_ADDRESS), d -> d.setAddress("123/4 Clementi Ave")));
 
         // a slash that is not preceded by whitespace
         assertParseSuccess(parser, " li/in/alice",
-                commandWith(List.of(PREFIX_LINKEDIN), d -> d.setLinkedin(new Linkedin("in/alice"))));
+                commandWith(List.of(PREFIX_LINKEDIN), d -> d.setLinkedin("in/alice")));
     }
 
     @Test
@@ -118,16 +109,22 @@ public class FindCommandParserTest {
     }
 
     @Test
-    public void parse_invalidValue_throwsParseException() {
-        assertParseFailure(parser, " n/James&", Name.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, " p/1234", Phone.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, " p/71234567", Phone.MESSAGE_CONSTRAINTS); // must begin with 8 or 9
-        assertParseFailure(parser, " e/not-an-email", Email.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, " tg/@john", Telegram.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, " t/hubby*", Tag.MESSAGE_CONSTRAINTS);
-
-        // invalid value alongside valid flags
-        assertParseFailure(parser, " n/Alice p/1234", Phone.MESSAGE_CONSTRAINTS);
+    public void parse_partialOrInvalidFormatValue_returnsFindCommand() {
+        // values are raw search text, so they need not be valid full field values
+        assertParseSuccess(parser, " n/ali",
+                commandWith(List.of(PREFIX_NAME), d -> d.setName("ali")));
+        assertParseSuccess(parser, " n/James&",
+                commandWith(List.of(PREFIX_NAME), d -> d.setName("James&")));
+        assertParseSuccess(parser, " p/98",
+                commandWith(List.of(PREFIX_PHONE), d -> d.setPhone("98")));
+        assertParseSuccess(parser, " p/71234567",
+                commandWith(List.of(PREFIX_PHONE), d -> d.setPhone("71234567")));
+        assertParseSuccess(parser, " e/alice",
+                commandWith(List.of(PREFIX_EMAIL), d -> d.setEmail("alice")));
+        assertParseSuccess(parser, " tg/@john",
+                commandWith(List.of(PREFIX_TELEGRAM), d -> d.setTelegram("@john")));
+        assertParseSuccess(parser, " t/fri",
+                commandWith(List.of(PREFIX_TAG), d -> d.setTags(Set.of("fri"))));
     }
 
     @Test
@@ -139,54 +136,57 @@ public class FindCommandParserTest {
     @Test
     public void parse_singleFlag_returnsFindCommand() {
         assertParseSuccess(parser, " n/Alice Pauline",
-                commandWith(List.of(PREFIX_NAME), d -> d.setName(new Name("Alice Pauline"))));
+                commandWith(List.of(PREFIX_NAME), d -> d.setName("Alice Pauline")));
         assertParseSuccess(parser, " p/91234567",
-                commandWith(List.of(PREFIX_PHONE), d -> d.setPhone(new Phone("91234567"))));
+                commandWith(List.of(PREFIX_PHONE), d -> d.setPhone("91234567")));
         assertParseSuccess(parser, " a/123 Clementi Ave",
-                commandWith(List.of(PREFIX_ADDRESS), d -> d.setAddress(new Address("123 Clementi Ave"))));
+                commandWith(List.of(PREFIX_ADDRESS), d -> d.setAddress("123 Clementi Ave")));
         assertParseSuccess(parser, " e/alice@example.com",
-                commandWith(List.of(PREFIX_EMAIL), d -> d.setEmail(new Email("alice@example.com"))));
+                commandWith(List.of(PREFIX_EMAIL), d -> d.setEmail("alice@example.com")));
         assertParseSuccess(parser, " gh/AliceGh",
-                commandWith(List.of(PREFIX_GITHUB), d -> d.setGithub(new Github("AliceGh"))));
+                commandWith(List.of(PREFIX_GITHUB), d -> d.setGithub("AliceGh")));
         assertParseSuccess(parser, " li/alice-li",
-                commandWith(List.of(PREFIX_LINKEDIN), d -> d.setLinkedin(new Linkedin("alice-li"))));
+                commandWith(List.of(PREFIX_LINKEDIN), d -> d.setLinkedin("alice-li")));
         assertParseSuccess(parser, " tg/alicetg",
-                commandWith(List.of(PREFIX_TELEGRAM), d -> d.setTelegram(new Telegram("alicetg"))));
+                commandWith(List.of(PREFIX_TELEGRAM), d -> d.setTelegram("alicetg")));
         assertParseSuccess(parser, " g/T09",
-                commandWith(List.of(PREFIX_GROUP), d -> d.setGroups(Set.of(new Group("T09")))));
+                commandWith(List.of(PREFIX_GROUP), d -> d.setGroups(Set.of("T09"))));
         assertParseSuccess(parser, " t/friend",
-                commandWith(List.of(PREFIX_TAG), d -> d.setTags(Set.of(new Tag("friend")))));
+                commandWith(List.of(PREFIX_TAG), d -> d.setTags(Set.of("friend"))));
     }
 
     @Test
-    public void parse_valuesAreNormalised_returnsFindCommand() {
-        // name is stored as block letters, so the case of the input does not matter
-        assertParseSuccess(parser, " n/alice pauline",
-                commandWith(List.of(PREFIX_NAME), d -> d.setName(new Name("ALICE PAULINE"))));
-
-        // email, group and tag are stored in lowercase
-        assertParseSuccess(parser, " e/Alice@Example.COM",
-                commandWith(List.of(PREFIX_EMAIL), d -> d.setEmail(new Email("alice@example.com"))));
-        assertParseSuccess(parser, " g/t09",
-                commandWith(List.of(PREFIX_GROUP), d -> d.setGroups(Set.of(new Group("T09")))));
+    public void parse_valuesKeepTheirCase_returnsFindCommand() {
+        // case is handled when matching, so the search text is kept as typed
+        assertParseSuccess(parser, " n/alice PAULINE",
+                commandWith(List.of(PREFIX_NAME), d -> d.setName("alice PAULINE")));
+        assertParseSuccess(parser, " gh/AliceGh",
+                commandWith(List.of(PREFIX_GITHUB), d -> d.setGithub("AliceGh")));
         assertParseSuccess(parser, " t/FRIEND",
-                commandWith(List.of(PREFIX_TAG), d -> d.setTags(Set.of(new Tag("friend")))));
+                commandWith(List.of(PREFIX_TAG), d -> d.setTags(Set.of("FRIEND"))));
+    }
+
+    @Test
+    public void parse_repeatedGroupFlag_returnsFindCommandWithAllGroups() {
+        FindCommand expectedCommand = commandWith(List.of(PREFIX_GROUP),
+                d -> d.setGroups(Set.of("T09", "lab3")));
+        assertParseSuccess(parser, " g/T09 g/lab3", expectedCommand);
     }
 
     @Test
     public void parse_whitespaceAroundValues_returnsFindCommand() {
         assertParseSuccess(parser, " \n n/  Alice Pauline  \t g/  T09 \n",
                 commandWith(List.of(PREFIX_NAME, PREFIX_GROUP), d -> {
-                    d.setName(new Name("Alice Pauline"));
-                    d.setGroups(Set.of(new Group("T09")));
+                    d.setName("Alice Pauline");
+                    d.setGroups(Set.of("T09"));
                 }));
     }
 
     @Test
     public void parse_multipleFlags_returnsFindCommand() {
         FindCommand expectedCommand = commandWith(List.of(PREFIX_NAME, PREFIX_GROUP), d -> {
-            d.setName(new Name("Lim Jun Han"));
-            d.setGroups(Set.of(new Group("T09")));
+            d.setName("Lim Jun Han");
+            d.setGroups(Set.of("T09"));
         });
         assertParseSuccess(parser, " n/Lim Jun Han g/T09", expectedCommand);
     }
@@ -194,8 +194,8 @@ public class FindCommandParserTest {
     @Test
     public void parse_flagsInDifferentOrder_returnsSameFindCommand() {
         FindCommand expectedCommand = commandWith(List.of(PREFIX_NAME, PREFIX_GROUP), d -> {
-            d.setName(new Name("Lim Jun Han"));
-            d.setGroups(Set.of(new Group("T09")));
+            d.setName("Lim Jun Han");
+            d.setGroups(Set.of("T09"));
         });
         assertParseSuccess(parser, " g/T09 n/Lim Jun Han", expectedCommand);
     }
@@ -203,7 +203,7 @@ public class FindCommandParserTest {
     @Test
     public void parse_repeatedTagFlag_returnsFindCommandWithAllTags() {
         FindCommand expectedCommand = commandWith(List.of(PREFIX_TAG),
-                d -> d.setTags(Set.of(new Tag("friend"), new Tag("classmate"))));
+                d -> d.setTags(Set.of("friend", "classmate")));
         assertParseSuccess(parser, " t/friend t/classmate", expectedCommand);
     }
 
@@ -213,15 +213,15 @@ public class FindCommandParserTest {
                 List.of(PREFIX_NAME, PREFIX_PHONE, PREFIX_ADDRESS, PREFIX_EMAIL, PREFIX_GITHUB, PREFIX_LINKEDIN,
                         PREFIX_TELEGRAM, PREFIX_GROUP, PREFIX_TAG),
                 d -> {
-                    d.setName(new Name("Alice Pauline"));
-                    d.setPhone(new Phone("91234567"));
-                    d.setAddress(new Address("123 Clementi Ave"));
-                    d.setEmail(new Email("alice@example.com"));
-                    d.setGithub(new Github("AliceGh"));
-                    d.setLinkedin(new Linkedin("alice-li"));
-                    d.setTelegram(new Telegram("alicetg"));
-                    d.setGroups(Set.of(new Group("T09")));
-                    d.setTags(Set.of(new Tag("friend")));
+                    d.setName("Alice Pauline");
+                    d.setPhone("91234567");
+                    d.setAddress("123 Clementi Ave");
+                    d.setEmail("alice@example.com");
+                    d.setGithub("AliceGh");
+                    d.setLinkedin("alice-li");
+                    d.setTelegram("alicetg");
+                    d.setGroups(Set.of("T09"));
+                    d.setTags(Set.of("friend"));
                 });
         assertParseSuccess(parser, " t/friend g/T09 tg/alicetg li/alice-li gh/AliceGh e/alice@example.com"
                 + " a/123 Clementi Ave p/91234567 n/Alice Pauline", expectedCommand);

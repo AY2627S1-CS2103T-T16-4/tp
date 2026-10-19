@@ -10,11 +10,11 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
-import static seedu.address.testutil.TypicalPersons.CARL;
 import static seedu.address.testutil.TypicalPersons.JACK;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,6 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.FindPersonDescriptor;
-import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.PersonMatchesFlagsPredicate;
 
@@ -37,8 +36,8 @@ public class FindCommandTest {
 
     @Test
     public void equals() {
-        PersonMatchesFlagsPredicate firstPredicate = predicateWith(d -> d.setName(new Name("first")));
-        PersonMatchesFlagsPredicate secondPredicate = predicateWith(d -> d.setName(new Name("second")));
+        PersonMatchesFlagsPredicate firstPredicate = predicateWith(d -> d.setName("first"));
+        PersonMatchesFlagsPredicate secondPredicate = predicateWith(d -> d.setName("second"));
 
         FindCommand findFirstCommand = new FindCommand(firstPredicate, List.of(PREFIX_NAME));
         FindCommand findSecondCommand = new FindCommand(secondPredicate, List.of(PREFIX_NAME));
@@ -65,23 +64,37 @@ public class FindCommandTest {
 
     @Test
     public void execute_singleFlagOneMatch_personFound() {
-        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setName(ALICE.getName()));
+        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setName("alice"));
         assertFindSuccess(predicate, List.of(PREFIX_NAME), List.of(ALICE));
     }
 
     @Test
     public void execute_singleFlagMultipleMatches_allMatchesFound() {
-        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setGroups(ALICE.getGroups()));
+        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setGroups(Set.of("t09")));
         assertFindSuccess(predicate, List.of(PREFIX_GROUP), List.of(ALICE, BENSON, JACK));
+    }
+
+    @Test
+    public void execute_partialName_allPersonsWithNameStartingWithSearchFound() {
+        // the search is case-insensitive and matches the start of the name only
+        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setName("bEn"));
+        assertFindSuccess(predicate, List.of(PREFIX_NAME), List.of(BENSON));
+
+        // "meier" is in BENSON's and DANIEL's names, but not at the start
+        PersonMatchesFlagsPredicate middleOfNamePredicate = predicateWith(d -> d.setName("meier"));
+        FindCommand command = new FindCommand(middleOfNamePredicate, List.of(PREFIX_NAME));
+        expectedModel.updateFilteredPersonList(middleOfNamePredicate);
+        assertCommandSuccess(command, model, String.format(FindCommand.MESSAGE_NOT_FOUND, "n/"), expectedModel);
+        assertEquals(List.of(), model.getFilteredPersonList());
     }
 
     @Test
     public void execute_githubDifferingOnlyByCase_onlyExactCaseFound() {
         // ALICE and JACK have github usernames that differ only by case
-        PersonMatchesFlagsPredicate alicePredicate = predicateWith(d -> d.setGithub(ALICE.getGithub()));
+        PersonMatchesFlagsPredicate alicePredicate = predicateWith(d -> d.setGithub("AliceGh"));
         assertFindSuccess(alicePredicate, List.of(PREFIX_GITHUB), List.of(ALICE));
 
-        PersonMatchesFlagsPredicate jackPredicate = predicateWith(d -> d.setGithub(JACK.getGithub()));
+        PersonMatchesFlagsPredicate jackPredicate = predicateWith(d -> d.setGithub("alicegh"));
         assertFindSuccess(jackPredicate, List.of(PREFIX_GITHUB), List.of(JACK));
     }
 
@@ -89,8 +102,8 @@ public class FindCommandTest {
     public void execute_multipleFlags_onlyPersonsMatchingAllFlagsFound() {
         // ALICE, BENSON and JACK share a group, but only JACK has the searched tag
         PersonMatchesFlagsPredicate predicate = predicateWith(d -> {
-            d.setGroups(JACK.getGroups());
-            d.setTags(JACK.getTags());
+            d.setGroups(Set.of("t09"));
+            d.setTags(Set.of("colleagues"));
         });
         assertFindSuccess(predicate, List.of(PREFIX_GROUP, PREFIX_TAG), List.of(JACK));
     }
@@ -99,8 +112,8 @@ public class FindCommandTest {
     public void execute_noMatch_notFoundMessageNamesFlags() {
         // each value is held by someone, but not by the same person
         PersonMatchesFlagsPredicate predicate = predicateWith(d -> {
-            d.setGithub(ALICE.getGithub());
-            d.setGroups(CARL.getGroups());
+            d.setGithub("AliceGh");
+            d.setGroups(Set.of("t10"));
         });
         FindCommand command = new FindCommand(predicate, List.of(PREFIX_GITHUB, PREFIX_GROUP));
         String expectedMessage = String.format(FindCommand.MESSAGE_NOT_FOUND, "gh/ g/");
@@ -112,7 +125,7 @@ public class FindCommandTest {
 
     @Test
     public void toStringMethod() {
-        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setName(ALICE.getName()));
+        PersonMatchesFlagsPredicate predicate = predicateWith(d -> d.setName("alice"));
         List<Prefix> usedPrefixes = List.of(PREFIX_NAME);
         FindCommand findCommand = new FindCommand(predicate, usedPrefixes);
         String expected = FindCommand.class.getCanonicalName()
