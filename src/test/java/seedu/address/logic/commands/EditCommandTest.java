@@ -24,7 +24,9 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.person.FindPersonDescriptor;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.PersonMatchesFlagsPredicate;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 import seedu.address.testutil.PersonBuilder;
 
@@ -97,8 +99,10 @@ public class EditCommandTest {
         String expectedMessage = String.format(EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson));
 
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
-        expectedModel.setPerson(model.getFilteredPersonList().get(0), editedPerson);
-
+        FindPersonDescriptor descriptor = new FindPersonDescriptor();
+        descriptor.setName(personInFilteredList.getName());
+        expectedModel.updateFilteredPersonList(new PersonMatchesFlagsPredicate(descriptor));
+        expectedModel.setPerson(expectedModel.getFilteredPersonList().get(0), editedPerson);
         assertCommandSuccess(editCommand, model,
                 expectedMessage, expectedModel);
     }

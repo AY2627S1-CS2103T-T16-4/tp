@@ -24,6 +24,7 @@ public class ModelManager implements Model {
     private final Deque<AddressBook> undoHistory = new ArrayDeque<>();
     private final UserPrefs userPrefs;
     private final FilteredList<Person> filteredPersons;
+    private Predicate<Person> currentPredicate = PREDICATE_SHOW_ALL_PERSONS;
 
     /**
      * Initializes a ModelManager with the given addressBook and userPrefs.
@@ -86,7 +87,6 @@ public class ModelManager implements Model {
     @Override
     public void addPerson(Person person) {
         addressBook.addPerson(person);
-        updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
     }
 
     @Override
@@ -110,6 +110,7 @@ public class ModelManager implements Model {
     @Override
     public void updateFilteredPersonList(Predicate<Person> predicate) {
         requireNonNull(predicate);
+        currentPredicate = predicate;
         filteredPersons.setPredicate(predicate);
     }
 
@@ -144,7 +145,7 @@ public class ModelManager implements Model {
         }
 
         addressBook.resetData(undoHistory.pop());
-        updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
+        updateFilteredPersonList(currentPredicate);
         return true;
     }
 
