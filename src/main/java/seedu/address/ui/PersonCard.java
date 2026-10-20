@@ -33,6 +33,8 @@ public class PersonCard extends UiPart<Region> {
     @FXML
     private Label id;
     @FXML
+    private Label pinnedIndicator;
+    @FXML
     private FlowPane groups;
 
     /**
@@ -44,6 +46,9 @@ public class PersonCard extends UiPart<Region> {
         id.setText(displayedIndex + ". ");
         name.setText(person.getName().fullName);
         name.setTooltip(new Tooltip(person.getName().fullName));
+        pinnedIndicator.setVisible(person.isPinned());
+        pinnedIndicator.setManaged(person.isPinned());
+        pinnedIndicator.setTooltip(new Tooltip("Pinned contact"));
         initials.setText(getInitials(person));
         person.getGroups().stream()
                 .sorted(Comparator.comparing(group -> group.value))
