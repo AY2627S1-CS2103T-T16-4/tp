@@ -79,7 +79,7 @@ public class AddressBookParserTest {
     public void parseCommand_find() throws Exception {
         FindCommand command = (FindCommand) parser.parseCommand(FindCommand.COMMAND_WORD + " n/Alice");
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
-        descriptor.setName(new Name("Alice"));
+        descriptor.setName("Alice");
         assertEquals(new FindCommand(new PersonMatchesFlagsPredicate(descriptor), List.of(PREFIX_NAME)), command);
     }
 

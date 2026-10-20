@@ -12,6 +12,7 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -60,32 +61,18 @@ public class FindCommandParser implements Parser<FindCommand> {
         argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE, PREFIX_ADDRESS, PREFIX_EMAIL,
                 PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM);
 
+        // The values are kept as raw search text to allow partial matching (e.g. p/98 or e/tom), so they are
+        // not validated as full field values.
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
-        if (argMultimap.getValue(PREFIX_NAME).isPresent()) {
-            descriptor.setName(ParserUtil.parseName(argMultimap.getValue(PREFIX_NAME).get()));
-        }
-        if (argMultimap.getValue(PREFIX_PHONE).isPresent()) {
-            descriptor.setPhone(ParserUtil.parsePhone(argMultimap.getValue(PREFIX_PHONE).get()));
-        }
-        if (argMultimap.getValue(PREFIX_ADDRESS).isPresent()) {
-            descriptor.setAddress(ParserUtil.parseAddress(argMultimap.getValue(PREFIX_ADDRESS).get()));
-        }
-        if (argMultimap.getValue(PREFIX_EMAIL).isPresent()) {
-            descriptor.setEmail(ParserUtil.parseEmail(argMultimap.getValue(PREFIX_EMAIL).get()));
-        }
-        if (argMultimap.getValue(PREFIX_GITHUB).isPresent()) {
-            descriptor.setGithub(ParserUtil.parseGithub(argMultimap.getValue(PREFIX_GITHUB).get()));
-        }
-        if (argMultimap.getValue(PREFIX_LINKEDIN).isPresent()) {
-            descriptor.setLinkedin(ParserUtil.parseLinkedin(argMultimap.getValue(PREFIX_LINKEDIN).get()));
-        }
-        if (argMultimap.getValue(PREFIX_TELEGRAM).isPresent()) {
-            descriptor.setTelegram(ParserUtil.parseTelegram(argMultimap.getValue(PREFIX_TELEGRAM).get()));
-        }
-        if (argMultimap.getValue(PREFIX_GROUP).isPresent()) {
-            descriptor.setGroups(ParserUtil.parseGroups(argMultimap.getAllValues(PREFIX_GROUP)));
-        }
-        descriptor.setTags(ParserUtil.parseTags(argMultimap.getAllValues(PREFIX_TAG)));
+        argMultimap.getValue(PREFIX_NAME).ifPresent(descriptor::setName);
+        argMultimap.getValue(PREFIX_PHONE).ifPresent(descriptor::setPhone);
+        argMultimap.getValue(PREFIX_ADDRESS).ifPresent(descriptor::setAddress);
+        argMultimap.getValue(PREFIX_EMAIL).ifPresent(descriptor::setEmail);
+        argMultimap.getValue(PREFIX_GITHUB).ifPresent(descriptor::setGithub);
+        argMultimap.getValue(PREFIX_LINKEDIN).ifPresent(descriptor::setLinkedin);
+        argMultimap.getValue(PREFIX_TELEGRAM).ifPresent(descriptor::setTelegram);
+        descriptor.setGroups(new HashSet<>(argMultimap.getAllValues(PREFIX_GROUP)));
+        descriptor.setTags(new HashSet<>(argMultimap.getAllValues(PREFIX_TAG)));
 
         return new FindCommand(new PersonMatchesFlagsPredicate(descriptor), usedPrefixes);
     }
