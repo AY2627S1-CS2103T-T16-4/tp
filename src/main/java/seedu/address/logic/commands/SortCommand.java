@@ -37,23 +37,31 @@ public class SortCommand extends Command {
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
-        Comparator<Person> byName = Comparator.comparing(person -> person.getName().fullName,
-                String.CASE_INSENSITIVE_ORDER);
-        Comparator<Person> comparator;
-        if (field == Field.NAME) {
-            comparator = descending ? byName.reversed() : byName;
-        } else {
-            Comparator<String> groupOrder = descending
-                    ? String.CASE_INSENSITIVE_ORDER.reversed() : String.CASE_INSENSITIVE_ORDER;
-            comparator = Comparator.comparing(SortCommand::firstGroup, Comparator.nullsLast(groupOrder))
-                    .thenComparing(byName);
-        }
-        model.sortFilteredPersonList(comparator);
+        int visibleContactCount = model.getFilteredPersonList().size();
+        model.sortFilteredPersonList(createComparator());
+        assert model.getFilteredPersonList().size() == visibleContactCount
+                : "Sorting must preserve the number of visible contacts";
         return new CommandResult(String.format(MESSAGE_SUCCESS, field.name().toLowerCase(Locale.ROOT),
                 descending ? "descending" : "ascending"));
     }
 
-    private static String firstGroup(Person person) {
+    private Comparator<Person> createComparator() {
+        Comparator<Person> byName = Comparator.comparing(person -> person.getName().fullName,
+                String.CASE_INSENSITIVE_ORDER);
+        return switch (field) {
+            case NAME -> descending ? byName.reversed() : byName;
+            case GROUP -> {
+                Comparator<String> groupOrder = descending
+                        ? String.CASE_INSENSITIVE_ORDER.reversed() : String.CASE_INSENSITIVE_ORDER;
+                yield Comparator.comparing(SortCommand::getAlphabeticallyFirstGroup, Comparator.nullsLast(groupOrder))
+                        .thenComparing(byName);
+            }
+        };
+    }
+
+    /** Returns the alphabetically first group, or null for an ungrouped contact. */
+    private static String getAlphabeticallyFirstGroup(Person person) {
+        assert person != null : "The sort comparator must receive a non-null contact";
         return person.getGroups().stream().map(group -> group.value)
                 .min(String.CASE_INSENSITIVE_ORDER).orElse(null);
     }
