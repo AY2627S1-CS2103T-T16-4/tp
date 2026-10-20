@@ -1,18 +1,13 @@
 package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.StringUtil;
-import seedu.address.logic.commands.PersonTarget;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
@@ -30,29 +25,6 @@ import seedu.address.model.tag.Tag;
 public class ParserUtil {
 
     public static final String MESSAGE_INVALID_INDEX = "Index must be a positive integer.";
-
-    /**
-     * Parses a required full name and optional complete phone number for a single-contact command.
-     *
-     * @throws ParseException if arguments are missing, repeated, or invalid.
-     */
-    public static PersonTarget parsePersonTarget(String args, String messageUsage) throws ParseException {
-        requireNonNull(args);
-        requireNonNull(messageUsage);
-        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE);
-
-        if (argMultimap.getValue(PREFIX_NAME).isEmpty() || !argMultimap.getPreamble().isEmpty()) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, messageUsage));
-        }
-        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_NAME, PREFIX_PHONE);
-
-        Name name = parseName(argMultimap.getValue(PREFIX_NAME).get());
-        Optional<Phone> phone = Optional.empty();
-        if (argMultimap.getValue(PREFIX_PHONE).isPresent()) {
-            phone = Optional.of(parsePhone(argMultimap.getValue(PREFIX_PHONE).get()));
-        }
-        return new PersonTarget(name, phone);
-    }
 
     /**
      * Parses {@code oneBasedIndex} into an {@code Index} and returns it. Leading and trailing whitespaces will be

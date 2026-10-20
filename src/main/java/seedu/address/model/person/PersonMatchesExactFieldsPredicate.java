@@ -49,6 +49,11 @@ public class PersonMatchesExactFieldsPredicate implements Predicate<Person> {
     }
 
     @Override
+    public int hashCode() {
+        return descriptor.hashCode();
+    }
+
+    @Override
     public String toString() {
         return new ToStringBuilder(this).add("descriptor", descriptor).toString();
     }
