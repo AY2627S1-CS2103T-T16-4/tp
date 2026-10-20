@@ -18,6 +18,10 @@ Class Address
 Class Email
 Class Name
 Class Phone
+Class Github
+Class Linkedin
+Class Telegram
+Class Group
 Class Tag
 
 Class I #FFFFFF
@@ -41,6 +45,10 @@ Person *--> Name
 Person *--> Phone
 Person *--> Email
 Person *--> Address
+Person *--> Github
+Person *--> Linkedin
+Person *--> Telegram
+Person *--> "*" Group
 Person *--> "*" Tag
 
 Person -[hidden]up--> I
