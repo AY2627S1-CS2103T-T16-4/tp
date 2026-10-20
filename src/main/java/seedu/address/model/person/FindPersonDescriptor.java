@@ -7,28 +7,30 @@ import java.util.Set;
 
 import seedu.address.commons.util.CollectionUtil;
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.model.tag.Tag;
 
 /**
- * Stores the values to search for when finding persons. Each non-null field must match.
- * An empty tag set places no restriction on tags.
+ * Stores the text to search for when finding persons. Each non-null field must be a prefix of the
+ * corresponding field of a matching person. The values are raw search text, so that they can match the start
+ * of a field (partial matching). Unlike the person fields, they are therefore not validated against the format of
+ * the field they are searched in.
+ * An empty group or tag set places no restriction on groups or tags respectively.
  */
 public class FindPersonDescriptor {
-    private Name name;
-    private Phone phone;
-    private Email email;
-    private Address address;
-    private final Set<Group> groups = new HashSet<>();
-    private Github github;
-    private Linkedin linkedin;
-    private Telegram telegram;
-    private final Set<Tag> tags = new HashSet<>();
+    private String name;
+    private String phone;
+    private String email;
+    private String address;
+    private final Set<String> groups = new HashSet<>();
+    private String github;
+    private String linkedin;
+    private String telegram;
+    private final Set<String> tags = new HashSet<>();
 
     public FindPersonDescriptor() {}
 
     /**
      * Copy constructor.
-     * A defensive copy of {@code tags} is used internally.
+     * A defensive copy of {@code groups} and {@code tags} is used internally.
      */
     public FindPersonDescriptor(FindPersonDescriptor toCopy) {
         setName(toCopy.name);
@@ -50,35 +52,35 @@ public class FindPersonDescriptor {
                 || !tags.isEmpty() || !groups.isEmpty();
     }
 
-    public void setName(Name name) {
+    public void setName(String name) {
         this.name = name;
     }
 
-    public Optional<Name> getName() {
+    public Optional<String> getName() {
         return Optional.ofNullable(name);
     }
 
-    public void setPhone(Phone phone) {
+    public void setPhone(String phone) {
         this.phone = phone;
     }
 
-    public Optional<Phone> getPhone() {
+    public Optional<String> getPhone() {
         return Optional.ofNullable(phone);
     }
 
-    public void setEmail(Email email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 
-    public Optional<Email> getEmail() {
+    public Optional<String> getEmail() {
         return Optional.ofNullable(email);
     }
 
-    public void setAddress(Address address) {
+    public void setAddress(String address) {
         this.address = address;
     }
 
-    public Optional<Address> getAddress() {
+    public Optional<String> getAddress() {
         return Optional.ofNullable(address);
     }
 
@@ -86,7 +88,7 @@ public class FindPersonDescriptor {
      * Replaces the groups to search for with {@code groups}.
      * A defensive copy of {@code groups} is used internally.
      */
-    public void setGroups(Set<Group> groups) {
+    public void setGroups(Set<String> groups) {
         this.groups.clear();
         this.groups.addAll(groups);
     }
@@ -95,31 +97,31 @@ public class FindPersonDescriptor {
      * Returns an unmodifiable group set, which throws {@code UnsupportedOperationException}
      * if modification is attempted.
      */
-    public Set<Group> getGroups() {
+    public Set<String> getGroups() {
         return Collections.unmodifiableSet(groups);
     }
 
-    public void setGithub(Github github) {
+    public void setGithub(String github) {
         this.github = github;
     }
 
-    public Optional<Github> getGithub() {
+    public Optional<String> getGithub() {
         return Optional.ofNullable(github);
     }
 
-    public void setLinkedin(Linkedin linkedin) {
+    public void setLinkedin(String linkedin) {
         this.linkedin = linkedin;
     }
 
-    public Optional<Linkedin> getLinkedin() {
+    public Optional<String> getLinkedin() {
         return Optional.ofNullable(linkedin);
     }
 
-    public void setTelegram(Telegram telegram) {
+    public void setTelegram(String telegram) {
         this.telegram = telegram;
     }
 
-    public Optional<Telegram> getTelegram() {
+    public Optional<String> getTelegram() {
         return Optional.ofNullable(telegram);
     }
 
@@ -127,7 +129,7 @@ public class FindPersonDescriptor {
      * Replaces the tags to search for with {@code tags}.
      * A defensive copy of {@code tags} is used internally.
      */
-    public void setTags(Set<Tag> tags) {
+    public void setTags(Set<String> tags) {
         this.tags.clear();
         this.tags.addAll(tags);
     }
@@ -136,7 +138,7 @@ public class FindPersonDescriptor {
      * Returns an unmodifiable tag set, which throws {@code UnsupportedOperationException}
      * if modification is attempted.
      */
-    public Set<Tag> getTags() {
+    public Set<String> getTags() {
         return Collections.unmodifiableSet(tags);
     }
 

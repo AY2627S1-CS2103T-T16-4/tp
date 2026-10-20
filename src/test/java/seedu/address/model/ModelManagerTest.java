@@ -134,7 +134,7 @@ public class ModelManagerTest {
 
         // different filteredList -> returns false
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
-        descriptor.setName(ALICE.getName());
+        descriptor.setName(ALICE.getName().fullName);
         modelManager.updateFilteredPersonList(new PersonMatchesFlagsPredicate(descriptor));
         assertFalse(modelManager.equals(new ModelManager(addressBook, userPrefs)));
 

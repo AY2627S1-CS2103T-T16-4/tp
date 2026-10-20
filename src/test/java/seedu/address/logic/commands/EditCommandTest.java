@@ -100,7 +100,7 @@ public class EditCommandTest {
 
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
-        descriptor.setName(personInFilteredList.getName());
+        descriptor.setName(personInFilteredList.getName().fullName);
         expectedModel.updateFilteredPersonList(new PersonMatchesFlagsPredicate(descriptor));
         expectedModel.setPerson(expectedModel.getFilteredPersonList().get(0), editedPerson);
         assertCommandSuccess(editCommand, model,
