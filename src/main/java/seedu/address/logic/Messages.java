@@ -36,6 +36,17 @@ public class Messages {
      */
     public static String format(Person person) {
         final StringBuilder builder = new StringBuilder();
+
+        String groups = person.getGroups().stream()
+                .map(Object::toString)
+                .sorted()
+                .collect(Collectors.joining(", "));
+
+        String tags = person.getTags().stream()
+                .map(Object::toString)
+                .sorted()
+                .collect(Collectors.joining(", "));
+
         builder.append(person.getName())
                 .append("; Phone: ")
                 .append(person.getPhone())
@@ -43,8 +54,17 @@ public class Messages {
                 .append(person.getEmail())
                 .append("; Address: ")
                 .append(person.getAddress())
-                .append("; Tags: ");
-        person.getTags().forEach(builder::append);
+                .append("; GitHub: ")
+                .append(person.getGithub())
+                .append("; Linkedin: ")
+                .append(person.getLinkedin())
+                .append("; Telegram: ")
+                .append(person.getTelegram())
+                .append("; Groups: ")
+                .append(groups)
+                .append("; Tags: ")
+                .append(tags)
+                .append(";");
         return builder.toString();
     }
 
