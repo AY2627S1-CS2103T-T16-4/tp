@@ -1,21 +1,34 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.Messages.getErrorMessageForDuplicatePrefixes;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_GITHUB;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_LINKEDIN;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
 
-import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.logic.Messages;
 import seedu.address.logic.commands.DeleteCommand;
+import seedu.address.model.person.Address;
+import seedu.address.model.person.Email;
+import seedu.address.model.person.ExactPersonMatchDescriptor;
+import seedu.address.model.person.Github;
+import seedu.address.model.person.Group;
+import seedu.address.model.person.Linkedin;
 import seedu.address.model.person.Name;
+import seedu.address.model.person.PersonMatchesExactFieldsPredicate;
 import seedu.address.model.person.Phone;
-
-
+import seedu.address.model.person.Telegram;
+import seedu.address.model.tag.Tag;
 
 /**
  * As we are only doing white-box testing, our test cases do not cover path variations
@@ -26,80 +39,100 @@ import seedu.address.model.person.Phone;
  */
 public class DeleteCommandParserTest {
 
+    private static final String MESSAGE_INVALID_FORMAT =
+            String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE);
+
     private DeleteCommandParser parser = new DeleteCommandParser();
 
     @Test
-    public void parse_nameOnly_returnsDeleteCommand() {
-        assertParseSuccess(parser, " n/John Doe",
-                new DeleteCommand(new Name("John Doe"), Optional.empty()));
-    }
-
-    @Test
-    public void parse_nameAndPhone_returnsDeleteCommand() {
-        assertParseSuccess(parser, " n/John Doe p/81231234",
-                new DeleteCommand(new Name("John Doe"),
-                        Optional.of(new Phone("81231234"))));
-    }
-
-    @Test
-    public void parse_reversedPrefixOrder_returnsDeleteCommand() {
-        assertParseSuccess(parser, " p/81231234 n/John Doe",
-                new DeleteCommand(new Name("John Doe"),
-                        Optional.of(new Phone("81231234"))));
-    }
-
-    @Test
-    public void parse_surroundingWhitespace_returnsDeleteCommand() {
-        assertParseSuccess(parser, "   n/  John Doe   p/  81231234   ",
-                new DeleteCommand(new Name("John Doe"),
-                        Optional.of(new Phone("81231234"))));
-    }
-
-    @Test
-    public void parse_missingName_throwsParseException() {
-        String expectedMessage = String.format(
-                MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE);
-
-        assertParseFailure(parser, "", expectedMessage);
-        assertParseFailure(parser, "   ", expectedMessage);
-        assertParseFailure(parser, " p/81231234", expectedMessage);
-    }
-
-    @Test
-    public void parse_oldIndexSyntax_throwsParseException() {
-        assertParseFailure(parser, "1", String.format(
-                MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE));
+    public void parse_noPrefix_throwsParseException() {
+        assertParseFailure(parser, "", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, "     ", MESSAGE_INVALID_FORMAT);
     }
 
     @Test
     public void parse_nonEmptyPreamble_throwsParseException() {
-        assertParseFailure(parser, " unexpected n/John Doe", String.format(
-                MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE));
+        assertParseFailure(parser, " Alice", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, " unexpected n/Alice", MESSAGE_INVALID_FORMAT);
     }
 
     @Test
-    public void parse_invalidName_throwsParseException() {
-        assertParseFailure(parser, " n/", Name.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, " n/   ", Name.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, " n/John&", Name.MESSAGE_CONSTRAINTS);
+    public void parse_unknownPrefix_throwsParseException() {
+        assertParseFailure(parser, " x/foo", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, " x/foo n/Alice", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, " n/Alice x/foo g/T09", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, " n/Alice g/T09 x/foo", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, " n/Alice ph/91234567", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, " g/T09 N/Alice", MESSAGE_INVALID_FORMAT);
     }
 
     @Test
-    public void parse_invalidPhone_throwsParseException() {
-        assertParseFailure(parser, " n/John Doe p/", Phone.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, " n/John Doe p/abc", Phone.MESSAGE_CONSTRAINTS);
-        assertParseFailure(parser, " n/John Doe p/12", Phone.MESSAGE_CONSTRAINTS);
+    public void parse_unknownPrefixWithInvalidValue_reportsInvalidFormat() {
+        // Unknown prefixes are checked before empty or invalid field values.
+        assertParseFailure(parser, " n/ x/foo", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, " p/1234 x/foo", MESSAGE_INVALID_FORMAT);
     }
 
     @Test
-    public void parse_duplicateNamePrefix_throwsParseException() {
-        assertParseFailure(parser, " n/John Doe n/Jane Doe",
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_NAME));
+    public void parse_invalidValue_throwsParseException() {
+        assertParseFailure(parser, " n/James&", Name.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " p/abc", Phone.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " p/1234", Phone.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " p/71234567", Phone.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " e/not-an-email", Email.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " tg/@john", Telegram.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " t/hubby*", Tag.MESSAGE_CONSTRAINTS);
+
+        assertParseFailure(parser, " n/Alice p/1234", Phone.MESSAGE_CONSTRAINTS);
     }
 
     @Test
-    public void parse_duplicatePhonePrefix_throwsParseException() {
-        assertParseFailure(parser, " n/John Doe p/81231234 p/91234567",
-                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_PHONE));
+    public void parse_duplicateScalarPrefix_throwsParseException() {
+        assertParseFailure(parser, " n/Alice n/Bob",
+                getErrorMessageForDuplicatePrefixes(PREFIX_NAME));
+        assertParseFailure(parser, " p/91234567 p/81234567",
+                getErrorMessageForDuplicatePrefixes(PREFIX_PHONE));
+        assertParseFailure(parser, " a/First Street a/Second Street",
+                getErrorMessageForDuplicatePrefixes(PREFIX_ADDRESS));
+        assertParseFailure(parser, " e/alice@example.com e/bob@example.com",
+                getErrorMessageForDuplicatePrefixes(PREFIX_EMAIL));
+        assertParseFailure(parser, " gh/alice gh/bob",
+                getErrorMessageForDuplicatePrefixes(PREFIX_GITHUB));
+        assertParseFailure(parser, " li/alice li/bob",
+                getErrorMessageForDuplicatePrefixes(PREFIX_LINKEDIN));
+        assertParseFailure(parser, " tg/alice tg/bob",
+                getErrorMessageForDuplicatePrefixes(PREFIX_TELEGRAM));
+    }
+
+    @Test
+    public void parse_singlePrefix_returnsDeleteCommand() {
+        assertParseSuccess(parser, " n/Alice Pauline",
+                commandWith(d -> d.setName(new Name("Alice Pauline"))));
+        assertParseSuccess(parser, " p/91234567",
+                commandWith(d -> d.setPhone(new Phone("91234567"))));
+        assertParseSuccess(parser, " a/123 Clementi Ave",
+                commandWith(d -> d.setAddress(new Address("123 Clementi Ave"))));
+        assertParseSuccess(parser, " e/alice@example.com",
+                commandWith(d -> d.setEmail(new Email("alice@example.com"))));
+        assertParseSuccess(parser, " gh/AliceGh",
+                commandWith(d -> d.setGithub(new Github("AliceGh"))));
+        assertParseSuccess(parser, " li/alice-li",
+                commandWith(d -> d.setLinkedin(new Linkedin("alice-li"))));
+        assertParseSuccess(parser, " tg/alicetg",
+                commandWith(d -> d.setTelegram(new Telegram("alicetg"))));
+        assertParseSuccess(parser, " g/T09",
+                commandWith(d -> d.setGroups(Set.of(new Group("T09")))));
+        assertParseSuccess(parser, " t/friend",
+                commandWith(d -> d.setTags(Set.of(new Tag("friend")))));
+    }
+
+    /**
+     * Builds the expected command from exact-match criteria.
+     */
+    private static DeleteCommand commandWith(
+            Consumer<ExactPersonMatchDescriptor> setup) {
+        ExactPersonMatchDescriptor descriptor = new ExactPersonMatchDescriptor();
+        setup.accept(descriptor);
+        return new DeleteCommand(new PersonMatchesExactFieldsPredicate(descriptor));
     }
 }
