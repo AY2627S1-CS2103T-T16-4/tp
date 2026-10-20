@@ -12,8 +12,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import seedu.address.model.tag.Tag;
-
 public class FindPersonDescriptorTest {
 
     @Test
@@ -23,39 +21,39 @@ public class FindPersonDescriptorTest {
 
         // each field on its own -> returns true
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
-        descriptor.setName(new Name("Alice"));
+        descriptor.setName("Alice");
         assertTrue(descriptor.isAnyFieldSet());
 
         descriptor = new FindPersonDescriptor();
-        descriptor.setPhone(new Phone("91234567"));
+        descriptor.setPhone("91234567");
         assertTrue(descriptor.isAnyFieldSet());
 
         descriptor = new FindPersonDescriptor();
-        descriptor.setEmail(new Email("alice@example.com"));
+        descriptor.setEmail("alice@example.com");
         assertTrue(descriptor.isAnyFieldSet());
 
         descriptor = new FindPersonDescriptor();
-        descriptor.setAddress(new Address("Clementi"));
+        descriptor.setAddress("Clementi");
         assertTrue(descriptor.isAnyFieldSet());
 
         descriptor = new FindPersonDescriptor();
-        descriptor.setGroups(Set.of(new Group("T09")));
+        descriptor.setGroups(Set.of("T09"));
         assertTrue(descriptor.isAnyFieldSet());
 
         descriptor = new FindPersonDescriptor();
-        descriptor.setGithub(new Github("alice"));
+        descriptor.setGithub("alice");
         assertTrue(descriptor.isAnyFieldSet());
 
         descriptor = new FindPersonDescriptor();
-        descriptor.setLinkedin(new Linkedin("alice"));
+        descriptor.setLinkedin("alice");
         assertTrue(descriptor.isAnyFieldSet());
 
         descriptor = new FindPersonDescriptor();
-        descriptor.setTelegram(new Telegram("alice"));
+        descriptor.setTelegram("alice");
         assertTrue(descriptor.isAnyFieldSet());
 
         descriptor = new FindPersonDescriptor();
-        descriptor.setTags(Set.of(new Tag("friend")));
+        descriptor.setTags(Set.of("friend"));
         assertTrue(descriptor.isAnyFieldSet());
     }
 
@@ -76,24 +74,24 @@ public class FindPersonDescriptorTest {
     @Test
     public void getTags_modifyTags_throwsUnsupportedOperationException() {
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
-        assertThrows(UnsupportedOperationException.class, () -> descriptor.getTags().add(new Tag("friend")));
+        assertThrows(UnsupportedOperationException.class, () -> descriptor.getTags().add("friend"));
     }
 
     @Test
     public void setTags_defensiveCopy() {
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
-        HashSet<Tag> tags = new HashSet<>(Set.of(new Tag("friend")));
+        HashSet<String> tags = new HashSet<>(Set.of("friend"));
         descriptor.setTags(tags);
-        tags.add(new Tag("family"));
-        assertEquals(Set.of(new Tag("friend")), descriptor.getTags());
+        tags.add("family");
+        assertEquals(Set.of("friend"), descriptor.getTags());
     }
 
     @Test
     public void equals() {
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
-        descriptor.setName(new Name("Alice"));
-        descriptor.setGithub(new Github("alice"));
-        descriptor.setTags(Set.of(new Tag("friend")));
+        descriptor.setName("Alice");
+        descriptor.setGithub("alice");
+        descriptor.setTags(Set.of("friend"));
 
         // same values -> returns true (copy constructor)
         assertEquals(descriptor, new FindPersonDescriptor(descriptor));
@@ -109,47 +107,47 @@ public class FindPersonDescriptorTest {
 
         // different name -> returns false
         FindPersonDescriptor other = new FindPersonDescriptor(descriptor);
-        other.setName(new Name("Bob"));
+        other.setName("Bob");
         assertNotEquals(descriptor, other);
 
         // different phone -> returns false
         other = new FindPersonDescriptor(descriptor);
-        other.setPhone(new Phone("91234567"));
+        other.setPhone("91234567");
         assertNotEquals(descriptor, other);
 
         // different email -> returns false
         other = new FindPersonDescriptor(descriptor);
-        other.setEmail(new Email("alice@example.com"));
+        other.setEmail("alice@example.com");
         assertNotEquals(descriptor, other);
 
         // different address -> returns false
         other = new FindPersonDescriptor(descriptor);
-        other.setAddress(new Address("Clementi"));
+        other.setAddress("Clementi");
         assertNotEquals(descriptor, other);
 
         // different group -> returns false
         other = new FindPersonDescriptor(descriptor);
-        other.setGroups(Set.of(new Group("T09")));
+        other.setGroups(Set.of("T09"));
         assertNotEquals(descriptor, other);
 
         // different github -> returns false
         other = new FindPersonDescriptor(descriptor);
-        other.setGithub(new Github("bob"));
+        other.setGithub("bob");
         assertNotEquals(descriptor, other);
 
         // different linkedin -> returns false
         other = new FindPersonDescriptor(descriptor);
-        other.setLinkedin(new Linkedin("alice"));
+        other.setLinkedin("alice");
         assertNotEquals(descriptor, other);
 
         // different telegram -> returns false
         other = new FindPersonDescriptor(descriptor);
-        other.setTelegram(new Telegram("alice"));
+        other.setTelegram("alice");
         assertNotEquals(descriptor, other);
 
         // different tags -> returns false
         other = new FindPersonDescriptor(descriptor);
-        other.setTags(Set.of(new Tag("family")));
+        other.setTags(Set.of("family"));
         assertNotEquals(descriptor, other);
     }
 

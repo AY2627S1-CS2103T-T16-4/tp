@@ -20,15 +20,16 @@ import seedu.address.model.Model;
 import seedu.address.model.person.PersonMatchesFlagsPredicate;
 
 /**
- * Finds and lists all persons in the address book whose fields match every given flag value.
- * Matching is exact, and is case-sensitive only for GitHub usernames.
+ * Finds and lists all persons in the address book whose fields start with every given flag value.
+ * Matching is by prefix, and is case-sensitive only for GitHub usernames.
  */
 public class FindCommand extends Command {
 
     public static final String COMMAND_WORD = "find";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all persons whose fields match "
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all persons whose fields start with "
             + "all of the specified values and displays them as a list with index numbers.\n"
+            + "The search is case-insensitive, except for GITHUB, which is case-sensitive.\n"
             + "Parameters: "
             + "[" + PREFIX_NAME + "NAME] "
             + "[" + PREFIX_PHONE + "PHONE] "

@@ -140,7 +140,7 @@ public class CommandTestUtil {
 
         Person person = model.getFilteredPersonList().get(targetIndex.getZeroBased());
         FindPersonDescriptor descriptor = new FindPersonDescriptor();
-        descriptor.setName(person.getName());
+        descriptor.setName(person.getName().fullName);
         model.updateFilteredPersonList(new PersonMatchesFlagsPredicate(descriptor));
 
         assertEquals(1, model.getFilteredPersonList().size());
