@@ -145,6 +145,23 @@ Examples:
 * `list` followed by `delete 2` deletes the 2nd person in the address book.
 * `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
 
+### Sorting the current list: `sort`
+
+Sorts the displayed contacts by name or group, retaining the current search filter.
+
+Format: `sort name|group [asc|desc]`
+
+* `sort name asc` sorts names alphabetically, ignoring case.
+* `sort name desc` sorts names in reverse alphabetical order.
+* `sort group` sorts by group alphabetically. Ascending is the default for either field.
+* `sort group desc` reverses group order. Names within a group remain alphabetical.
+* For contacts with multiple groups, the alphabetically first group determines their position.
+  Contacts without groups appear last in either direction.
+* After `find g/t01`, use `sort name` to sort only those search results.
+* Sorting remains active for subsequent searches, edits, and `list` during the current session.
+  Edit indexes refer to the displayed order. Sorting does not change saved contact order or create an undo step.
+
+
 ### Clearing all entries: `clear`
 
 Clears all entries from the address book.
@@ -203,5 +220,5 @@ Action     | Format, Examples
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List**   | `list`
-
+**Sort**   | `sort name/group asc/desc` <br> e.g., `sort name asc`, `sort group desc`
 **Help**   | `help`
