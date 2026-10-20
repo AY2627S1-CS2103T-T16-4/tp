@@ -9,7 +9,6 @@ import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -24,9 +23,11 @@ import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.person.ExactPersonMatchDescriptor;
 import seedu.address.model.person.FindPersonDescriptor;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.PersonMatchesExactFieldsPredicate;
 import seedu.address.model.person.PersonMatchesFlagsPredicate;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 import seedu.address.testutil.PersonBuilder;
@@ -52,12 +53,14 @@ public class AddressBookParserTest {
 
     @Test
     public void parseCommand_delete() throws Exception {
-        DeleteCommand command = (DeleteCommand) parser.parseCommand(
-                DeleteCommand.COMMAND_WORD + " n/John Doe");
+        ExactPersonMatchDescriptor descriptor = new ExactPersonMatchDescriptor();
+        descriptor.setName(new Name("John Doe"));
 
-        assertEquals(
-                new DeleteCommand(new Name("John Doe"), Optional.empty()),
-                command);
+        DeleteCommand expectedCommand =
+                new DeleteCommand(new PersonMatchesExactFieldsPredicate(descriptor));
+
+        assertEquals(expectedCommand,
+                parser.parseCommand(DeleteCommand.COMMAND_WORD + " n/John Doe"));
     }
 
     @Test
