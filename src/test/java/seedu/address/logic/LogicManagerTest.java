@@ -85,7 +85,7 @@ public class LogicManagerTest {
     @Test
     public void execute_contactCommands_requestsSelectionReset() throws Exception {
         List<String> contactCommands = List.of("add n/Bob p/92345678", "edit 1 n/Alicia", "delete n/Alice",
-                "clear", "find n/Alice", "find g/Missing", "list");
+                "clear", "find n/Alice", "find g/Missing", "list", "sort name", "sort group desc");
 
         for (String command : contactCommands) {
             model.setAddressBook(new AddressBook());

@@ -4,12 +4,14 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.ArrayDeque;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.model.person.Person;
@@ -24,6 +26,7 @@ public class ModelManager implements Model {
     private final Deque<AddressBook> undoHistory = new ArrayDeque<>();
     private final UserPrefs userPrefs;
     private final FilteredList<Person> filteredPersons;
+    private final SortedList<Person> sortedPersons;
     private Predicate<Person> currentPredicate = PREDICATE_SHOW_ALL_PERSONS;
 
     /**
@@ -37,6 +40,7 @@ public class ModelManager implements Model {
         this.addressBook = new AddressBook(addressBook);
         this.userPrefs = new UserPrefs(userPrefs);
         filteredPersons = new FilteredList<>(this.addressBook.getPersonList());
+        sortedPersons = new SortedList<>(filteredPersons);
     }
 
     public ModelManager() {
@@ -104,7 +108,13 @@ public class ModelManager implements Model {
      */
     @Override
     public ObservableList<Person> getFilteredPersonList() {
-        return filteredPersons;
+        return sortedPersons;
+    }
+
+    @Override
+    public void sortFilteredPersonList(Comparator<Person> comparator) {
+        requireNonNull(comparator);
+        sortedPersons.setComparator(comparator);
     }
 
     @Override
@@ -127,7 +137,7 @@ public class ModelManager implements Model {
 
         return addressBook.equals(otherModelManager.addressBook)
                 && userPrefs.equals(otherModelManager.userPrefs)
-                && filteredPersons.equals(otherModelManager.filteredPersons);
+                && sortedPersons.equals(otherModelManager.sortedPersons);
     }
 
     //=========== Undo ======================================================================================

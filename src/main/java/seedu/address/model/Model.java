@@ -1,5 +1,6 @@
 package seedu.address.model;
 
+import java.util.Comparator;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
@@ -68,6 +69,9 @@ public interface Model {
      * @throws NullPointerException if {@code predicate} is null.
      */
     void updateFilteredPersonList(Predicate<Person> predicate);
+
+    /** Sorts the visible list without changing its filter or the stored contact order. */
+    void sortFilteredPersonList(Comparator<Person> comparator);
 
     /**
      * Saves the given address book state for a future undo operation.
