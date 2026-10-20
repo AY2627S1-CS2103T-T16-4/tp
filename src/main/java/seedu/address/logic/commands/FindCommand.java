@@ -59,6 +59,7 @@ public class FindCommand extends Command {
     public FindCommand(PersonMatchesFlagsPredicate predicate, List<Prefix> usedPrefixes) {
         requireNonNull(predicate);
         requireNonNull(usedPrefixes);
+        assert !usedPrefixes.isEmpty() : "find must be given at least one flag";
         this.predicate = predicate;
         this.usedPrefixes = List.copyOf(usedPrefixes);
     }
@@ -67,6 +68,7 @@ public class FindCommand extends Command {
     public CommandResult execute(Model model) {
         requireNonNull(model);
         model.updateFilteredPersonList(predicate);
+        assert model.getFilteredPersonList() != null;
         if (model.getFilteredPersonList().isEmpty()) {
             String flags = usedPrefixes.stream().map(Prefix::toString).collect(Collectors.joining(" "));
             return new CommandResult(String.format(MESSAGE_NOT_FOUND, flags));

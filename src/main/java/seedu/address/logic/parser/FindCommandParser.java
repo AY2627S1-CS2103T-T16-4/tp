@@ -74,6 +74,7 @@ public class FindCommandParser implements Parser<FindCommand> {
         descriptor.setGroups(new HashSet<>(argMultimap.getAllValues(PREFIX_GROUP)));
         descriptor.setTags(new HashSet<>(argMultimap.getAllValues(PREFIX_TAG)));
 
+        assert !usedPrefixes.isEmpty();
         return new FindCommand(new PersonMatchesFlagsPredicate(descriptor), usedPrefixes);
     }
 
@@ -83,6 +84,7 @@ public class FindCommandParser implements Parser<FindCommand> {
      * absorbed into the value of the preceding flag.
      */
     private static boolean containsUnknownFlag(String args) {
+        assert args != null;
         Matcher matcher = FLAG_LIKE_TOKEN.matcher(args);
         while (matcher.find()) {
             String token = matcher.group();
