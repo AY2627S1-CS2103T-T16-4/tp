@@ -159,6 +159,19 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Pinned contacts
+
+The `pin` command marks one matching contact as pinned. Its implementation has four main parts:
+
+* **Shared targeting:** `PinCommandParser` uses `ExactPersonMatchParser` to validate criteria, and `PersonTarget` resolves them against all contacts using `PersonMatchesExactFieldsPredicate`. These classes are shared with `delete`. All supplied fields must match. Ambiguous matches are displayed for refinement; unsuccessful requests leave contact data unchanged.
+* **Pin state:** `PinCommand` replaces the contact with an immutable copy whose `isPinned` flag is `true`, preserving its other details. Editing retains this flag.
+* **Display:** `ModelManager` sorts the filtered view with pinned contacts first, preserving addition order within each section. The stored list stays in addition order. The UI and `edit` use the same displayed list, and `PersonCard` shows a star for pinned contacts.
+* **Persistence and undo:** `JsonAdaptedPerson` stores `isPinned`, defaulting to `false` for older files. Successful pins save an undo snapshot through `LogicManager`, allowing the existing undo mechanism to restore the previous state.
+
+The activity diagram summarizes the flow, grouping unsuccessful requests into one path.
+
+<puml src="diagrams/PinActivityDiagram.puml" alt="Pin activity flow showing validation, contact replacement, display update, saving, and feedback" />
+
 ### \[Proposed\] Undo/redo feature
 
 #### Proposed Implementation
@@ -299,7 +312,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `**`     | Beyond MVP | 10th time user | View events for contacts under the same group | Check my group’s upcoming schedule and availability.                                |
 | `**`     | Beyond MVP | 10th time user | Edit events for contacts under the same group | Update meeting times or details when plans change.                                  |
 | `**`     | Beyond MVP | 10th time user | Delete events for contacts under the same group | Remove cancelled or outdated meetings from our schedule.                            |
-| `*`      | Beyond MVP | Experienced User | Pin contacts to appear at the top | Access important contacts quickly                                                   |
+| `*`      | MVP | Experienced User | Pin contacts to appear at the top | Access important contacts quickly                                                   |
 | `*`      | Beyond MVP | Experienced User | Assign custom keyboard shortcuts to commands | Perform frequent tasks faster and tailor the application to my workflow             |
 
 ### Use cases
@@ -428,6 +441,42 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     * 1a1. GM displays an empty list and informs user that contact list is empty.
 
+    * Use case ends.
+
+**System:** GitMate (GM)<br>
+**Use case:** U6. Pin a contact<br>
+**Actor:** User<br>
+**Precondition:** GM is running and ready to receive commands
+
+**MSS**
+
+1. User requests to pin a contact, supplying details that identify it uniquely.
+1. GM pins the contact and displays it above unpinned contacts whenever it is included in the current view.
+1. GM displays a confirmation message.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. GM detects missing or invalid contact criteria.
+
+    * 1a1. GM displays an error explaining the accepted input.
+    * Use case ends.
+
+* 1b. GM finds no contact matching the supplied criteria.
+
+    * 1b1. GM informs the user that no contact matches.
+    * Use case ends.
+
+* 1c. GM finds multiple matching contacts.
+
+    * 1c1. GM displays the matching contacts and requests additional details. No contact is pinned.
+    * 1c2. User supplies further details to identify one contact.
+    * Use case resumes at step 1.
+
+* 1d. GM finds that the contact is already pinned.
+
+    * 1d1. GM informs the user that the contact is already pinned.
     * Use case ends.
 
 ### Non-Functional Requirements
