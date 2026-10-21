@@ -1,0 +1,20 @@
+@startuml
+skin rose
+skinparam ActivityFontSize 15
+skinparam ArrowFontSize 12
+
+start
+:Receive pin command;
+:Validate criteria and resolve contact;
+
+if () then ([valid request and\none unpinned match])
+    :Replace contact with pinned copy;
+    :Update pinned-first display;
+    :Save undo snapshot and contact data;
+    :Show success message;
+else ([else])
+    :Show error without changing contact data;
+endif
+
+stop
+@enduml
