@@ -17,6 +17,12 @@
           <Region fx:constant="USE_PREF_SIZE" />
         </minWidth>
       </Label>
+      <Label fx:id="pinnedIndicator" text="★" styleClass="pinned-indicator" accessibleText="Pinned contact"
+             visible="false" managed="false">
+        <minWidth>
+          <Region fx:constant="USE_PREF_SIZE" />
+        </minWidth>
+      </Label>
       <Label fx:id="name" styleClass="contact-name" minWidth="0" maxWidth="Infinity" HBox.hgrow="ALWAYS" />
     </HBox>
     <FlowPane fx:id="groups" hgap="6" vgap="6" alignment="CENTER_LEFT" minWidth="0" />

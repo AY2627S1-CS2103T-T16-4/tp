@@ -4,12 +4,15 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.ArrayDeque;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.model.person.Person;
@@ -24,6 +27,7 @@ public class ModelManager implements Model {
     private final Deque<AddressBook> undoHistory = new ArrayDeque<>();
     private final UserPrefs userPrefs;
     private final FilteredList<Person> filteredPersons;
+    private final ObservableList<Person> displayedPersons;
     private Predicate<Person> currentPredicate = PREDICATE_SHOW_ALL_PERSONS;
 
     /**
@@ -37,6 +41,11 @@ public class ModelManager implements Model {
         this.addressBook = new AddressBook(addressBook);
         this.userPrefs = new UserPrefs(userPrefs);
         filteredPersons = new FilteredList<>(this.addressBook.getPersonList());
+        // SortedList can reorder equal keys on insertion, so use the stored position to break ties.
+        Comparator<Person> displayOrder = Comparator.comparing(Person::isPinned).reversed()
+                .thenComparingInt(this.addressBook.getPersonList()::indexOf);
+        displayedPersons = FXCollections.unmodifiableObservableList(
+                new SortedList<>(filteredPersons, displayOrder));
     }
 
     public ModelManager() {
@@ -99,12 +108,11 @@ public class ModelManager implements Model {
     //=========== Filtered Person List Accessors =============================================================
 
     /**
-     * Returns an unmodifiable view of the list of {@code Person} backed by the internal list of
-     * {@code addressBook}
+     * Returns matching contacts with pinned contacts first, preserving addition order within each section.
      */
     @Override
     public ObservableList<Person> getFilteredPersonList() {
-        return filteredPersons;
+        return displayedPersons;
     }
 
     @Override

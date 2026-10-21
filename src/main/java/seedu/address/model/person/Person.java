@@ -28,12 +28,21 @@ public class Person {
     private final Linkedin linkedin;
     private final Telegram telegram;
     private final Set<Tag> tags = new HashSet<>();
+    private final boolean isPinned;
 
     /**
-     * Every field must be present and not null.
+     * Creates an unpinned person. Every field must be present and not null.
      */
     public Person(Name name, Phone phone, Email email, Address address, Set<Group> groups,
-                  Github github, Linkedin linkedin, Telegram telegram, Set<Tag> tags) {
+            Github github, Linkedin linkedin, Telegram telegram, Set<Tag> tags) {
+        this(name, phone, email, address, groups, github, linkedin, telegram, tags, false);
+    }
+
+    /**
+     * Creates a person with the given details and pin status. Every field must be present and not null.
+     */
+    public Person(Name name, Phone phone, Email email, Address address, Set<Group> groups,
+            Github github, Linkedin linkedin, Telegram telegram, Set<Tag> tags, boolean isPinned) {
         requireAllNonNull(name, phone, email, address, groups, github, linkedin, telegram, tags);
         this.name = name;
         this.phone = phone;
@@ -44,7 +53,15 @@ public class Person {
         this.linkedin = linkedin;
         this.telegram = telegram;
         this.tags.addAll(tags);
+        this.isPinned = isPinned;
+    }
 
+    /**
+     * Copies a person's details with the given pin status.
+     */
+    public Person(Person person, boolean isPinned) {
+        this(person.getName(), person.getPhone(), person.getEmail(), person.getAddress(), person.getGroups(),
+                person.getGithub(), person.getLinkedin(), person.getTelegram(), person.getTags(), isPinned);
     }
 
     public Name getName() {
@@ -91,6 +108,10 @@ public class Person {
         return Collections.unmodifiableSet(tags);
     }
 
+    public boolean isPinned() {
+        return isPinned;
+    }
+
     /**
      * Returns true if both persons have the same name.
      * This defines a weaker notion of equality between two persons.
@@ -127,13 +148,14 @@ public class Person {
                 && github.equals(otherPerson.github)
                 && linkedin.equals(otherPerson.linkedin)
                 && telegram.equals(otherPerson.telegram)
-                && tags.equals(otherPerson.tags);
+                && tags.equals(otherPerson.tags)
+                && isPinned == otherPerson.isPinned;
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, groups, github, linkedin, telegram, tags);
+        return Objects.hash(name, phone, email, address, groups, github, linkedin, telegram, tags, isPinned);
     }
 
     @Override

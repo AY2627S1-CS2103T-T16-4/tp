@@ -2,6 +2,7 @@ package seedu.address.model.person;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -160,6 +161,11 @@ public class ExactPersonMatchDescriptor {
                 && getLinkedin().equals(otherDescriptor.getLinkedin())
                 && getTelegram().equals(otherDescriptor.getTelegram())
                 && tags.equals(otherDescriptor.tags);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, phone, email, address, groups, github, linkedin, telegram, tags);
     }
 
     @Override
