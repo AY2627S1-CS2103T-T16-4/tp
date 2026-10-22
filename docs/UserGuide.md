@@ -220,7 +220,7 @@ Format: `sort name|group [asc|desc]`. Ascending is the default.
   contacts without groups appear last within their section when sorting by group.
 * Sorting preserves the current search filter. For example, run `find g/t09`, then `sort name`.
 * Sorting remains active for subsequent searches, edits, and `list` in the current session.
-  Edit indexes follow the displayed order. Sorting does not change saved contact order or create an undo step.
+  Edited contacts move to their new sorted position. Sorting does not change saved contact order or create an undo step.
 
 ## Command summary
 

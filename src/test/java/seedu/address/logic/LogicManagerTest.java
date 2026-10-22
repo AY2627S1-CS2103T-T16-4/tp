@@ -99,7 +99,9 @@ public class LogicManagerTest {
                 ClearCommand.COMMAND_WORD,
                 FindCommand.COMMAND_WORD + NAME_DESC_AMY,
                 FindCommand.COMMAND_WORD + GROUP_DESC_BOB,
-                ListCommand.COMMAND_WORD);
+                ListCommand.COMMAND_WORD,
+                "sort name",
+                "sort group desc");
 
         for (String command : contactCommands) {
             model.setAddressBook(new AddressBook());

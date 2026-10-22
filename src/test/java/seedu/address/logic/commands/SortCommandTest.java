@@ -114,11 +114,12 @@ public class SortCommandTest {
     }
 
     @Test
-    public void execute_editAfterSort_usesDisplayedIndex() throws Exception {
+    public void execute_editAfterSort_reordersUpdatedContact() throws Exception {
         addContacts();
         AddressBookParser parser = new AddressBookParser();
         parser.parseCommand("sort name").execute(model);
-        parser.parseCommand("edit 1 n/Zoe").execute(model);
+        parser.parseCommand("edit n/" + ALICE.getName().fullName + " " + EditCommand.EDIT_SEPARATOR + " n/Zoe")
+                .execute(model);
         assertEquals(List.of(BENSON, CARL, DANIEL, new PersonBuilder(ALICE).withName("Zoe").build()),
                 model.getFilteredPersonList());
     }
