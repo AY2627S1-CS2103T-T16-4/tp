@@ -37,6 +37,7 @@ class JsonAdaptedPerson {
     private final String linkedin;
     private final String telegram;
     private final List<JsonAdaptedTag> tags = new ArrayList<>();
+    private final boolean isPinned;
 
     /**
      * Constructs a {@code JsonAdaptedPerson} with the given person details.
@@ -46,7 +47,7 @@ class JsonAdaptedPerson {
             @JsonProperty("email") String email, @JsonProperty("address") String address,
             @JsonProperty("groups") List<JsonAdaptedGroup> groups, @JsonProperty("github") String github,
             @JsonProperty("linkedin") String linkedin, @JsonProperty("telegram") String telegram,
-            @JsonProperty("tags") List<JsonAdaptedTag> tags) {
+            @JsonProperty("tags") List<JsonAdaptedTag> tags, @JsonProperty("isPinned") boolean isPinned) {
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -60,12 +61,13 @@ class JsonAdaptedPerson {
         if (tags != null) {
             this.tags.addAll(tags);
         }
+        this.isPinned = isPinned;
     }
 
     /** Compatibility constructor for JSON data that predates the optional contact fields. */
     public JsonAdaptedPerson(String name, String phone, String email, String address,
             List<JsonAdaptedTag> tags) {
-        this(name, phone, email, address, null, null, null, null, tags);
+        this(name, phone, email, address, null, null, null, null, tags, false);
     }
 
     /**
@@ -85,6 +87,7 @@ class JsonAdaptedPerson {
         tags.addAll(source.getTags().stream()
                 .map(JsonAdaptedTag::new)
                 .collect(Collectors.toList()));
+        isPinned = source.isPinned();
     }
 
     /**
@@ -171,7 +174,7 @@ class JsonAdaptedPerson {
         final Set<Tag> modelTags = new HashSet<>(personTags);
 
         return new Person(modelName, modelPhone, modelEmail, modelAddress,
-                modelGroup, modelGithub, modelLinkedin, modelTelegram, modelTags);
+                modelGroup, modelGithub, modelLinkedin, modelTelegram, modelTags, isPinned);
     }
 
 }

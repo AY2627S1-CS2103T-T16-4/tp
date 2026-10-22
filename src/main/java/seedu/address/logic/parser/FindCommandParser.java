@@ -14,9 +14,11 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.FindPersonDescriptor;
@@ -26,6 +28,8 @@ import seedu.address.model.person.PersonMatchesFlagsPredicate;
  * Parses input arguments and creates a new FindCommand object
  */
 public class FindCommandParser implements Parser<FindCommand> {
+
+    private static final Logger logger = LogsCenter.getLogger(FindCommandParser.class);
 
     /** Every flag that {@code find} accepts, in the order they are listed in error messages. */
     private static final List<Prefix> SEARCHABLE_PREFIXES = List.of(PREFIX_NAME, PREFIX_PHONE, PREFIX_ADDRESS,
@@ -40,6 +44,7 @@ public class FindCommandParser implements Parser<FindCommand> {
      * @throws ParseException if the user input does not conform to the expected format
      */
     public FindCommand parse(String args) throws ParseException {
+        logger.fine("Parsing find arguments: " + args);
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args, SEARCHABLE_PREFIXES.toArray(new Prefix[0]));
 
@@ -48,12 +53,14 @@ public class FindCommandParser implements Parser<FindCommand> {
                 .toList();
 
         if (!argMultimap.getPreamble().isEmpty() || usedPrefixes.isEmpty() || containsUnknownFlag(args)) {
+            logger.info("Rejected find input: missing, unknown or non-flag arguments");
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
         }
 
         // Must run before validation, as some value types (e.g. Email) accept an empty string.
         for (Prefix prefix : usedPrefixes) {
             if (argMultimap.getAllValues(prefix).stream().anyMatch(String::isEmpty)) {
+                logger.info("Rejected find input: empty value for " + prefix);
                 throw new ParseException(String.format(MESSAGE_EMPTY_FLAG_VALUE, prefix));
             }
         }
@@ -74,6 +81,8 @@ public class FindCommandParser implements Parser<FindCommand> {
         descriptor.setGroups(new HashSet<>(argMultimap.getAllValues(PREFIX_GROUP)));
         descriptor.setTags(new HashSet<>(argMultimap.getAllValues(PREFIX_TAG)));
 
+        assert !usedPrefixes.isEmpty();
+        logger.fine("Parsed find with flags: " + usedPrefixes);
         return new FindCommand(new PersonMatchesFlagsPredicate(descriptor), usedPrefixes);
     }
 
@@ -83,6 +92,7 @@ public class FindCommandParser implements Parser<FindCommand> {
      * absorbed into the value of the preceding flag.
      */
     private static boolean containsUnknownFlag(String args) {
+        assert args != null;
         Matcher matcher = FLAG_LIKE_TOKEN.matcher(args);
         while (matcher.find()) {
             String token = matcher.group();

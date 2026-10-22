@@ -131,6 +131,23 @@ Examples:
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
 
+### Pinning a contact: `pin`
+
+Keeps an important contact above unpinned contacts, with a star beside its name.
+
+Format: `pin [n/NAME] [p/PHONE_NUMBER] [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...`
+
+* Provide at least one field. All supplied values must match in full, ignoring letter case except for GitHub usernames (`gh/`).
+* If several contacts match, GitMate displays them and requests more details. No contact is pinned unless exactly one matches. An already-pinned contact produces an error.
+* Pinned contacts stay in the order they were added, above unpinned contacts.
+* Searches all contacts without clearing the current search after success. Use `list` to see a pinned contact hidden by the search.
+* Pins are saved automatically and retained after editing or restarting. There is no `unpin` command.
+
+Examples:
+
+* `pin p/98765432` pins the contact with phone number `98765432`.
+* `pin n/John Doe p/98765432` pins the contact matching both the full name and phone number.
+
 ### Deleting a person: `delete`
 
 Deletes the specified person from the address book.
@@ -192,7 +209,6 @@ _Details coming soon ..._
 
 --------------------------------------------------------------------------------------------------------------------
 
-
 ## Command summary
 
 Action     | Format, Examples
@@ -203,5 +219,5 @@ Action     | Format, Examples
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List**   | `list`
-
+**Pin**    | `pin [n/NAME] [p/PHONE_NUMBER] [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...` (at least one field)<br> e.g., `pin p/98765432`
 **Help**   | `help`

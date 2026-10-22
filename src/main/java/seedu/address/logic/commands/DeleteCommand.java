@@ -4,87 +4,58 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import seedu.address.commons.util.ToStringBuilder;
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
-import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
-import seedu.address.model.person.Phone;
+import seedu.address.model.person.PersonMatchesExactFieldsPredicate;
 
 /**
- * Deletes a person identified using the person's name and optionally their phone number.
+ * Deletes a contact identified by exact field criteria.
  */
 public class DeleteCommand extends Command {
 
     public static final String COMMAND_WORD = "delete";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD
-            + ": Deletes the person identified by their name.\n"
-            + "Parameters: "
-            + PREFIX_NAME + "NAME "
-            + "[" + PREFIX_PHONE + "PHONE_NUMBER]\n"
-            + String.format("Example 1: %s %sJohn Doe\n", COMMAND_WORD, PREFIX_NAME)
-            + String.format("Example 2: %s %sJohn Doe %s81231234", COMMAND_WORD, PREFIX_NAME, PREFIX_PHONE);
+            + ": Deletes a contact only when exactly one contact matches "
+            + "all supplied values.\n"
+            + PersonTarget.MESSAGE_PARAMETERS
+            + "At least one prefix must be provided.\n"
+            + "Example: " + COMMAND_WORD + " "
+            + PREFIX_NAME + "John Doe " + PREFIX_PHONE + "81231234";
 
-    public static final String MESSAGE_PERSON_NOT_FOUND =
-            "No contact matches the supplied name and phone number.";
+    public static final String MESSAGE_PERSON_NOT_FOUND = PersonTarget.MESSAGE_PERSON_NOT_FOUND;
 
     public static final String MESSAGE_AMBIGUOUS_PERSON =
-            "Multiple contacts match:\n%1$s\n"
-                    + "Please specify a phone number using p/PHONE_NUMBER.";
+            String.format(PersonTarget.MESSAGE_AMBIGUOUS_PERSON, "deleted");
+
+    public static final String MESSAGE_EMPTY_FLAG_VALUE =
+            "Please provide a value for %1$s to delete by.";
 
     public static final String MESSAGE_DELETE_PERSON_SUCCESS =
-            "Deleted person: %1$s, Phone: %2$s";
+            "Deleted person: %1$s";
 
-    private final Name targetName;
-    private final Optional<Phone> targetPhone;
+    private final PersonTarget target;
 
     /**
-     * Creates a DeleteCommand to delete a person by name and optional phone number.
-     *
-     * @param targetName Full name of the person to delete.
-     * @param targetPhone Phone number to match, or {@code Optional.empty()} to match by name only.
+     * Creates a command that deletes the unique person satisfying {@code predicate}.
      */
-    public DeleteCommand(Name targetName, Optional<Phone> targetPhone) {
-        this.targetName = requireNonNull(targetName);
-        this.targetPhone = requireNonNull(targetPhone);
+    public DeleteCommand(PersonMatchesExactFieldsPredicate predicate) {
+        target = new PersonTarget(predicate);
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> matches = model.getAddressBook().getPersonList().stream()
-                .filter(person -> person.getName().equals(targetName))
-                .filter(person -> targetPhone
-                        .map(phone -> person.getPhone().equals(phone))
-                        .orElse(true))
-                .toList();
 
-        if (matches.isEmpty()) {
-            throw new CommandException(MESSAGE_PERSON_NOT_FOUND);
-        }
-
-        if (matches.size() > 1) {
-            String matchingContacts = matches.stream()
-                    .map(person -> String.format("%s, Phone: %s",
-                            person.getName(), person.getPhone()))
-                    .collect(Collectors.joining("\n"));
-
-            throw new CommandException(
-                    String.format(MESSAGE_AMBIGUOUS_PERSON, matchingContacts));
-        }
-
-        Person personToDelete = matches.getFirst();
+        Person personToDelete = target.resolve(model, MESSAGE_PERSON_NOT_FOUND, MESSAGE_AMBIGUOUS_PERSON);
         model.deletePerson(personToDelete);
 
         return new CommandResult(String.format(
                 MESSAGE_DELETE_PERSON_SUCCESS,
-                personToDelete.getName(),
-                personToDelete.getPhone()));
+                Messages.format(personToDelete)));
     }
 
     @Override
@@ -93,13 +64,16 @@ public class DeleteCommand extends Command {
             return true;
         }
 
-        // instanceof handles nulls
         if (!(other instanceof DeleteCommand otherDeleteCommand)) {
             return false;
         }
 
-        return targetName.equals(otherDeleteCommand.targetName)
-                && targetPhone.equals(otherDeleteCommand.targetPhone);
+        return target.equals(otherDeleteCommand.target);
+    }
+
+    @Override
+    public int hashCode() {
+        return target.hashCode();
     }
 
     @Override
@@ -110,8 +84,7 @@ public class DeleteCommand extends Command {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .add("targetName", targetName)
-                .add("targetPhone", targetPhone)
+                .add("predicate", target.predicate())
                 .toString();
     }
 }

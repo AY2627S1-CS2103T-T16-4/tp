@@ -9,6 +9,7 @@ import java.util.Deque;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
@@ -26,7 +27,7 @@ public class ModelManager implements Model {
     private final Deque<AddressBook> undoHistory = new ArrayDeque<>();
     private final UserPrefs userPrefs;
     private final FilteredList<Person> filteredPersons;
-    private final SortedList<Person> sortedPersons;
+    private final ObservableList<Person> displayedPersons;
     private Predicate<Person> currentPredicate = PREDICATE_SHOW_ALL_PERSONS;
 
     /**
@@ -40,7 +41,11 @@ public class ModelManager implements Model {
         this.addressBook = new AddressBook(addressBook);
         this.userPrefs = new UserPrefs(userPrefs);
         filteredPersons = new FilteredList<>(this.addressBook.getPersonList());
-        sortedPersons = new SortedList<>(filteredPersons);
+        // SortedList can reorder equal keys on insertion, so use the stored position to break ties.
+        Comparator<Person> displayOrder = Comparator.comparing(Person::isPinned).reversed()
+                .thenComparingInt(this.addressBook.getPersonList()::indexOf);
+        displayedPersons = FXCollections.unmodifiableObservableList(
+                new SortedList<>(filteredPersons, displayOrder));
     }
 
     public ModelManager() {
@@ -103,18 +108,11 @@ public class ModelManager implements Model {
     //=========== Filtered Person List Accessors =============================================================
 
     /**
-     * Returns an unmodifiable view of the list of {@code Person} backed by the internal list of
-     * {@code addressBook}
+     * Returns matching contacts with pinned contacts first, preserving addition order within each section.
      */
     @Override
     public ObservableList<Person> getFilteredPersonList() {
-        return sortedPersons;
-    }
-
-    @Override
-    public void sortFilteredPersonList(Comparator<Person> comparator) {
-        requireNonNull(comparator);
-        sortedPersons.setComparator(comparator);
+        return displayedPersons;
     }
 
     @Override
@@ -137,7 +135,7 @@ public class ModelManager implements Model {
 
         return addressBook.equals(otherModelManager.addressBook)
                 && userPrefs.equals(otherModelManager.userPrefs)
-                && sortedPersons.equals(otherModelManager.sortedPersons);
+                && filteredPersons.equals(otherModelManager.filteredPersons);
     }
 
     //=========== Undo ======================================================================================

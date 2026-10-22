@@ -154,6 +154,11 @@
     -fx-font-weight: bold;
 }
 
+.gitmate-window .pinned-indicator {
+    -fx-text-fill: #f2c45a;
+    -fx-padding: 0 6 0 0;
+}
+
 .gitmate-window .contact-index {
     -fx-text-fill: #9fb2c5;
 }

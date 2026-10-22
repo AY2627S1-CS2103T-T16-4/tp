@@ -61,7 +61,7 @@ public interface Model {
      */
     void setPerson(Person target, Person editedPerson);
 
-    /** Returns an unmodifiable view of the filtered person list */
+    /** Returns an unmodifiable filtered list, pinned first with addition order preserved within each section. */
     ObservableList<Person> getFilteredPersonList();
 
     /**

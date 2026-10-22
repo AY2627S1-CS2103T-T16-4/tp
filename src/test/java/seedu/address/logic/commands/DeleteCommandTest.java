@@ -5,22 +5,29 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandFailure;
 import static seedu.address.logic.commands.CommandTestUtil.assertCommandSuccess;
-import static seedu.address.logic.commands.CommandTestUtil.showPersonAtIndex;
-import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
+import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
+import static seedu.address.testutil.TypicalPersons.DANIEL;
+import static seedu.address.testutil.TypicalPersons.DANIEL_TWIN;
+import static seedu.address.testutil.TypicalPersons.JACK;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.Messages;
+import seedu.address.logic.commands.exceptions.CommandException;
+import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
+import seedu.address.model.person.ExactPersonMatchDescriptor;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
-import seedu.address.model.person.Phone;
+import seedu.address.model.person.PersonMatchesExactFieldsPredicate;
 
 /**
  * Contains integration tests (interaction with the Model) and unit tests for
@@ -29,207 +36,237 @@ import seedu.address.model.person.Phone;
 public class DeleteCommandTest {
 
     private Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+    private Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
 
     @Test
-    public void execute_validNameUnfilteredList_success() {
-        Person personToDelete = ALICE;
-        DeleteCommand deleteCommand =
-                new DeleteCommand(personToDelete.getName(), Optional.empty());
+    public void execute_nameOnlyOneMatch_success() {
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setName(ALICE.getName()));
 
-        String expectedMessage = String.format(
-                DeleteCommand.MESSAGE_DELETE_PERSON_SUCCESS,
-                personToDelete.getName(), personToDelete.getPhone());
+        assertDeleteSuccess(predicate, ALICE);
+    }
 
-        ModelManager expectedModel = new ModelManager(model.getAddressBook(), new UserPrefs());
-        expectedModel.deletePerson(personToDelete);
+    @Test
+    public void execute_phoneOnlyOneMatch_success() {
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setPhone(ALICE.getPhone()));
 
-        assertCommandSuccess(deleteCommand, model,
-                expectedMessage, expectedModel);
+        assertDeleteSuccess(predicate, ALICE);
+    }
+
+    @Test
+    public void execute_emailOnlyOneMatch_success() {
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setEmail(ALICE.getEmail()));
+
+        assertDeleteSuccess(predicate, ALICE);
+    }
+
+    @Test
+    public void execute_addressOnlyOneMatch_success() {
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setAddress(ALICE.getAddress()));
+
+        assertDeleteSuccess(predicate, ALICE);
+    }
+
+    @Test
+    public void execute_githubOnlyOneMatch_success() {
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setGithub(ALICE.getGithub()));
+
+        assertDeleteSuccess(predicate, ALICE);
+    }
+
+    @Test
+    public void execute_linkedinOnlyOneMatch_success() {
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setLinkedin(ALICE.getLinkedin()));
+
+        assertDeleteSuccess(predicate, ALICE);
+    }
+
+    @Test
+    public void execute_telegramOnlyOneMatch_success() {
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setTelegram(ALICE.getTelegram()));
+
+        assertDeleteSuccess(predicate, ALICE);
+    }
+
+    @Test
+    public void execute_multipleFlagsOneMatch_success() {
+        // ALICE, BENSON and JACK share a group, but only JACK has this tag.
+        PersonMatchesExactFieldsPredicate predicate = predicateWith(d -> {
+            d.setGroups(JACK.getGroups());
+            d.setTags(JACK.getTags());
+        });
+
+        assertDeleteSuccess(predicate, JACK);
+    }
+
+    @Test
+    public void execute_multipleTagsOneMatch_success() {
+        // Only BENSON has both "friends" and "owesMoney".
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setTags(BENSON.getTags()));
+
+        assertDeleteSuccess(predicate, BENSON);
+    }
+
+    @Test
+    public void execute_sameNameAndMatchingPhone_success() {
+        // DANIEL and DANIEL_TWIN have the same name.
+        PersonMatchesExactFieldsPredicate predicate = predicateWith(d -> {
+            d.setName(DANIEL.getName());
+            d.setPhone(DANIEL.getPhone());
+        });
+
+        assertDeleteSuccess(predicate, DANIEL);
+        assertTrue(model.hasPerson(DANIEL_TWIN));
     }
 
     @Test
     public void execute_unknownName_throwsCommandException() {
-        DeleteCommand deleteCommand =
-                new DeleteCommand(new Name("Unknown Person"), Optional.empty());
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setName(new Name("Unknown Person")));
 
-        assertCommandFailure(
-                deleteCommand, model, DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
+        assertCommandFailure(new DeleteCommand(predicate), model,
+                DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
     }
 
     @Test
-    public void execute_existingNameOutsideFilteredList_success() {
-        showPersonAtIndex(model, INDEX_FIRST_PERSON); // Shows Alice
+    public void execute_fieldsBelongingToDifferentPersons_throwsCommandException() {
+        PersonMatchesExactFieldsPredicate predicate = predicateWith(d -> {
+            d.setName(ALICE.getName());
+            d.setPhone(BENSON.getPhone());
+        });
 
-        DeleteCommand deleteCommand =
-                new DeleteCommand(BENSON.getName(), Optional.empty());
-
-        Model expectedModel =
-                new ModelManager(model.getAddressBook(), new UserPrefs());
-        expectedModel.deletePerson(BENSON);
-        showPersonAtIndex(expectedModel, INDEX_FIRST_PERSON);
-
-        String expectedMessage = String.format(
-                DeleteCommand.MESSAGE_DELETE_PERSON_SUCCESS,
-                BENSON.getName(), BENSON.getPhone());
-
-        assertCommandSuccess(deleteCommand, model,
-                expectedMessage, expectedModel);
+        assertCommandFailure(new DeleteCommand(predicate), model,
+                DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
     }
 
     @Test
-    public void execute_matchingNameAndPhone_success() {
-        DeleteCommand deleteCommand = new DeleteCommand(
-                ALICE.getName(), Optional.of(ALICE.getPhone()));
+    public void execute_partialName_throwsCommandException() {
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setName(new Name("Alice")));
 
-        String expectedMessage = String.format(
-                DeleteCommand.MESSAGE_DELETE_PERSON_SUCCESS,
-                ALICE.getName(), ALICE.getPhone());
-
-        Model expectedModel =
-                new ModelManager(model.getAddressBook(), new UserPrefs());
-        expectedModel.deletePerson(ALICE);
-
-        assertCommandSuccess(deleteCommand, model,
-                expectedMessage, expectedModel);
-    }
-
-    @Test
-    public void execute_matchingNameWrongPhone_throwsCommandException() {
-        DeleteCommand deleteCommand = new DeleteCommand(
-                ALICE.getName(), Optional.of(BENSON.getPhone()));
-
-        assertCommandFailure(
-                deleteCommand, model, DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
-    }
-
-    @Test
-    public void execute_wrongNameMatchingPhone_throwsCommandException() {
-        DeleteCommand deleteCommand = new DeleteCommand(
-                new Name("Unknown Person"), Optional.of(ALICE.getPhone()));
-
-        assertCommandFailure(
-                deleteCommand, model, DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
-    }
-
-    @Test
-    public void execute_visibleNameFilteredList_success() {
-        showPersonAtIndex(model, INDEX_FIRST_PERSON);
-
-        DeleteCommand deleteCommand =
-                new DeleteCommand(ALICE.getName(), Optional.empty());
-
-        String expectedMessage = String.format(
-                DeleteCommand.MESSAGE_DELETE_PERSON_SUCCESS,
-                ALICE.getName(), ALICE.getPhone());
-
-        Model expectedModel =
-                new ModelManager(model.getAddressBook(), new UserPrefs());
-        expectedModel.deletePerson(ALICE);
-        showNoPerson(expectedModel);
-
-        assertCommandSuccess(deleteCommand, model,
-                expectedMessage, expectedModel);
+        assertCommandFailure(new DeleteCommand(predicate), model,
+                DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
     }
 
     @Test
     public void execute_emptyAddressBook_throwsCommandException() {
         Model emptyModel = new ModelManager();
-        DeleteCommand deleteCommand =
-                new DeleteCommand(ALICE.getName(), Optional.empty());
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setName(ALICE.getName()));
 
-        assertCommandFailure(
-                deleteCommand, emptyModel, DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
+        assertCommandFailure(new DeleteCommand(predicate), emptyModel,
+                DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
     }
 
     @Test
-    public void execute_partialName_throwsCommandException() {
-        DeleteCommand deleteCommand =
-                new DeleteCommand(new Name("Alice"), Optional.empty());
+    public void execute_multipleMatches_showsMatchesWithoutDeleting() {
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setGroups(ALICE.getGroups()));
 
-        assertCommandFailure(
-                deleteCommand, model, DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
+        assertAmbiguousFailure(predicate, List.of(ALICE, BENSON, JACK));
     }
 
     @Test
-    public void execute_differentNameCase_success() {
-        DeleteCommand deleteCommand =
-                new DeleteCommand(new Name("alice pauline"), Optional.empty());
+    public void execute_sameNameMultipleMatches_showsBothWithoutDeleting() {
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setName(DANIEL.getName()));
 
-        String expectedMessage = String.format(
-                DeleteCommand.MESSAGE_DELETE_PERSON_SUCCESS,
-                ALICE.getName(), ALICE.getPhone());
-
-        Model expectedModel =
-                new ModelManager(model.getAddressBook(), new UserPrefs());
-        expectedModel.deletePerson(ALICE);
-
-        assertCommandSuccess(deleteCommand, model,
-                expectedMessage, expectedModel);
+        assertAmbiguousFailure(predicate, List.of(DANIEL, DANIEL_TWIN));
     }
 
     @Test
     public void equals() {
-        DeleteCommand deleteFirstCommand =
-                new DeleteCommand(ALICE.getName(), Optional.empty());
-        DeleteCommand deleteSecondCommand =
-                new DeleteCommand(BENSON.getName(), Optional.empty());
+        PersonMatchesExactFieldsPredicate firstPredicate =
+                predicateWith(d -> d.setName(ALICE.getName()));
+        PersonMatchesExactFieldsPredicate samePredicate =
+                predicateWith(d -> d.setName(ALICE.getName()));
+        PersonMatchesExactFieldsPredicate secondPredicate =
+                predicateWith(d -> d.setName(BENSON.getName()));
 
-        // same object -> returns true
-        assertTrue(deleteFirstCommand.equals(deleteFirstCommand));
+        DeleteCommand firstCommand = new DeleteCommand(firstPredicate);
 
-        // same values -> returns true
-        DeleteCommand deleteFirstCommandCopy =
-                new DeleteCommand(ALICE.getName(), Optional.empty());
-        assertTrue(deleteFirstCommand.equals(deleteFirstCommandCopy));
+        assertTrue(firstCommand.equals(firstCommand));
+        assertTrue(firstCommand.equals(new DeleteCommand(samePredicate)));
+        assertFalse(firstCommand.equals(null));
+        assertFalse(firstCommand.equals(1));
+        assertFalse(firstCommand.equals(new DeleteCommand(secondPredicate)));
 
-        // different types -> returns false
-        assertFalse(deleteFirstCommand.equals(1));
+        PersonMatchesExactFieldsPredicate additionalFieldPredicate =
+                predicateWith(d -> {
+                    d.setName(ALICE.getName());
+                    d.setPhone(ALICE.getPhone());
+                });
 
-        // null -> returns false
-        assertFalse(deleteFirstCommand.equals(null));
+        assertFalse(firstCommand.equals(
+                new DeleteCommand(additionalFieldPredicate)));
+    }
+    @Test
+    public void isUndoable_returnsTrue() {
+        DeleteCommand command = new DeleteCommand(
+                predicateWith(d -> d.setName(ALICE.getName())));
 
-        // different person -> returns false
-        assertFalse(deleteFirstCommand.equals(deleteSecondCommand));
-
-        DeleteCommand withPhone = new DeleteCommand(
-                ALICE.getName(), Optional.of(ALICE.getPhone()));
-
-        // Same name and phone
-        assertTrue(withPhone.equals(new DeleteCommand(
-                ALICE.getName(), Optional.of(ALICE.getPhone()))));
-
-        // Same name, phone omitted
-        assertFalse(withPhone.equals(new DeleteCommand(
-                ALICE.getName(), Optional.empty())));
-
-        // Same name, different phone
-        assertFalse(withPhone.equals(new DeleteCommand(
-                ALICE.getName(), Optional.of(BENSON.getPhone()))));
-
-        // Different name, same phone
-        assertFalse(withPhone.equals(new DeleteCommand(
-                BENSON.getName(), Optional.of(ALICE.getPhone()))));
+        assertTrue(command.isUndoable());
     }
 
     @Test
     public void toStringMethod() {
-        Name targetName = ALICE.getName();
-        Optional<Phone> targetPhone = Optional.of(ALICE.getPhone());
-        DeleteCommand deleteCommand = new DeleteCommand(targetName, targetPhone);
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setName(ALICE.getName()));
+        DeleteCommand command = new DeleteCommand(predicate);
 
         String expected = DeleteCommand.class.getCanonicalName()
-                + "{targetName=" + targetName
-                + ", targetPhone=" + targetPhone + "}";
+                + "{predicate=" + predicate + "}";
 
-        assertEquals(expected, deleteCommand.toString());
+        assertEquals(expected, command.toString());
     }
 
     /**
-     * Updates {@code model}'s filtered list to show no one.
+     * Asserts that exactly the expected person is deleted and the success
+     * message uses the shared person formatter.
      */
-    private void showNoPerson(Model model) {
-        model.updateFilteredPersonList(p -> false);
+    private void assertDeleteSuccess(
+            PersonMatchesExactFieldsPredicate predicate, Person personToDelete) {
+        DeleteCommand command = new DeleteCommand(predicate);
+        expectedModel.deletePerson(personToDelete);
 
-        assertTrue(model.getFilteredPersonList().isEmpty());
+        String expectedMessage = String.format(
+                DeleteCommand.MESSAGE_DELETE_PERSON_SUCCESS,
+                Messages.format(personToDelete));
+
+        assertCommandSuccess(command, model, expectedMessage, expectedModel);
+        assertFalse(model.hasPerson(personToDelete));
+    }
+
+    /**
+     * Asserts that an ambiguous deletion displays the matches and leaves
+     * the address book unchanged.
+     */
+    private void assertAmbiguousFailure(
+            PersonMatchesExactFieldsPredicate predicate, List<Person> expectedPersons) {
+        AddressBook originalAddressBook = new AddressBook(model.getAddressBook());
+        DeleteCommand command = new DeleteCommand(predicate);
+
+        assertThrows(CommandException.class,
+                DeleteCommand.MESSAGE_AMBIGUOUS_PERSON, () -> command.execute(model));
+
+        assertEquals(originalAddressBook, model.getAddressBook());
+        assertEquals(expectedPersons, model.getFilteredPersonList());
+    }
+
+    /**
+     * Builds an exact-match predicate using the same pattern as FindCommandTest.
+     */
+    private static PersonMatchesExactFieldsPredicate predicateWith(
+            Consumer<ExactPersonMatchDescriptor> setup) {
+        ExactPersonMatchDescriptor descriptor = new ExactPersonMatchDescriptor();
+        setup.accept(descriptor);
+        return new PersonMatchesExactFieldsPredicate(descriptor);
     }
 }
