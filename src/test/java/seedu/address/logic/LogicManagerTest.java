@@ -8,10 +8,14 @@ import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.GITHUB_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.GROUP_DESC_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.GROUP_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.LINKEDIN_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
+import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.TELEGRAM_DESC_AMY;
+import static seedu.address.logic.commands.EditCommand.EDIT_SEPARATOR;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.AMY;
 
@@ -25,9 +29,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import seedu.address.logic.commands.AddCommand;
+import seedu.address.logic.commands.ClearCommand;
 import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteCommand;
+import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.ExitCommand;
+import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.UndoCommand;
@@ -84,13 +91,20 @@ public class LogicManagerTest {
 
     @Test
     public void execute_contactCommands_requestsSelectionReset() throws Exception {
-        List<String> contactCommands = List.of("add n/Bob p/92345678", "edit 1 n/Alicia", "delete n/Alice",
-                "clear", "find n/Alice", "find g/Missing", "list");
+        List<String> contactCommands = List.of(
+                AddCommand.COMMAND_WORD + NAME_DESC_BOB + PHONE_DESC_BOB,
+                EditCommand.COMMAND_WORD + NAME_DESC_AMY
+                        + " " + EDIT_SEPARATOR + NAME_DESC_BOB,
+                DeleteCommand.COMMAND_WORD + NAME_DESC_AMY,
+                ClearCommand.COMMAND_WORD,
+                FindCommand.COMMAND_WORD + NAME_DESC_AMY,
+                FindCommand.COMMAND_WORD + GROUP_DESC_BOB,
+                ListCommand.COMMAND_WORD);
 
         for (String command : contactCommands) {
             model.setAddressBook(new AddressBook());
             model.updateFilteredPersonList(Model.PREDICATE_SHOW_ALL_PERSONS);
-            model.addPerson(new PersonBuilder().withName("Alice").withPhone("91234567").build());
+            model.addPerson(AMY);
 
             CommandResult result = logic.execute(command);
 
