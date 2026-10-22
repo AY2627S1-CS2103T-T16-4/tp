@@ -1,5 +1,6 @@
 package seedu.address.model;
 
+import java.util.Comparator;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
@@ -60,7 +61,7 @@ public interface Model {
      */
     void setPerson(Person target, Person editedPerson);
 
-    /** Returns an unmodifiable filtered list, pinned first with addition order preserved within each section. */
+    /** Returns an unmodifiable filtered list, pinned first and sorted within each section. */
     ObservableList<Person> getFilteredPersonList();
 
     /**
@@ -68,6 +69,9 @@ public interface Model {
      * @throws NullPointerException if {@code predicate} is null.
      */
     void updateFilteredPersonList(Predicate<Person> predicate);
+
+    /** Sorts the visible list without changing its filter or the stored contact order. */
+    void sortFilteredPersonList(Comparator<Person> comparator);
 
     /**
      * Saves the given address book state for a future undo operation.
