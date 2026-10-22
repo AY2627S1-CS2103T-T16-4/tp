@@ -16,6 +16,7 @@ import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.TELEGRAM_DESC_AMY;
 import static seedu.address.logic.commands.EditCommand.EDIT_SEPARATOR;
+import static seedu.address.logic.commands.SortCommand.DIRECTION_DESCENDING;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.AMY;
 
@@ -37,6 +38,7 @@ import seedu.address.logic.commands.ExitCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
+import seedu.address.logic.commands.SortCommand;
 import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -44,6 +46,7 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.ReadOnlyAddressBook;
+import seedu.address.model.SortSettings.Field;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.Person;
 import seedu.address.storage.JsonAddressBookStorage;
@@ -100,8 +103,8 @@ public class LogicManagerTest {
                 FindCommand.COMMAND_WORD + NAME_DESC_AMY,
                 FindCommand.COMMAND_WORD + GROUP_DESC_BOB,
                 ListCommand.COMMAND_WORD,
-                "sort name",
-                "sort group desc");
+                SortCommand.COMMAND_WORD + " " + Field.NAME.getKeyword(),
+                SortCommand.COMMAND_WORD + " " + Field.GROUP.getKeyword() + " " + DIRECTION_DESCENDING);
 
         for (String command : contactCommands) {
             model.setAddressBook(new AddressBook());

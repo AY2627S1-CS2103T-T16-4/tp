@@ -1,31 +1,50 @@
 package seedu.address.logic.parser;
 
+import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.commands.SortCommand.DIRECTION_ASCENDING;
+import static seedu.address.logic.commands.SortCommand.DIRECTION_DESCENDING;
 
 import seedu.address.logic.commands.SortCommand;
-import seedu.address.logic.commands.SortCommand.Field;
 import seedu.address.logic.parser.exceptions.ParseException;
+import seedu.address.model.SortSettings.Field;
 
-/** Parses the field and optional direction for a sort command. */
+/** Parses the field, optional direction, and optional persistence mode. */
 public class SortCommandParser implements Parser<SortCommand> {
     @Override
     public SortCommand parse(String args) throws ParseException {
+        requireNonNull(args);
         String[] words = args.trim().split("\\s+");
-        if (words.length > 2 || !isValidField(words[0])) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE));
+        if (words.length > 3) {
+            throw invalidFormat();
         }
-        if (words.length == 2 && !isValidDirection(words[1])) {
-            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE));
+        Field field = Field.fromKeyword(words[0]).orElseThrow(SortCommandParser::invalidFormat);
+        boolean isDescending = false;
+        boolean isContinuous = false;
+        int nextWord = 1;
+        if (nextWord < words.length && isValidDirection(words[nextWord])) {
+            isDescending = words[nextWord].equals(DIRECTION_DESCENDING);
+            nextWord++;
         }
-        return new SortCommand(words[0].equals("name") ? Field.NAME : Field.GROUP,
-                words.length == 2 && words[1].equals("desc"));
-    }
-
-    private static boolean isValidField(String field) {
-        return field.equals("name") || field.equals("group");
+        if (nextWord < words.length) {
+            isContinuous = switch (words[nextWord]) {
+                case "cont" -> true;
+                case "none" -> false;
+                default -> throw invalidFormat();
+            };
+            nextWord++;
+        }
+        if (nextWord != words.length) {
+            throw invalidFormat();
+        }
+        return new SortCommand(field, isDescending, isContinuous);
     }
 
     private static boolean isValidDirection(String direction) {
-        return direction.equals("asc") || direction.equals("desc");
+        return direction.equals(DIRECTION_ASCENDING) || direction.equals(DIRECTION_DESCENDING);
+    }
+
+    private static ParseException invalidFormat() {
+        return new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE));
     }
 }

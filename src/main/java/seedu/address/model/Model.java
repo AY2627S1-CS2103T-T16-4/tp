@@ -1,6 +1,5 @@
 package seedu.address.model;
 
-import java.util.Comparator;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
@@ -70,8 +69,11 @@ public interface Model {
      */
     void updateFilteredPersonList(Predicate<Person> predicate);
 
-    /** Sorts the visible list without changing its filter or the stored contact order. */
-    void sortFilteredPersonList(Comparator<Person> comparator);
+    /**
+     * Sorts the view without changing its filter or stored order.
+     * Saves the startup preference when continuous, otherwise clears it.
+     */
+    void sortFilteredPersonList(SortSettings settings, boolean isContinuous);
 
     /**
      * Saves the given address book state for a future undo operation.

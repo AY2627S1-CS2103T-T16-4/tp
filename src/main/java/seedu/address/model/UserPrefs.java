@@ -12,6 +12,7 @@ import seedu.address.commons.core.GuiSettings;
 public class UserPrefs implements ReadOnlyUserPrefs {
 
     private GuiSettings guiSettings = new GuiSettings();
+    private SortSettings savedSortSettings;
 
     /**
      * Creates a {@code UserPrefs} with default values.
@@ -24,6 +25,7 @@ public class UserPrefs implements ReadOnlyUserPrefs {
     public UserPrefs(ReadOnlyUserPrefs userPrefs) {
         requireNonNull(userPrefs);
         setGuiSettings(userPrefs.getGuiSettings());
+        setSavedSortSettings(userPrefs.getSavedSortSettings());
     }
 
     public GuiSettings getGuiSettings() {
@@ -33,6 +35,16 @@ public class UserPrefs implements ReadOnlyUserPrefs {
     public void setGuiSettings(GuiSettings guiSettings) {
         requireNonNull(guiSettings);
         this.guiSettings = guiSettings;
+    }
+
+    @Override
+    public SortSettings getSavedSortSettings() {
+        return savedSortSettings;
+    }
+
+    /** Sets the startup sort preference; null disables restoration. */
+    public void setSavedSortSettings(SortSettings savedSortSettings) {
+        this.savedSortSettings = savedSortSettings;
     }
 
     @Override
@@ -46,17 +58,18 @@ public class UserPrefs implements ReadOnlyUserPrefs {
             return false;
         }
 
-        return guiSettings.equals(otherUserPrefs.guiSettings);
+        return guiSettings.equals(otherUserPrefs.guiSettings)
+                && Objects.equals(savedSortSettings, otherUserPrefs.savedSortSettings);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(guiSettings);
+        return Objects.hash(guiSettings, savedSortSettings);
     }
 
     @Override
     public String toString() {
-        return "Gui Settings : " + guiSettings;
+        return "Gui Settings : " + guiSettings + ", Saved Sort Settings : " + savedSortSettings;
     }
 
 }

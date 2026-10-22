@@ -15,11 +15,12 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import javafx.collections.ObservableList;
-import seedu.address.logic.commands.SortCommand.Field;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
+import seedu.address.model.SortSettings;
+import seedu.address.model.SortSettings.Field;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.PersonBuilder;
 
@@ -38,7 +39,8 @@ public class SortCommandTest {
         addContacts();
         ObservableList<Person> view = model.getFilteredPersonList();
         CommandResult result = new SortCommand(Field.NAME, false).execute(model);
-        assertEquals("Sorted contacts by name (ascending).", result.getFeedbackToUser());
+        assertEquals("Sorted contacts by name (ascending)." + SortCommand.MESSAGE_SESSION_ONLY,
+                result.getFeedbackToUser());
         assertEquals(List.of(ALICE, BENSON, CARL, DANIEL), view);
         assertEquals(List.of(DANIEL, CARL, BENSON, ALICE), model.getAddressBook().getPersonList());
         new SortCommand(Field.NAME, true).execute(model);
@@ -162,14 +164,69 @@ public class SortCommandTest {
     }
 
     @Test
-    public void equalsAndNulls() {
+    public void execute_tag_handlesMultipleTagsCaseTiesAndMissingTags() throws Exception {
+        Person alice = new PersonBuilder(ALICE).withTags("zulu", "Alpha").build();
+        Person benson = new PersonBuilder(BENSON).withTags("alpha").build();
+        Person carl = new PersonBuilder(CARL).withTags("beta").build();
+        Person daniel = new PersonBuilder(DANIEL).withTags().build();
+        model.addPerson(daniel);
+        model.addPerson(carl);
+        model.addPerson(benson);
+        model.addPerson(alice);
+        AddressBookParser parser = new AddressBookParser();
+
+        parser.parseCommand("sort tag asc").execute(model);
+        assertEquals(List.of(alice, benson, carl, daniel), model.getFilteredPersonList());
+        CommandResult result = parser.parseCommand("sort tag desc cont").execute(model);
+        assertEquals("Sorted contacts by tag (descending)." + SortCommand.MESSAGE_PERSISTENT,
+                result.getFeedbackToUser());
+        assertEquals(List.of(carl, alice, benson, daniel), model.getFilteredPersonList());
+        assertEquals(new SortSettings(Field.TAG, true), model.getUserPrefs().getSavedSortSettings());
+
+        // A tag replacement moves the contact without another sort command.
+        Person editedAlice = new PersonBuilder(alice).withTags("omega").build();
+        model.setPerson(alice, editedAlice);
+        assertEquals(List.of(editedAlice, carl, benson, daniel), model.getFilteredPersonList());
+        Person pinnedDaniel = new Person(daniel, true);
+        model.setPerson(daniel, pinnedDaniel);
+        assertEquals(List.of(pinnedDaniel, editedAlice, carl, benson), model.getFilteredPersonList());
+        model.updateFilteredPersonList(person -> !person.equals(carl));
+        parser.parseCommand("sort tag asc cont").execute(model);
+        assertEquals(List.of(pinnedDaniel, benson, editedAlice), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_sessionOnlySort_addStillReorders() {
+        model.addPerson(DANIEL);
+        model.addPerson(BENSON);
+        new SortCommand(Field.NAME, false).execute(model);
+        model.addPerson(ALICE);
+        assertEquals(List.of(ALICE, BENSON, DANIEL), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void equals() {
         SortCommand command = new SortCommand(Field.NAME, false);
         assertEquals(command, new SortCommand(Field.NAME, false));
         assertNotEquals(command, new SortCommand(Field.NAME, true));
         assertNotEquals(command, new SortCommand(Field.GROUP, false));
+        assertNotEquals(command, new SortCommand(Field.NAME, false, true));
         assertNotEquals(command, null);
+        assertEquals(command.hashCode(), new SortCommand(Field.NAME, false).hashCode());
+    }
+
+    @Test
+    public void constructor_nullField_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new SortCommand(null, false));
-        assertThrows(NullPointerException.class, () -> command.execute(null));
-        assertThrows(NullPointerException.class, () -> model.sortFilteredPersonList(null));
+    }
+
+    @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new SortCommand(Field.NAME, false).execute(null));
+    }
+
+    @Test
+    public void sortFilteredPersonList_nullSettings_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> model.sortFilteredPersonList(null, false));
     }
 }
