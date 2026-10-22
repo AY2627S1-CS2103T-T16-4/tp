@@ -451,8 +451,8 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **MSS**
 
 1. User requests to pin a contact, supplying details that identify it uniquely.
-1. GM pins the contact and displays it above unpinned contacts whenever it is included in the current view.
-1. GM displays a confirmation message.
+2. GM pins the contact and displays it above unpinned contacts whenever it is included in the current view.
+3. GM displays a confirmation message.
 
    Use case ends.
 
@@ -478,6 +478,28 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     * 1d1. GM informs the user that the contact is already pinned.
     * Use case ends.
+
+**System:** GitMate (GM)  
+**Use case:** U7. Sort Address Book
+**Actor:** User  
+**Precondition:** GM is running and ready to receive commands
+
+**MSS**
+
+1.  User enters sort command with sorting details.
+2.  GM reorganises current contacts according to details.
+3.  GM repeats to user details to confirm sort.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an unsupported field
+
+    * 1a1. GM displays an error explaining the accepted input.
+    * Use case ends.
+
+
 
 ### Non-Functional Requirements
 
