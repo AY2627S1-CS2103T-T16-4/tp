@@ -8,7 +8,6 @@ import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -21,6 +20,7 @@ import seedu.address.model.AddressBook;
 import seedu.address.model.Model;
 import seedu.address.model.ReadOnlyAddressBook;
 import seedu.address.model.ReadOnlyUserPrefs;
+import seedu.address.model.SortSettings;
 import seedu.address.model.person.Person;
 import seedu.address.testutil.PersonBuilder;
 
@@ -106,7 +106,7 @@ public class AddCommandTest {
      */
     private class ModelStub implements Model {
         @Override
-        public void sortFilteredPersonList(Comparator<Person> comparator) {
+        public void sortFilteredPersonList(SortSettings settings, boolean isContinuous) {
             throw new AssertionError("This method should not be called.");
         }
 

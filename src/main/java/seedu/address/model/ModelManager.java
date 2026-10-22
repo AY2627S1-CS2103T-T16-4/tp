@@ -47,6 +47,10 @@ public class ModelManager implements Model {
                 .thenComparingInt(this.addressBook.getPersonList()::indexOf);
         sortedPersons = new SortedList<>(filteredPersons, displayOrder);
         displayedPersons = FXCollections.unmodifiableObservableList(sortedPersons);
+        SortSettings savedSortSettings = this.userPrefs.getSavedSortSettings();
+        if (savedSortSettings != null) {
+            applySortSettings(savedSortSettings);
+        }
     }
 
     public ModelManager() {
@@ -118,10 +122,16 @@ public class ModelManager implements Model {
     }
 
     @Override
-    public void sortFilteredPersonList(Comparator<Person> comparator) {
-        requireNonNull(comparator);
+    public void sortFilteredPersonList(SortSettings settings, boolean isContinuous) {
+        requireNonNull(settings);
+        applySortSettings(settings);
+        userPrefs.setSavedSortSettings(isContinuous ? settings : null);
+    }
+
+    /** Applies the field order while retaining pin priority and stable tie-breaking. */
+    private void applySortSettings(SortSettings settings) {
         sortedPersons.setComparator(Comparator.comparing(Person::isPinned).reversed()
-                .thenComparing(comparator)
+                .thenComparing(settings.createComparator())
                 .thenComparingInt(addressBook.getPersonList()::indexOf));
     }
 

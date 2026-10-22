@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.commands.SortCommand;
-import seedu.address.logic.commands.SortCommand.Field;
+import seedu.address.model.SortSettings.Field;
 
 public class SortCommandParserTest {
     private final SortCommandParser parser = new SortCommandParser();
@@ -28,8 +28,24 @@ public class SortCommandParserTest {
     }
 
     @Test
+    public void parse_sortModes_success() throws Exception {
+        for (Field field : Field.values()) {
+            String keyword = field.getKeyword();
+            assertParseSuccess(parser, keyword, new SortCommand(field, false));
+            assertParseSuccess(parser, keyword + " cont", new SortCommand(field, false, true));
+            assertParseSuccess(parser, keyword + " none", new SortCommand(field, false, false));
+            assertParseSuccess(parser, keyword + " asc cont", new SortCommand(field, false, true));
+            assertParseSuccess(parser, keyword + " desc cont", new SortCommand(field, true, true));
+            assertParseSuccess(parser, keyword + " desc none", new SortCommand(field, true, false));
+        }
+        assertEquals(new SortCommand(Field.TAG, true, true),
+                new AddressBookParser().parseCommand("sort tag desc cont"));
+    }
+
+    @Test
     public void parse_invalidArguments_failure() {
-        for (String args : List.of("", " ", "phone", "asc", "name ascending", "group down", "name asc extra")) {
+        for (String args : List.of("", " ", "phone", "asc", "name ascending", "group down", "name asc extra",
+                "name cont desc", "tag desc cont extra", "tag cont cont", "name asc desc", "TAG", "tag CONT")) {
             assertParseFailure(parser, args, String.format(MESSAGE_INVALID_COMMAND_FORMAT, SortCommand.MESSAGE_USAGE));
         }
     }
