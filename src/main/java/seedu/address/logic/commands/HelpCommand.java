@@ -20,6 +20,8 @@ public class HelpCommand extends Command {
             SortCommand.MESSAGE_USAGE,
             "list: Shows all contacts.\nExample: list",
             "clear: Deletes all contacts.\nExample: clear",
+            PinCommand.MESSAGE_USAGE,
+            SortCommand.MESSAGE_USAGE,
             UndoCommand.MESSAGE_USAGE,
             MESSAGE_USAGE,
             "exit: Closes the application.\nExample: exit");

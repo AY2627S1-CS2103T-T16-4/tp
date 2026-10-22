@@ -79,17 +79,17 @@ public class EditPersonDescriptorTest {
 
     @Test
     public void toStringMethod() {
-        EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
+        EditPersonDescriptor descriptor = DESC_AMY;
         String expected = EditPersonDescriptor.class.getCanonicalName() + "{name="
-                + editPersonDescriptor.getName().orElse(null) + ", phone="
-                + editPersonDescriptor.getPhone().orElse(null) + ", email="
-                + editPersonDescriptor.getEmail().orElse(null) + ", address="
-                + editPersonDescriptor.getAddress().orElse(null) + ", groups="
-                + editPersonDescriptor.getGroups().orElse(null) + ", github="
-                + editPersonDescriptor.getGithub().orElse(null) + ", linkedin="
-                + editPersonDescriptor.getLinkedin().orElse(null) + ", telegram="
-                + editPersonDescriptor.getTelegram().orElse(null) + ", tags="
-                + editPersonDescriptor.getTags().orElse(null) + "}";
-        assertEquals(expected, editPersonDescriptor.toString());
+                + descriptor.getName().orElse(null) + ", phone="
+                + descriptor.getPhone().orElse(null) + ", email="
+                + descriptor.getEmail().orElse(null) + ", address="
+                + descriptor.getAddress().orElse(null) + ", github="
+                + descriptor.getGithub().orElse(null) + ", linkedin="
+                + descriptor.getLinkedin().orElse(null) + ", telegram="
+                + descriptor.getTelegram().orElse(null) + ", groups="
+                + descriptor.getGroups().orElse(null) + ", tags="
+                + descriptor.getTags().orElse(null) + "}";
+        assertEquals(expected, descriptor.toString());
     }
 }

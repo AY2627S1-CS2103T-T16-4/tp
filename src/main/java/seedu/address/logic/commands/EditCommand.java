@@ -1,24 +1,13 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_GITHUB;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_GROUP;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_LINKEDIN;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.CollectionUtil;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
@@ -31,64 +20,84 @@ import seedu.address.model.person.Group;
 import seedu.address.model.person.Linkedin;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.PersonMatchesExactFieldsPredicate;
 import seedu.address.model.person.Phone;
 import seedu.address.model.person.Telegram;
 import seedu.address.model.tag.Tag;
 
 /**
- * Edits the details of an existing person in the address book.
+ * Edits the unique contact matching the supplied exact field criteria.
  */
 public class EditCommand extends Command {
 
     public static final String COMMAND_WORD = "edit";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Edits the details of the person identified "
-            + "by the index number used in the displayed person list. "
-            + "Existing values will be overwritten by the input values.\n"
-            + "Parameters: INDEX (must be a positive integer) "
-            + "[" + PREFIX_NAME + "NAME] "
-            + "[" + PREFIX_PHONE + "PHONE] "
-            + "[" + PREFIX_ADDRESS + "ADDRESS] "
-            + "[" + PREFIX_EMAIL + "EMAIL] "
-            + "[" + PREFIX_GITHUB + "GITHUB] "
-            + "[" + PREFIX_LINKEDIN + "LINKEDIN] "
-            + "[" + PREFIX_TELEGRAM + "TELEGRAM] "
-            + "[" + PREFIX_GROUP + "GROUP] "
-            + "[" + PREFIX_TAG + "TAG]...\n"
-            + "Example: " + COMMAND_WORD + " 1 "
-            + PREFIX_PHONE + "91234567 "
-            + PREFIX_EMAIL + "johndoe@example.com";
+    public static final String EDIT_SEPARATOR = ">>";
 
-    public static final String MESSAGE_EDIT_PERSON_SUCCESS = "Edited person: %1$s";
-    public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
+    public static final String MESSAGE_USAGE = COMMAND_WORD
+            + ": Edits exactly one contact matching all supplied search values.\n"
+            + "Format: edit SEARCH_FLAGS "
+            + EDIT_SEPARATOR
+            + " UPDATE_FLAGS\n"
+            + PersonTarget.MESSAGE_PARAMETERS
+            + "Use the supported prefixes on either side of "
+            + EDIT_SEPARATOR
+            + ".\n"
+            + "Provide at least one search flag and one update flag.\n"
+            + "Search flags require nonempty values.\n"
+            + "Name and phone cannot be cleared.\n"
+            + "An empty update value clears an optional field.\n"
+            + "Tag and group values toggle membership; t/ and g/ clear all.\n"
+            + "Example: edit n/charlotte "
+            + EDIT_SEPARATOR
+            + " n/charlotte tan t/tag1 t/tag2 g/grp1 g/grp2";
+
+    public static final String MESSAGE_PERSON_NOT_FOUND =
+            PersonTarget.MESSAGE_PERSON_NOT_FOUND;
+
+    public static final String MESSAGE_AMBIGUOUS_PERSON =
+            String.format(PersonTarget.MESSAGE_AMBIGUOUS_PERSON, "edited");
+
+    public static final String MESSAGE_EMPTY_FLAG_VALUE =
+            "Please provide a value for %1$s to identify the contact to edit.";
+
+    public static final String MESSAGE_CANNOT_CLEAR_REQUIRED_FIELD =
+            "Please provide a value for %1$s. Name and phone cannot be cleared.";
+
+    public static final String MESSAGE_EDIT_PERSON_SUCCESS =
+            "Edited person: %1$s";
+
+    public static final String MESSAGE_NOT_EDITED =
+            "At least one field to edit must be provided after >>.";
+
     public static final String MESSAGE_DUPLICATE_PERSON =
             "This person already exists in the address book. No duplicate phone numbers!";
 
-    private final Index index;
+    public static final String MESSAGE_MIXED_CLEAR_AND_TOGGLE =
+            "Use %1$s alone to clear the field or provide only nonempty values to toggle.";
+
+    private final PersonTarget target;
     private final EditPersonDescriptor editPersonDescriptor;
 
     /**
-     * @param index of the person in the filtered person list to edit
-     * @param editPersonDescriptor details to edit the person with
+     * Creates a command that edits the unique contact satisfying {@code predicate}.
+     *
+     * @param predicate Exact field criteria used to identify the contact to edit.
+     * @param editPersonDescriptor Updates to apply to the matching contact.
      */
-    public EditCommand(Index index, EditPersonDescriptor editPersonDescriptor) {
-        requireNonNull(index);
-        requireNonNull(editPersonDescriptor);
-
-        this.index = index;
-        this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
+    public EditCommand(
+            PersonMatchesExactFieldsPredicate predicate,
+            EditPersonDescriptor editPersonDescriptor) {
+        this.target = new PersonTarget(predicate);
+        this.editPersonDescriptor = new EditPersonDescriptor(requireNonNull(editPersonDescriptor));
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
-        List<Person> lastShownList = model.getFilteredPersonList();
 
-        if (index.getZeroBased() >= lastShownList.size()) {
-            throw new CommandException(Messages.MESSAGE_INVALID_PERSON_DISPLAYED_INDEX);
-        }
+        Person personToEdit = target.resolve(model, MESSAGE_PERSON_NOT_FOUND, MESSAGE_AMBIGUOUS_PERSON);
 
-        Person personToEdit = lastShownList.get(index.getZeroBased());
         Person editedPerson = createEditedPerson(personToEdit, editPersonDescriptor);
 
         if (!personToEdit.isSamePerson(editedPerson) && model.hasPerson(editedPerson)) {
@@ -96,29 +105,75 @@ public class EditCommand extends Command {
         }
 
         model.setPerson(personToEdit, editedPerson);
-        return new CommandResult(String.format(MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson)));
+
+        return new CommandResult(
+                String.format(MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson)));
     }
 
     /**
-     * Creates and returns a {@code Person} with the details of {@code personToEdit}
-     * edited with {@code editPersonDescriptor}.
+     * Creates an updated contact, preserving unspecified fields and pin state.
+     *
+     * @param personToEdit Contact whose current values provide the defaults.
+     * @param descriptor Field replacements and membership updates to apply.
      */
     private static Person createEditedPerson(
-            Person personToEdit, EditPersonDescriptor editPersonDescriptor) {
-        assert personToEdit != null;
+            Person personToEdit, EditPersonDescriptor descriptor) {
+        requireNonNull(personToEdit);
 
-        Name updatedName = editPersonDescriptor.getName().orElse(personToEdit.getName());
-        Phone updatedPhone = editPersonDescriptor.getPhone().orElse(personToEdit.getPhone());
-        Email updatedEmail = editPersonDescriptor.getEmail().orElse(personToEdit.getEmail());
-        Address updatedAddress = editPersonDescriptor.getAddress().orElse(personToEdit.getAddress());
-        Set<Group> updatedGroups = editPersonDescriptor.getGroups().orElse(personToEdit.getGroups());
-        Github updatedGithub = editPersonDescriptor.getGithub().orElse(personToEdit.getGithub());
-        Linkedin updatedLinkedin = editPersonDescriptor.getLinkedin().orElse(personToEdit.getLinkedin());
-        Telegram updatedTelegram = editPersonDescriptor.getTelegram().orElse(personToEdit.getTelegram());
-        Set<Tag> updatedTags = editPersonDescriptor.getTags().orElse(personToEdit.getTags());
+        Name updatedName = descriptor.getName().orElse(personToEdit.getName());
+        Phone updatedPhone = descriptor.getPhone().orElse(personToEdit.getPhone());
+        Email updatedEmail = descriptor.getEmail().orElse(personToEdit.getEmail());
+        Address updatedAddress = descriptor.getAddress().orElse(personToEdit.getAddress());
+        Github updatedGithub = descriptor.getGithub().orElse(personToEdit.getGithub());
+        Linkedin updatedLinkedin = descriptor.getLinkedin().orElse(personToEdit.getLinkedin());
+        Telegram updatedTelegram = descriptor.getTelegram().orElse(personToEdit.getTelegram());
 
-        return new Person(updatedName, updatedPhone, updatedEmail, updatedAddress,
-                updatedGroups, updatedGithub, updatedLinkedin, updatedTelegram, updatedTags, personToEdit.isPinned());
+        Set<Group> updatedGroups = applySetEdit(personToEdit.getGroups(), descriptor.getGroups());
+        Set<Tag> updatedTags = applySetEdit(personToEdit.getTags(), descriptor.getTags());
+
+        return new Person(
+                updatedName,
+                updatedPhone,
+                updatedEmail,
+                updatedAddress,
+                updatedGroups,
+                updatedGithub,
+                updatedLinkedin,
+                updatedTelegram,
+                updatedTags,
+                personToEdit.isPinned());
+    }
+
+    /**
+     * Returns a copy of the current set with the requested membership updates applied.
+     * An absent update preserves the set; a present but empty set clears it.
+     * Otherwise, each supplied value toggles membership once.
+     *
+     * @param <T> Type of element in the set.
+     * @param current Existing set whose contents are copied before editing.
+     * @param update Optional set of values to toggle, or an empty set to clear all values.
+     */
+    private static <T> Set<T> applySetEdit(
+            Set<T> current, Optional<Set<T>> update) {
+        Set<T> result = new HashSet<>(current);
+
+        if (update.isEmpty()) {
+            return result;
+        }
+
+        Set<T> values = update.get();
+        if (values.isEmpty()) {
+            result.clear();
+            return result;
+        }
+
+        for (T value : values) {
+            if (!result.remove(value)) {
+                result.add(value);
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -127,12 +182,11 @@ public class EditCommand extends Command {
             return true;
         }
 
-        // instanceof handles nulls
         if (!(other instanceof EditCommand otherEditCommand)) {
             return false;
         }
 
-        return index.equals(otherEditCommand.index)
+        return target.equals(otherEditCommand.target)
                 && editPersonDescriptor.equals(otherEditCommand.editPersonDescriptor);
     }
 
@@ -144,15 +198,16 @@ public class EditCommand extends Command {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .add("index", index)
+                .add("predicate", target.predicate())
                 .add("editPersonDescriptor", editPersonDescriptor)
                 .toString();
     }
 
     /**
-     * Stores the details to edit the person with.
-     * Each supplied field replaces the corresponding value.
-     * An empty value for an optional contact field clears that field.
+     * Stores requested updates.
+     * Null fields are unchanged.
+     * Supplied scalar values replace existing values.
+     * Empty sets clear tags/groups; nonempty sets toggle their members.
      */
     public static class EditPersonDescriptor {
         private Name name;
@@ -165,30 +220,35 @@ public class EditCommand extends Command {
         private Set<Group> groups;
         private Set<Tag> tags;
 
+        /**
+         * Creates a descriptor with no field updates.
+         */
         public EditPersonDescriptor() {}
 
         /**
-         * Copy constructor.
-         * A defensive copy of {@code tags} is used internally.
+         * Creates a copy of the given descriptor, defensively copying collection fields.
+         *
+         * @param toCopy Descriptor whose field updates are copied.
          */
         public EditPersonDescriptor(EditPersonDescriptor toCopy) {
+            requireNonNull(toCopy);
             setName(toCopy.name);
             setPhone(toCopy.phone);
             setEmail(toCopy.email);
             setAddress(toCopy.address);
-            setGroups(toCopy.groups);
             setGithub(toCopy.github);
             setLinkedin(toCopy.linkedin);
             setTelegram(toCopy.telegram);
+            setGroups(toCopy.groups);
             setTags(toCopy.tags);
         }
 
         /**
-         * Returns true if at least one field is edited.
+         * Returns true if at least one field update is supplied.
          */
         public boolean isAnyFieldEdited() {
             return CollectionUtil.isAnyNonNull(
-                    name, phone, email, address, groups, github, linkedin, telegram, tags);
+                    name, phone, email, address, github, linkedin, telegram, groups, tags);
         }
 
         public void setName(Name name) {
@@ -223,23 +283,6 @@ public class EditCommand extends Command {
             return Optional.ofNullable(address);
         }
 
-        /**
-         * Sets {@code groups} to this object's {@code groups}.
-         * A defensive copy of {@code groups} is used internally.
-         */
-        public void setGroups(Set<Group> groups) {
-            this.groups = (groups != null) ? new HashSet<>(groups) : null;
-        }
-
-        /**
-         * Returns an unmodifiable tag set, which throws {@code UnsupportedOperationException}
-         * if modification is attempted.
-         * Returns {@code Optional#empty()} if {@code groups} is null.
-         */
-        public Optional<Set<Group>> getGroups() {
-            return (groups != null) ? Optional.of(Collections.unmodifiableSet(groups)) : Optional.empty();
-        }
-
         public void setGithub(Github github) {
             this.github = github;
         }
@@ -265,20 +308,41 @@ public class EditCommand extends Command {
         }
 
         /**
-         * Sets {@code tags} to this object's {@code tags}.
-         * A defensive copy of {@code tags} is used internally.
+         * Stores a defensive copy of the requested group update.
+         * A {@code null} value leaves groups unchanged; an empty set clears all groups.
+         * A nonempty set toggles membership for each supplied group.
          */
-        public void setTags(Set<Tag> tags) {
-            this.tags = (tags != null) ? new HashSet<>(tags) : null;
+        public void setGroups(Set<Group> groups) {
+            this.groups = groups == null ? null : new HashSet<>(groups);
         }
 
         /**
-         * Returns an unmodifiable tag set, which throws {@code UnsupportedOperationException}
-         * if modification is attempted.
-         * Returns {@code Optional#empty()} if {@code tags} is null.
+         * Returns an optional containing an unmodifiable group update set, or an empty optional if unchanged.
+         * A present but empty set requests clearing all groups.
+         */
+        public Optional<Set<Group>> getGroups() {
+            return groups == null
+                    ? Optional.empty()
+                    : Optional.of(Collections.unmodifiableSet(groups));
+        }
+
+        /**
+         * Stores a defensive copy of the requested tag update.
+         * A {@code null} value leaves tags unchanged; an empty set clears all tags.
+         * A nonempty set toggles membership for each supplied tag.
+         */
+        public void setTags(Set<Tag> tags) {
+            this.tags = tags == null ? null : new HashSet<>(tags);
+        }
+
+        /**
+         * Returns an optional containing an unmodifiable tag update set, or an empty optional if unchanged.
+         * A present but empty set requests clearing all tags.
          */
         public Optional<Set<Tag>> getTags() {
-            return (tags != null) ? Optional.of(Collections.unmodifiableSet(tags)) : Optional.empty();
+            return tags == null
+                    ? Optional.empty()
+                    : Optional.of(Collections.unmodifiableSet(tags));
         }
 
         @Override
@@ -287,20 +351,25 @@ public class EditCommand extends Command {
                 return true;
             }
 
-            // instanceof handles nulls
-            if (!(other instanceof EditPersonDescriptor otherEditPersonDescriptor)) {
+            if (!(other instanceof EditPersonDescriptor otherDescriptor)) {
                 return false;
             }
 
-            return Objects.equals(name, otherEditPersonDescriptor.name)
-                    && Objects.equals(phone, otherEditPersonDescriptor.phone)
-                    && Objects.equals(email, otherEditPersonDescriptor.email)
-                    && Objects.equals(address, otherEditPersonDescriptor.address)
-                    && Objects.equals(groups, otherEditPersonDescriptor.groups)
-                    && Objects.equals(github, otherEditPersonDescriptor.github)
-                    && Objects.equals(linkedin, otherEditPersonDescriptor.linkedin)
-                    && Objects.equals(telegram, otherEditPersonDescriptor.telegram)
-                    && Objects.equals(tags, otherEditPersonDescriptor.tags);
+            return Objects.equals(name, otherDescriptor.name)
+                    && Objects.equals(phone, otherDescriptor.phone)
+                    && Objects.equals(email, otherDescriptor.email)
+                    && Objects.equals(address, otherDescriptor.address)
+                    && Objects.equals(github, otherDescriptor.github)
+                    && Objects.equals(linkedin, otherDescriptor.linkedin)
+                    && Objects.equals(telegram, otherDescriptor.telegram)
+                    && Objects.equals(groups, otherDescriptor.groups)
+                    && Objects.equals(tags, otherDescriptor.tags);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(
+                    name, phone, email, address, github, linkedin, telegram, groups, tags);
         }
 
         @Override
@@ -310,10 +379,10 @@ public class EditCommand extends Command {
                     .add("phone", phone)
                     .add("email", email)
                     .add("address", address)
-                    .add("groups", groups)
                     .add("github", github)
                     .add("linkedin", linkedin)
                     .add("telegram", telegram)
+                    .add("groups", groups)
                     .add("tags", tags)
                     .toString();
         }
