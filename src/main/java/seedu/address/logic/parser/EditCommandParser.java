@@ -38,18 +38,13 @@ public class EditCommandParser implements Parser<EditCommand> {
             PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM,
             PREFIX_GROUP, PREFIX_TAG);
 
+    private static final List<Prefix> UNCLEARABLE_PREFIXES = List.of(PREFIX_NAME, PREFIX_PHONE);
+
     private static final Pattern FLAG_LIKE_TOKEN = Pattern.compile("(?<=\\s)[A-Za-z]+/");
 
     private final ExactPersonMatchParser targetParser =
             new ExactPersonMatchParser(EditCommand.MESSAGE_USAGE, EditCommand.MESSAGE_EMPTY_FLAG_VALUE);
 
-    /**
-     * Parses exact search criteria and field updates into an edit command.
-     * The search criteria and updates must be separated by a single {@code >>}.
-     *
-     * @param args Command arguments containing search criteria and field updates.
-     * @throws ParseException If the syntax is invalid, a field value is invalid, or no updates are supplied.
-     */
     @Override
     public EditCommand parse(String args) throws ParseException {
         requireNonNull(args);
@@ -97,12 +92,11 @@ public class EditCommandParser implements Parser<EditCommand> {
                 PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS,
                 PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM);
 
-        // Required contact fields can be updated, but cannot be cleared.
-        for (Prefix prefix : List.of(PREFIX_NAME, PREFIX_PHONE)) {
+        for (int i = 0; i < UNCLEARABLE_PREFIXES.size(); i++) {
+            Prefix prefix = UNCLEARABLE_PREFIXES.get(i);
             if (updates.getValue(prefix).filter(String::isEmpty).isPresent()) {
                 throw new ParseException(String.format(
-                        EditCommand.MESSAGE_CANNOT_CLEAR_REQUIRED_FIELD,
-                        prefix));
+                        EditCommand.MESSAGE_CANNOT_CLEAR_REQUIRED_FIELD, prefix));
             }
         }
     }
