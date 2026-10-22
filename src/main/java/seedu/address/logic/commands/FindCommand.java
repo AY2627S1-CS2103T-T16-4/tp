@@ -12,8 +12,10 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.parser.Prefix;
 import seedu.address.model.Model;
@@ -49,6 +51,8 @@ public class FindCommand extends Command {
 
     public static final String MESSAGE_EMPTY_FLAG_VALUE = "Please provide a value for %1$s to search for.";
 
+    private static final Logger logger = LogsCenter.getLogger(FindCommand.class);
+
     private final PersonMatchesFlagsPredicate predicate;
     private final List<Prefix> usedPrefixes;
 
@@ -59,6 +63,7 @@ public class FindCommand extends Command {
     public FindCommand(PersonMatchesFlagsPredicate predicate, List<Prefix> usedPrefixes) {
         requireNonNull(predicate);
         requireNonNull(usedPrefixes);
+        assert !usedPrefixes.isEmpty() : "find must be given at least one flag";
         this.predicate = predicate;
         this.usedPrefixes = List.copyOf(usedPrefixes);
     }
@@ -66,8 +71,12 @@ public class FindCommand extends Command {
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
+        logger.info("Executing find with flags: " + usedPrefixes);
         model.updateFilteredPersonList(predicate);
-        if (model.getFilteredPersonList().isEmpty()) {
+        assert model.getFilteredPersonList() != null;
+        int matchCount = model.getFilteredPersonList().size();
+        logger.fine("Find matched " + matchCount + " person(s)");
+        if (matchCount == 0) {
             String flags = usedPrefixes.stream().map(Prefix::toString).collect(Collectors.joining(" "));
             return new CommandResult(String.format(MESSAGE_NOT_FOUND, flags));
         }

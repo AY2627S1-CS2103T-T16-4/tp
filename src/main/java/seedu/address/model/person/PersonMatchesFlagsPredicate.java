@@ -25,6 +25,7 @@ public class PersonMatchesFlagsPredicate implements Predicate<Person> {
 
     @Override
     public boolean test(Person person) {
+        assert person != null;
         return descriptor.getName().map(search -> startsWithIgnoreCase(person.getName().fullName, search))
                         .orElse(true)
                 && descriptor.getPhone().map(search -> startsWithIgnoreCase(person.getPhone().value, search))
@@ -46,6 +47,7 @@ public class PersonMatchesFlagsPredicate implements Predicate<Person> {
     }
 
     private static boolean startsWithIgnoreCase(String value, String search) {
+        assert value != null && search != null;
         return value.toLowerCase().startsWith(search.toLowerCase());
     }
 
