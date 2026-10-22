@@ -209,6 +209,19 @@ _Details coming soon ..._
 
 --------------------------------------------------------------------------------------------------------------------
 
+## Sorting the current list: `sort`
+
+Format: `sort name|group [asc|desc]`. Ascending is the default.
+
+* `sort name asc` sorts names alphabetically, ignoring case; `sort name desc` reverses the order.
+* `sort group` sorts by each contact's alphabetically first group, breaking ties by name.
+  `sort group desc` reverses group order while keeping names within a group alphabetical.
+* Pinned contacts stay first. Sorting applies separately within the pinned and unpinned sections;
+  contacts without groups appear last within their section when sorting by group.
+* Sorting preserves the current search filter. For example, run `find g/t09`, then `sort name`.
+* Sorting remains active for subsequent searches, edits, and `list` in the current session.
+  Edit indexes follow the displayed order. Sorting does not change saved contact order or create an undo step.
+
 ## Command summary
 
 Action     | Format, Examples
@@ -219,5 +232,6 @@ Action     | Format, Examples
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List**   | `list`
+**Sort**   | `sort name\|group [asc\|desc]`<br> e.g., `sort name asc`, `sort group`
 **Pin**    | `pin [n/NAME] [p/PHONE_NUMBER] [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...` (at least one field)<br> e.g., `pin p/98765432`
 **Help**   | `help`

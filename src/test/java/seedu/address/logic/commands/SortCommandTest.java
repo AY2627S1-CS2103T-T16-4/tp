@@ -136,6 +136,31 @@ public class SortCommandTest {
     }
 
     @Test
+    public void execute_pinnedContacts_sortsWithinSectionsAndPreservesFilter() throws Exception {
+        addContacts();
+        Person pinnedBenson = new Person(BENSON, true);
+        Person pinnedDaniel = new Person(DANIEL, true);
+        model.setPerson(BENSON, pinnedBenson);
+        model.setPerson(DANIEL, pinnedDaniel);
+        AddressBookParser parser = new AddressBookParser();
+
+        parser.parseCommand("sort name asc").execute(model);
+        assertEquals(List.of(pinnedBenson, pinnedDaniel, ALICE, CARL), model.getFilteredPersonList());
+        parser.parseCommand("sort name desc").execute(model);
+        assertEquals(List.of(pinnedDaniel, pinnedBenson, CARL, ALICE), model.getFilteredPersonList());
+        parser.parseCommand("sort group").execute(model);
+        assertEquals(List.of(pinnedBenson, pinnedDaniel, ALICE, CARL), model.getFilteredPersonList());
+        parser.parseCommand("sort group desc").execute(model);
+        assertEquals(List.of(pinnedDaniel, pinnedBenson, CARL, ALICE), model.getFilteredPersonList());
+
+        parser.parseCommand("find g/t09").execute(model);
+        parser.parseCommand("sort name").execute(model);
+        assertEquals(List.of(pinnedBenson, ALICE), model.getFilteredPersonList());
+        parser.parseCommand("pin n/Alice Pauline").execute(model);
+        assertEquals(List.of(new Person(ALICE, true), pinnedBenson), model.getFilteredPersonList());
+    }
+
+    @Test
     public void equalsAndNulls() {
         SortCommand command = new SortCommand(Field.NAME, false);
         assertEquals(command, new SortCommand(Field.NAME, false));
