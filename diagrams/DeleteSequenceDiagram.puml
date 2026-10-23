@@ -7,17 +7,17 @@ participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
 participant ":DeleteCommandParser" as DeleteCommandParser LOGIC_COLOR
 participant "d:DeleteCommand" as DeleteCommand LOGIC_COLOR
-participant "r:CommandResult" as CommandResult LOGIC_COLOR
+participant "target:PersonTarget" as PersonTarget LOGIC_COLOR
 end box
 
 box Model MODEL_COLOR_T1
 participant "m:Model" as Model MODEL_COLOR
 end box
 
-[-> LogicManager : execute("delete 1")
+[-> LogicManager : execute("delete n/John Doe p/81231234")
 activate LogicManager
 
-LogicManager -> AddressBookParser : parseCommand("delete 1")
+LogicManager -> AddressBookParser : parseCommand("delete n/John Doe p/81231234")
 activate AddressBookParser
 
 create DeleteCommandParser
@@ -27,12 +27,18 @@ activate DeleteCommandParser
 DeleteCommandParser --> AddressBookParser
 deactivate DeleteCommandParser
 
-AddressBookParser -> DeleteCommandParser : parse("1")
+AddressBookParser -> DeleteCommandParser : parse(" n/John Doe p/81231234")
 activate DeleteCommandParser
 
 create DeleteCommand
-DeleteCommandParser -> DeleteCommand
+DeleteCommandParser -> DeleteCommand : new DeleteCommand(predicate)
 activate DeleteCommand
+
+create PersonTarget
+DeleteCommand -> PersonTarget : new PersonTarget(predicate)
+activate PersonTarget
+PersonTarget --> DeleteCommand
+deactivate PersonTarget
 
 DeleteCommand --> DeleteCommandParser :
 deactivate DeleteCommand
@@ -49,22 +55,26 @@ deactivate AddressBookParser
 LogicManager -> DeleteCommand : execute(m)
 activate DeleteCommand
 
-DeleteCommand -> Model : deletePerson(1)
+DeleteCommand -> PersonTarget : resolve(m, messageNotFound, messageAmbiguous)
+activate PersonTarget
+
+PersonTarget -> Model : getAddressBook()
+activate Model
+Model --> PersonTarget : addressBook
+deactivate Model
+
+PersonTarget --> DeleteCommand : personToDelete
+deactivate PersonTarget
+
+DeleteCommand -> Model : deletePerson(personToDelete)
 activate Model
 
 Model --> DeleteCommand
 deactivate Model
 
-create CommandResult
-DeleteCommand -> CommandResult
-activate CommandResult
-
-CommandResult --> DeleteCommand
-deactivate CommandResult
-
-DeleteCommand --> LogicManager : r
+DeleteCommand --> LogicManager : CommandResult
 deactivate DeleteCommand
 
-[<--LogicManager
+[<--LogicManager : CommandResult
 deactivate LogicManager
 @enduml

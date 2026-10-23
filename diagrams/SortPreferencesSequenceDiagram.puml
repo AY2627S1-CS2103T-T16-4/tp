@@ -1,0 +1,109 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+title Sorting with saved preferences (feature-branch design)
+
+participant ":SortCommand" as SortCommand LOGIC_COLOR
+participant ":ModelManager" as ModelManager MODEL_COLOR
+participant "sortedPersons:SortedList" as SortedPersons #DDDDDD
+participant ":UserPrefs" as UserPrefs MODEL_COLOR
+participant ":MainApp" as MainApp
+participant ":StorageManager" as StorageManager STORAGE_COLOR
+participant ":JsonUserPrefsStorage" as PrefsStorage STORAGE_COLOR
+database "preferences.json" as PrefsFile
+
+note over SortCommand, PrefsFile
+  Describes the sorting-with-preferences feature branch, not current master.
+  Parsing, GUI settings, and address-book storage are omitted.
+end note
+
+== Apply a sort command ==
+
+[-> SortCommand : execute(model)
+activate SortCommand
+SortCommand -> ModelManager : sortFilteredPersonList(settings, isContinuous)
+activate ModelManager
+ModelManager -> ModelManager : applySortSettings(settings)
+activate ModelManager
+note over ModelManager, SortedPersons
+  SortSettings creates the name, group, or tag comparator.
+  ModelManager adds pin priority and stored-position tie-breaking.
+end note
+ModelManager -> SortedPersons : setComparator(combinedComparator)
+SortedPersons --> ModelManager
+deactivate ModelManager
+
+alt cont specified
+    ModelManager -> UserPrefs : setSavedSortSettings(settings)
+else none specified or persistence argument omitted
+    ModelManager -> UserPrefs : setSavedSortSettings(null)
+end
+ModelManager --> SortCommand
+deactivate ModelManager
+[<-- SortCommand : CommandResult
+deactivate SortCommand
+
+note over ModelManager, UserPrefs
+  Both modes keep automatic sorting active during this session.
+  Add/edit changes flow through the observable lists to SortedList.
+  The filter and stored contact order remain unchanged.
+  Only cont retains a preference for the next launch.
+end note
+
+== Normal application shutdown ==
+
+[-> MainApp : stop()
+activate MainApp
+MainApp -> ModelManager : getUserPrefs()
+ModelManager --> MainApp : prefs
+MainApp -> StorageManager : saveUserPrefs(prefs)
+activate StorageManager
+StorageManager -> PrefsStorage : saveUserPrefs(prefs)
+activate PrefsStorage
+PrefsStorage -> PrefsFile : Write preferences JSON (via JsonUtil)
+PrefsFile --> PrefsStorage
+PrefsStorage --> StorageManager
+deactivate PrefsStorage
+StorageManager --> MainApp
+deactivate StorageManager
+[<-- MainApp
+deactivate MainApp
+
+== Next application launch (new instances) ==
+
+note over ModelManager, PrefsStorage
+  Lifelines below represent new application instances after restart.
+  Startup initialization details are omitted.
+end note
+
+[-> MainApp : init()
+activate MainApp
+MainApp -> PrefsStorage : readUserPrefs()
+activate PrefsStorage
+PrefsStorage -> PrefsFile : Read preferences JSON (via JsonUtil)
+PrefsFile --> PrefsStorage : saved data
+PrefsStorage --> MainApp : Optional<UserPrefs>
+deactivate PrefsStorage
+
+MainApp -> ModelManager : new ModelManager(addressBook, loadedPrefs)
+activate ModelManager
+note over ModelManager, UserPrefs
+  Copy loaded preferences and initialize the default pinned-first view.
+end note
+ModelManager -> UserPrefs : getSavedSortSettings()
+UserPrefs --> ModelManager : savedSortSettings
+alt savedSortSettings is not null
+    ModelManager -> ModelManager : applySortSettings(savedSortSettings)
+    ModelManager -> SortedPersons : setComparator(combinedComparator)
+else no saved sort preference
+    note over ModelManager, SortedPersons
+      Keep pinned-first stored order.
+    end note
+end
+ModelManager --> MainApp
+deactivate ModelManager
+[<-- MainApp
+deactivate MainApp
+
+@enduml
