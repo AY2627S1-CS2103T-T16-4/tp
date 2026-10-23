@@ -5,9 +5,13 @@ import java.util.Set;
 
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
+import seedu.address.model.person.Github;
+import seedu.address.model.person.Group;
+import seedu.address.model.person.Linkedin;
 import seedu.address.model.person.Name;
 import seedu.address.model.person.Person;
 import seedu.address.model.person.Phone;
+import seedu.address.model.person.Telegram;
 import seedu.address.model.tag.Tag;
 import seedu.address.model.util.SampleDataUtil;
 
@@ -25,6 +29,10 @@ public class PersonBuilder {
     private Phone phone;
     private Email email;
     private Address address;
+    private Set<Group> groups;
+    private Github github;
+    private Linkedin linkedin;
+    private Telegram telegram;
     private Set<Tag> tags;
 
     /**
@@ -35,6 +43,10 @@ public class PersonBuilder {
         phone = new Phone(DEFAULT_PHONE);
         email = new Email(DEFAULT_EMAIL);
         address = new Address(DEFAULT_ADDRESS);
+        groups = new HashSet<>();
+        github = new Github("");
+        linkedin = new Linkedin("");
+        telegram = new Telegram("");
         tags = new HashSet<>();
     }
 
@@ -46,6 +58,10 @@ public class PersonBuilder {
         phone = personToCopy.getPhone();
         email = personToCopy.getEmail();
         address = personToCopy.getAddress();
+        groups = new HashSet<>(personToCopy.getGroups());
+        github = personToCopy.getGithub();
+        linkedin = personToCopy.getLinkedin();
+        telegram = personToCopy.getTelegram();
         tags = new HashSet<>(personToCopy.getTags());
     }
 
@@ -89,8 +105,40 @@ public class PersonBuilder {
         return this;
     }
 
+    /**
+     * Sets the {@code Group} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withGroups(String ... groups) {
+        this.groups = SampleDataUtil.getGroupSet(groups);
+        return this;
+    }
+
+    /**
+     * Sets the {@code Github} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withGithub(String github) {
+        this.github = new Github(github);
+        return this;
+    }
+
+    /**
+     * Sets the {@code Linkedin} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withLinkedin(String linkedin) {
+        this.linkedin = new Linkedin(linkedin);
+        return this;
+    }
+
+    /**
+     * Sets the {@code Telegram} of the {@code Person} that we are building.
+     */
+    public PersonBuilder withTelegram(String telegram) {
+        this.telegram = new Telegram(telegram);
+        return this;
+    }
+
     public Person build() {
-        return new Person(name, phone, email, address, tags);
+        return new Person(name, phone, email, address, groups, github, linkedin, telegram, tags);
     }
 
 }

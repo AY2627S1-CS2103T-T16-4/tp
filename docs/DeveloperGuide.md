@@ -90,9 +90,9 @@ Here's a (partial) class diagram of the `Logic` component:
 
 <puml src="diagrams/LogicClassDiagram.puml" width="550"/>
 
-The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API call as an example.
+The sequence diagram below illustrates the high-level interactions within the `Logic` component, taking `execute("delete n/John Doe p/81231234")` as an example where exactly one contact matches all supplied criteria. The search includes contacts hidden by the current filter; undo bookkeeping, storage, and UI updates are omitted.
 
-<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `delete 1` Command" />
+<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for Deleting a Contact by Exact Field Criteria" />
 
 <box type="info" seamless>
 
@@ -159,6 +159,19 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Pinned contacts
+
+The `pin` command marks one matching contact as pinned. Its implementation has four main parts:
+
+* **Shared targeting:** `PinCommandParser` uses `ExactPersonMatchParser` to validate criteria, and `PersonTarget` resolves them against all contacts using `PersonMatchesExactFieldsPredicate`. These classes are shared with `delete`. All supplied fields must match. Ambiguous matches are displayed for refinement; unsuccessful requests leave contact data unchanged.
+* **Pin state:** `PinCommand` replaces the contact with an immutable copy whose `isPinned` flag is `true`, preserving its other details. Editing retains this flag.
+* **Display:** `ModelManager` sorts the filtered view with pinned contacts first, preserving addition order within each section. The stored list stays in addition order. The UI and `edit` use the same displayed list, and `PersonCard` shows a star for pinned contacts.
+* **Persistence and undo:** `JsonAdaptedPerson` stores `isPinned`, defaulting to `false` for older files. Successful pins save an undo snapshot through `LogicManager`, allowing the existing undo mechanism to restore the previous state.
+
+The activity diagram summarizes the flow, grouping unsuccessful requests into one path.
+
+<puml src="diagrams/PinActivityDiagram.puml" alt="Pin activity flow showing validation, contact replacement, display update, saving, and feedback" />
+
 ### Undo Command
 
 The undo feature allows users to restore the address book to the state before the most recent undoable command.
@@ -218,36 +231,38 @@ _{Explain here how the data archiving feature will be implemented}_
 
 **Target user profile**:
 
-* has a need to manage a significant number of contacts
-* prefers desktop apps over other types of applications
-* can type fast
-* prefers typing to mouse interactions
-* is reasonably comfortable using CLI apps
+* has a need to manage a significant number of teammate and peer contacts across multiple concurrent group projects and school activities
+* prefers fast, command-driven interfaces over mouse interactions and visual dashboards
+* can type fast and prefers typing commands for quick lookups and updates
+* is reasonably comfortable using command-line interfaces to manage contacts efficiently
 
-**Value proposition**: Manage contacts faster than with a typical mouse-driven GUI application.
+**Value proposition**: Helps NUS students rapidly track and access group project groupmates details through an intuitive command interface tailored for fast typists.
 
 
 ### User stories
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | As a …                                    | I want to …                 | So that I can…                                                        |
-|----------|--------------------------------------------|------------------------------|------------------------------------------------------------------------|
-| `* * *`  | new user                                   | see usage instructions       | refer to instructions when I forget how to use the App                 |
-| `* * *`  | user                                       | add a new person             |                                                                        |
-| `* * *`  | user                                       | delete a person              | remove entries that I no longer need                                   |
-| `* * *`  | user                                       | find a person by name        | locate details of persons without having to go through the entire list |
-| `* *`    | user                                       | hide private contact details | minimize chance of someone else seeing them by accident                |
-| `*`      | user with many persons in the address book | sort persons by name         | locate a person easily                                                 |
-
-*{More to be added}*
+| Priority | Scope      | As a … | I want to …                                                            | So that I can …                                                                     |
+|:---------|:-----------| :- |:-----------------------------------------------------------------------|:------------------------------------------------------------------------------------|
+| `***`    | MVP        | New user | See sample data upon launching the app                                 | Immediately understand how a populated contact list looks and functions             |
+| `***`    | MVP        | New user | Clear the sample data                                                  | Start populating the app with my own data                                           |
+| `***`    | MVP        | New user | See instructions for commands                                          | Quickly learn how to use the app and know what command formats are accepted         |
+| `***`    | MVP        | User | Add my groupmate’s contacts                                            | Keep track of their contact information for project collaboration                   |
+| `***`    | MVP        | User | Delete my groupmate’s contact                                          | Remove groupmates who I do not keep in contact with anymore                         |
+| `***`    | MVP        | User | List all my contacts                                                   | See an overview of all my current group project contacts                            |
+| `***`    | MVP        | User | Find my contacts                                                       | Quickly retrieve specific contact details without searching through the entire list |
+| `**`     | MVP        | Second-time user | Receive clear, non-destructive error messages when I mistype a command | Correct my input without losing my progress                                         |
+| `**`     | MVP        | 10th time user | To see my previous commands autofilled when I click the up arrow key   | Quickly repeat or correct recent commands without having to retype them             |
+| `***`    | Beyond MVP | User | Edit my groupmate's contact details                                    | Update outdated contact information without deleting and re-adding them             |
+| `*`      | Beyond MVP | Experienced User | Pin contacts to appear at the top                                      | Access important contacts quickly                                                   |
+| `*`      | Beyond MVP | Experienced User | Sort my contacts                                                       | Change the view of my contact list to my preferred choice                           |
 
 ### Use cases
 
 **System:** GitMate (GM)  
 **Use case:** U1. Add a contact  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -273,8 +288,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **System:** GitMate (GM)  
 **Use case:** U2. Delete a contact  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -300,14 +314,13 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 1c. GM detects multiple contacts matching the identifier.
 
-    * 1c1. GM prompts the user to specify further details to resolve ambiguity.
+    * 1c1. GM displays ambiguous contacts and prompts the user to specify further details to resolve ambiguity.
 
     * Use case ends.
  
 **System:** GitMate (GM)  
 **Use case:** U3. Find a contact  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -332,8 +345,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **System:** GitMate (GM)  
 **Use case:** U4. View help  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -352,8 +364,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **System:** GitMate (GM)  
 **Use case:** U5. List all contacts  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -370,8 +381,112 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     * Use case ends.
 
+**System:** GitMate (GM)<br>
+**Use case:** U6. Pin a contact<br>
+**Actor:** User<br>
+
+**MSS**
+
+1. User requests to pin a contact, supplying details that identify it uniquely.
+2. GM pins the contact and displays it above unpinned contacts whenever it is included in the current view.
+3. GM displays a confirmation message.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. GM detects missing or invalid contact criteria.
+
+    * 1a1. GM displays an error explaining the accepted input.
+    
+    * Use case ends.
+
+* 1b. GM finds no contact matching the supplied criteria.
+
+    * 1b1. GM informs the user that no contact matches.
+    
+    * Use case ends.
+
+* 1c. GM finds multiple matching contacts.
+
+    * 1c1. GM displays the matching contacts and requests additional details. No contact is pinned.
+    
+    * 1c2. User supplies further details to identify one contact.
+    
+    * Use case resumes at step 1.
+
+* 1d. GM finds that the contact is already pinned.
+
+    * 1d1. GM informs the user that the contact is already pinned.
+    
+    * Use case ends.
+
 **System:** GitMate (GM)  
-**Use case:** U6. Undo most recent command  
+**Use case:** U7. Sort Address Book
+**Actor:** User
+
+**MSS**
+
+1.  User enters sort command with sorting details.
+2.  GM reorganises current contacts according to details.
+3.  GM repeats to user details to confirm sort.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. User enters an unsupported field
+
+    * 1a1. GM displays an error explaining the accepted input.
+
+    * Use case ends.
+
+**System:** GitMate (GM)  
+**Use case:** U8. Edit a contact  
+**Actor:** User
+
+**MSS**
+
+1.  User enters edit command with contact details to identify the contact along with the desired updates.
+2.  GM updates the contact.
+3.  GM displays a confirmation message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. GM detects an invalid command format, invalid field values, or no fields to update.
+
+    * 1a1. GM displays an error message explaining the accepted input.
+
+    * Use case ends.
+
+* 1b. GM detects that the contact does not exist.
+
+    * 1b1. GM informs the user that no contact matches the supplied details.
+
+    * Use case ends.
+
+* 1c. GM detects multiple contacts matching the identifier.
+
+    * 1c1. GM displays ambiguous contacts and prompts the user to specify further details to resolve ambiguity.
+
+    * Use case ends.
+
+* 1d. GM detects an attempt to clear the contact's name or phone number.
+
+    * 1d1. GM informs the user that name and phone number cannot be cleared.
+
+    * Use case ends.
+
+* 1e. GM detects that the supplied phone number belongs to another contact.
+
+    * 1e1. GM informs the user of the duplicate phone number.
+
+    * Use case ends.
+    
+**System:** GitMate (GM)  
+**Use case:** U9. Undo most recent command  
 **Actor:** User  
 **Precondition:** GM is running and ready to receive commands
 
@@ -393,16 +508,29 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 ### Non-Functional Requirements
 
 1.  Should work on any _mainstream OS_ as long as it has Java `25` or above installed.
-2.  Should be able to hold up to 1000 persons without noticeable sluggishness in performance for typical usage.
-3.  A user with above average typing speed for regular English text (i.e. not code, not system admin commands) should be able to accomplish most of the tasks faster using commands than using the mouse.
-
-*{More to be added}*
+2.  The system should respond to any valid user command within two seconds when storing a contact list of up to 1,000 entries.
+3.  A user who can type at least 60 words per minute should be able to complete routine contact management tasks (adding, searching, deleting) faster using keyboard commands than performing the equivalent operations via GUI mouse interactions.
+4.  The application should be fully functional for all core contact management features without requiring an active internet connection after initial installation.
+5.  The user interface should have a clear, consistent layout with readable text and sufficient contrast between text and backgrounds.
+6.  Error messages and help descriptions should use clear, simple language that users can understand without technical knowledge.
+7.  All contact data should persist automatically across application sessions, saving to local storage upon the completion of any add, edit, or delete action.
+8.  A first-time user should be able to add, find, edit, and delete contacts within 15 minutes of completing setup, using only the application’s help messages and user guide for guidance.
 
 ### Glossary
 
-* **Mainstream OS**: Windows, Linux, Unix, or macOS
-* **Private contact detail**: A contact detail that is not meant to be shared with others
-
+* **MVP (Minimum Viable Product)**: The smallest set of features that makes GitMate usable, i.e. the features marked MVP in the user stories.
+* **Valid command**: A command that follows an accepted command format, with all required parameters present and correctly formatted.
+* **Core contact management features**: Our MVP commands of 'add', 'delete', 'find', 'help' and the sample data.
+* **Duplicate contact**: A contact whose phone number is already associated with another contact. Two contacts may share the same name, so a matching name alone does not make a duplicate.
+* **Mandatory field**: A contact detail that must be provided when adding a contact (name and phone number); the command is rejected if either is missing.
+* **CCA (Co-Curricular Activity)**: A student club, committee or organisation at NUS that a user may belong to outside their modules.
+* **Group**: A named set of groupmates, such as a module project team or a CCA committee (such contacts can be organised under the `g/` field).
+* **Groupmate**: A student collaborator assigned to the same project team or CCA as the user, whose contact details are managed within the application.
+* **Tag**: A label describing a contact's trait or project role (e.g. "frontend"), added with the `t/` field.
+* **Event**: A scheduled meeting or deadline linked to a group (e.g. a project meeting).
+* **Fast typist**: A user who types at least 60 words per minute.
+* **Local storage**: The data file on the user's own computer where GitMate saves contacts, so no internet connection or server is needed.
+* **Mainstream OS**: Windows, Linux, and macOS.
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Appendix: Instructions for manual testing**

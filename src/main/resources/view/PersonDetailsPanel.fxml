@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox styleClass="details-panel" spacing="12" minWidth="0"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+  <Label text="Contact details" styleClass="panel-title" />
+  <ScrollPane fx:id="detailsScroll" fitToWidth="true" hbarPolicy="NEVER"
+              styleClass="details-scroll" minWidth="0" VBox.vgrow="ALWAYS">
+    <VBox spacing="20" styleClass="details-content" minWidth="0">
+      <VBox alignment="CENTER" spacing="10" minWidth="0">
+        <Label fx:id="initials" styleClass="details-avatar" alignment="CENTER"
+               minWidth="64" prefWidth="64" maxWidth="64" minHeight="64" prefHeight="64" maxHeight="64" />
+        <Label fx:id="name" styleClass="details-name" wrapText="true" alignment="CENTER"
+               minWidth="0" maxWidth="Infinity" />
+        <VBox fx:id="groupsSection" alignment="CENTER" spacing="6">
+          <Label text="Groups" styleClass="detail-key" />
+          <FlowPane fx:id="groups" hgap="6" vgap="6" alignment="CENTER" />
+        </VBox>
+      </VBox>
+      <GridPane hgap="16" vgap="10" minWidth="0">
+        <columnConstraints>
+          <ColumnConstraints minWidth="72" prefWidth="72" />
+          <ColumnConstraints minWidth="0" hgrow="ALWAYS" />
+        </columnConstraints>
+        <Label text="Phone" styleClass="detail-key" GridPane.rowIndex="0" />
+        <Label fx:id="phone" styleClass="detail-value" wrapText="true" minWidth="0" maxWidth="Infinity"
+               GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <Label text="Email" styleClass="detail-key" GridPane.rowIndex="1" />
+        <Label fx:id="email" styleClass="detail-value" wrapText="true" minWidth="0" maxWidth="Infinity"
+               GridPane.columnIndex="1" GridPane.rowIndex="1" />
+        <Label text="Address" styleClass="detail-key" GridPane.rowIndex="2" />
+        <Label fx:id="address" styleClass="detail-value" wrapText="true" minWidth="0" maxWidth="Infinity"
+               GridPane.columnIndex="1" GridPane.rowIndex="2" />
+        <Label text="GitHub" styleClass="detail-key" GridPane.rowIndex="3" />
+        <Label fx:id="github" styleClass="detail-value" wrapText="true" minWidth="0" maxWidth="Infinity"
+               GridPane.columnIndex="1" GridPane.rowIndex="3" />
+        <Label text="LinkedIn" styleClass="detail-key" GridPane.rowIndex="4" />
+        <Label fx:id="linkedin" styleClass="detail-value" wrapText="true" minWidth="0" maxWidth="Infinity"
+               GridPane.columnIndex="1" GridPane.rowIndex="4" />
+        <Label text="Telegram" styleClass="detail-key" GridPane.rowIndex="5" />
+        <Label fx:id="telegram" styleClass="detail-value" wrapText="true" minWidth="0" maxWidth="Infinity"
+               GridPane.columnIndex="1" GridPane.rowIndex="5" />
+      </GridPane>
+      <VBox fx:id="tagsSection" spacing="10">
+        <Label text="Tags" styleClass="detail-key" />
+        <FlowPane fx:id="tags" hgap="6" vgap="6" />
+      </VBox>
+    </VBox>
+  </ScrollPane>
+  <VBox fx:id="emptyState" alignment="CENTER" spacing="10" VBox.vgrow="ALWAYS">
+    <Label text="No contact selected" styleClass="empty-state-title" />
+    <Label text="Add a contact or change your search to view details." styleClass="empty-state-message"
+           alignment="CENTER" wrapText="true" maxWidth="260" />
+  </VBox>
+</VBox>

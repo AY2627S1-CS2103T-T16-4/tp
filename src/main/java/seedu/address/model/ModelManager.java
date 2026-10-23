@@ -3,11 +3,16 @@ package seedu.address.model;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
+import java.util.ArrayDeque;
+import java.util.Comparator;
+import java.util.Deque;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.commons.core.LogsCenter;
 import seedu.address.model.person.Person;
@@ -19,8 +24,12 @@ public class ModelManager implements Model {
     private static final Logger logger = LogsCenter.getLogger(ModelManager.class);
 
     private final AddressBook addressBook;
+    private final Deque<AddressBook> undoHistory = new ArrayDeque<>();
     private final UserPrefs userPrefs;
     private final FilteredList<Person> filteredPersons;
+    private final SortedList<Person> sortedPersons;
+    private final ObservableList<Person> displayedPersons;
+    private Predicate<Person> currentPredicate = PREDICATE_SHOW_ALL_PERSONS;
 
     /**
      * Initializes a ModelManager with the given addressBook and userPrefs.
@@ -33,6 +42,15 @@ public class ModelManager implements Model {
         this.addressBook = new AddressBook(addressBook);
         this.userPrefs = new UserPrefs(userPrefs);
         filteredPersons = new FilteredList<>(this.addressBook.getPersonList());
+        // SortedList can reorder equal keys on insertion, so use the stored position to break ties.
+        Comparator<Person> displayOrder = Comparator.comparing(Person::isPinned).reversed()
+                .thenComparingInt(this.addressBook.getPersonList()::indexOf);
+        sortedPersons = new SortedList<>(filteredPersons, displayOrder);
+        displayedPersons = FXCollections.unmodifiableObservableList(sortedPersons);
+        SortSettings savedSortSettings = this.userPrefs.getSavedSortSettings();
+        if (savedSortSettings != null) {
+            applySortSettings(savedSortSettings);
+        }
     }
 
     public ModelManager() {
@@ -83,7 +101,6 @@ public class ModelManager implements Model {
     @Override
     public void addPerson(Person person) {
         addressBook.addPerson(person);
-        updateFilteredPersonList(PREDICATE_SHOW_ALL_PERSONS);
     }
 
     @Override
@@ -96,17 +113,32 @@ public class ModelManager implements Model {
     //=========== Filtered Person List Accessors =============================================================
 
     /**
-     * Returns an unmodifiable view of the list of {@code Person} backed by the internal list of
-     * {@code addressBook}
+     * Returns matching contacts with pinned contacts first and the selected sort order within each section.
+     * Before sorting, addition order is preserved within each section.
      */
     @Override
     public ObservableList<Person> getFilteredPersonList() {
-        return filteredPersons;
+        return displayedPersons;
+    }
+
+    @Override
+    public void sortFilteredPersonList(SortSettings settings, boolean isContinuous) {
+        requireNonNull(settings);
+        applySortSettings(settings);
+        userPrefs.setSavedSortSettings(isContinuous ? settings : null);
+    }
+
+    /** Applies the field order while retaining pin priority and stable tie-breaking. */
+    private void applySortSettings(SortSettings settings) {
+        sortedPersons.setComparator(Comparator.comparing(Person::isPinned).reversed()
+                .thenComparing(settings.createComparator())
+                .thenComparingInt(addressBook.getPersonList()::indexOf));
     }
 
     @Override
     public void updateFilteredPersonList(Predicate<Person> predicate) {
         requireNonNull(predicate);
+        currentPredicate = predicate;
         filteredPersons.setPredicate(predicate);
     }
 
@@ -123,7 +155,26 @@ public class ModelManager implements Model {
 
         return addressBook.equals(otherModelManager.addressBook)
                 && userPrefs.equals(otherModelManager.userPrefs)
-                && filteredPersons.equals(otherModelManager.filteredPersons);
+                && displayedPersons.equals(otherModelManager.displayedPersons);
+    }
+
+    //=========== Undo ======================================================================================
+
+    @Override
+    public void saveStateForUndo(ReadOnlyAddressBook state) {
+        requireNonNull(state);
+        undoHistory.push(new AddressBook(state));
+    }
+
+    @Override
+    public boolean undo() {
+        if (undoHistory.isEmpty()) {
+            return false;
+        }
+
+        addressBook.resetData(undoHistory.pop());
+        updateFilteredPersonList(currentPredicate);
+        return true;
     }
 
 }

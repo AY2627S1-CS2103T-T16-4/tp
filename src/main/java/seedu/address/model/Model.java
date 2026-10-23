@@ -60,7 +60,7 @@ public interface Model {
      */
     void setPerson(Person target, Person editedPerson);
 
-    /** Returns an unmodifiable view of the filtered person list */
+    /** Returns an unmodifiable filtered list, pinned first and sorted within each section. */
     ObservableList<Person> getFilteredPersonList();
 
     /**
@@ -68,4 +68,22 @@ public interface Model {
      * @throws NullPointerException if {@code predicate} is null.
      */
     void updateFilteredPersonList(Predicate<Person> predicate);
+
+    /**
+     * Sorts the view without changing its filter or stored order.
+     * Saves the startup preference when continuous, otherwise clears it.
+     */
+    void sortFilteredPersonList(SortSettings settings, boolean isContinuous);
+
+    /**
+     * Saves the given address book state for a future undo operation.
+     */
+    void saveStateForUndo(ReadOnlyAddressBook state);
+
+    /**
+     * Restores the most recently saved address book state.
+     *
+     * @return true if a state was restored, false if there is nothing to undo.
+     */
+    boolean undo();
 }

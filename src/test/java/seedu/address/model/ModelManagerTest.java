@@ -8,12 +8,11 @@ import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
-import seedu.address.model.person.NameContainsKeywordsPredicate;
+import seedu.address.model.person.FindPersonDescriptor;
+import seedu.address.model.person.PersonMatchesFlagsPredicate;
 import seedu.address.testutil.AddressBookBuilder;
 
 public class ModelManagerTest {
@@ -74,6 +73,43 @@ public class ModelManagerTest {
     }
 
     @Test
+    public void saveStateForUndo_thenUndo_restoresPreviousState() {
+        modelManager.addPerson(ALICE);
+        modelManager.saveStateForUndo(new AddressBook(modelManager.getAddressBook()));
+        modelManager.deletePerson(ALICE);
+
+        assertTrue(modelManager.undo());
+        assertTrue(modelManager.hasPerson(ALICE));
+    }
+
+    @Test
+    public void undo_withoutSavedState_returnsFalse() {
+        assertFalse(modelManager.undo());
+    }
+
+    @Test
+    public void undo_multipleTimes_restoresStatesInReverseOrder() {
+        modelManager.addPerson(ALICE);
+        modelManager.saveStateForUndo(new AddressBook(modelManager.getAddressBook()));
+        modelManager.addPerson(BENSON);
+        modelManager.saveStateForUndo(new AddressBook(modelManager.getAddressBook()));
+        modelManager.deletePerson(BENSON);
+
+        assertTrue(modelManager.undo());
+        assertTrue(modelManager.hasPerson(ALICE));
+        assertTrue(modelManager.hasPerson(BENSON));
+
+        assertTrue(modelManager.undo());
+        assertTrue(modelManager.hasPerson(ALICE));
+        assertFalse(modelManager.hasPerson(BENSON));
+    }
+
+    @Test
+    public void saveStateForUndo_nullState_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> modelManager.saveStateForUndo(null));
+    }
+
+    @Test
     public void equals() {
         AddressBook addressBook = new AddressBookBuilder().withPerson(ALICE).withPerson(BENSON).build();
         AddressBook differentAddressBook = new AddressBook();
@@ -97,8 +133,9 @@ public class ModelManagerTest {
         assertFalse(modelManager.equals(new ModelManager(differentAddressBook, userPrefs)));
 
         // different filteredList -> returns false
-        String[] keywords = ALICE.getName().fullName.split("\\s+");
-        modelManager.updateFilteredPersonList(new NameContainsKeywordsPredicate(List.of(keywords)));
+        FindPersonDescriptor descriptor = new FindPersonDescriptor();
+        descriptor.setName(ALICE.getName().fullName);
+        modelManager.updateFilteredPersonList(new PersonMatchesFlagsPredicate(descriptor));
         assertFalse(modelManager.equals(new ModelManager(addressBook, userPrefs)));
 
         // resets modelManager to initial state for upcoming tests

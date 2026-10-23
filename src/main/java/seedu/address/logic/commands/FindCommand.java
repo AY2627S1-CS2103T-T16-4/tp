@@ -1,37 +1,86 @@
 package seedu.address.logic.commands;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_GITHUB;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_GROUP;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_LINKEDIN;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 
+import java.util.List;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.util.ToStringBuilder;
-import seedu.address.logic.Messages;
+import seedu.address.logic.parser.Prefix;
 import seedu.address.model.Model;
-import seedu.address.model.person.NameContainsKeywordsPredicate;
+import seedu.address.model.person.PersonMatchesFlagsPredicate;
 
 /**
- * Finds and lists all persons in the address book whose name contains any of the argument keywords.
- * Keyword matching is case insensitive.
+ * Finds and lists all persons in the address book whose fields start with every given flag value.
+ * Matching is by prefix, and is case-sensitive only for GitHub usernames.
  */
 public class FindCommand extends Command {
 
     public static final String COMMAND_WORD = "find";
 
-    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all persons whose names contain any of "
-            + "the specified keywords (case-insensitive) and displays them as a list with index numbers.\n"
-            + "Parameters: KEYWORD [MORE_KEYWORDS]...\n"
-            + "Example: " + COMMAND_WORD + " alice bob charlie";
+    public static final String MESSAGE_USAGE = COMMAND_WORD + ": Finds all persons whose fields start with "
+            + "all of the specified values and displays them as a list with index numbers.\n"
+            + "The search is case-insensitive, except for GITHUB, which is case-sensitive.\n"
+            + "Parameters: "
+            + "[" + PREFIX_NAME + "NAME] "
+            + "[" + PREFIX_PHONE + "PHONE] "
+            + "[" + PREFIX_ADDRESS + "ADDRESS] "
+            + "[" + PREFIX_EMAIL + "EMAIL] "
+            + "[" + PREFIX_GITHUB + "GITHUB] "
+            + "[" + PREFIX_LINKEDIN + "LINKEDIN] "
+            + "[" + PREFIX_TELEGRAM + "TELEGRAM] "
+            + "[" + PREFIX_GROUP + "GROUP] "
+            + "[" + PREFIX_TAG + "TAG]...\n"
+            + "At least one flag must be provided.\n"
+            + "Example: " + COMMAND_WORD + " " + PREFIX_NAME + "LIM JUN HAN " + PREFIX_GROUP + "T09";
 
-    private final NameContainsKeywordsPredicate predicate;
+    public static final String MESSAGE_SUCCESS = "Here is the contact that matches your search.";
 
-    public FindCommand(NameContainsKeywordsPredicate predicate) {
+    public static final String MESSAGE_NOT_FOUND = "No contact was found. Please check the %1$s provided.";
+
+    public static final String MESSAGE_EMPTY_FLAG_VALUE = "Please provide a value for %1$s to search for.";
+
+    private static final Logger logger = LogsCenter.getLogger(FindCommand.class);
+
+    private final PersonMatchesFlagsPredicate predicate;
+    private final List<Prefix> usedPrefixes;
+
+    /**
+     * @param predicate the predicate that a person must satisfy to be listed.
+     * @param usedPrefixes the flags the user searched by, in the order they are shown in error messages.
+     */
+    public FindCommand(PersonMatchesFlagsPredicate predicate, List<Prefix> usedPrefixes) {
+        requireNonNull(predicate);
+        requireNonNull(usedPrefixes);
+        assert !usedPrefixes.isEmpty() : "find must be given at least one flag";
         this.predicate = predicate;
+        this.usedPrefixes = List.copyOf(usedPrefixes);
     }
 
     @Override
     public CommandResult execute(Model model) {
         requireNonNull(model);
+        logger.info("Executing find with flags: " + usedPrefixes);
         model.updateFilteredPersonList(predicate);
-        return new CommandResult(
-                String.format(Messages.MESSAGE_PERSONS_LISTED_OVERVIEW, model.getFilteredPersonList().size()));
+        assert model.getFilteredPersonList() != null;
+        int matchCount = model.getFilteredPersonList().size();
+        logger.fine("Find matched " + matchCount + " person(s)");
+        if (matchCount == 0) {
+            String flags = usedPrefixes.stream().map(Prefix::toString).collect(Collectors.joining(" "));
+            return new CommandResult(String.format(MESSAGE_NOT_FOUND, flags));
+        }
+        return new CommandResult(MESSAGE_SUCCESS);
     }
 
     @Override
@@ -45,13 +94,15 @@ public class FindCommand extends Command {
             return false;
         }
 
-        return predicate.equals(otherFindCommand.predicate);
+        return predicate.equals(otherFindCommand.predicate)
+                && usedPrefixes.equals(otherFindCommand.usedPrefixes);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .add("predicate", predicate)
+                .add("usedPrefixes", usedPrefixes)
                 .toString();
     }
 }

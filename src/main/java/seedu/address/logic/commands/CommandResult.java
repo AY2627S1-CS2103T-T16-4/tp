@@ -14,18 +14,30 @@ public class CommandResult {
     private final String feedbackToUser;
 
     /** Help information should be shown to the user. */
-    private final boolean showHelp;
+    private final boolean shouldShowHelp;
 
     /** The application should exit. */
-    private final boolean exit;
+    private final boolean shouldExit;
+
+    /** The UI should select the first contact in the resulting list. */
+    private final boolean shouldResetContactSelection;
 
     /**
      * Constructs a {@code CommandResult} with the specified fields.
      */
-    public CommandResult(String feedbackToUser, boolean showHelp, boolean exit) {
+    public CommandResult(String feedbackToUser, boolean shouldShowHelp, boolean shouldExit) {
+        this(feedbackToUser, shouldShowHelp, shouldExit, false);
+    }
+
+    /**
+     * Constructs a result with feedback and instructions for the UI.
+     */
+    public CommandResult(String feedbackToUser, boolean shouldShowHelp, boolean shouldExit,
+            boolean shouldResetContactSelection) {
         this.feedbackToUser = requireNonNull(feedbackToUser);
-        this.showHelp = showHelp;
-        this.exit = exit;
+        this.shouldShowHelp = shouldShowHelp;
+        this.shouldExit = shouldExit;
+        this.shouldResetContactSelection = shouldResetContactSelection;
     }
 
     /**
@@ -41,11 +53,18 @@ public class CommandResult {
     }
 
     public boolean isShowHelp() {
-        return showHelp;
+        return shouldShowHelp;
     }
 
     public boolean isExit() {
-        return exit;
+        return shouldExit;
+    }
+
+    /**
+     * Returns whether the UI should select the first contact in the resulting list.
+     */
+    public boolean shouldResetContactSelection() {
+        return shouldResetContactSelection;
     }
 
     @Override
@@ -60,21 +79,23 @@ public class CommandResult {
         }
 
         return feedbackToUser.equals(otherCommandResult.feedbackToUser)
-                && showHelp == otherCommandResult.showHelp
-                && exit == otherCommandResult.exit;
+                && shouldShowHelp == otherCommandResult.shouldShowHelp
+                && shouldExit == otherCommandResult.shouldExit
+                && shouldResetContactSelection == otherCommandResult.shouldResetContactSelection;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(feedbackToUser, showHelp, exit);
+        return Objects.hash(feedbackToUser, shouldShowHelp, shouldExit, shouldResetContactSelection);
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
                 .add("feedbackToUser", feedbackToUser)
-                .add("showHelp", showHelp)
-                .add("exit", exit)
+                .add("shouldShowHelp", shouldShowHelp)
+                .add("shouldExit", shouldExit)
+                .add("shouldResetContactSelection", shouldResetContactSelection)
                 .toString();
     }
 

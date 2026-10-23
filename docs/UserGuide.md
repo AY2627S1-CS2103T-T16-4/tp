@@ -94,6 +94,7 @@ Examples:
 ### Listing all persons: `list`
 
 Shows a list of all persons in the address book.
+* Empty list while using list command outputs "Your contact list is empty."; 
 
 Format: `list`
 
@@ -129,6 +130,23 @@ Examples:
 * `find John` returns `john` and `John Doe`
 * `find alex david` returns `Alex Yeoh`, `David Li`<br>
   ![result for 'find alex david'](images/findAlexDavidResult.png)
+
+### Pinning a contact: `pin`
+
+Keeps an important contact above unpinned contacts, with a star beside its name.
+
+Format: `pin [n/NAME] [p/PHONE_NUMBER] [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...`
+
+* Provide at least one field. All supplied values must match in full, ignoring letter case except for GitHub usernames (`gh/`).
+* If several contacts match, GitMate displays them and requests more details. No contact is pinned unless exactly one matches. An already-pinned contact produces an error.
+* Pinned contacts stay in the order they were added, above unpinned contacts.
+* Searches all contacts without clearing the current search after success. Use `list` to see a pinned contact hidden by the search.
+* Pins are saved automatically and retained after editing or restarting. There is no `unpin` command.
+
+Examples:
+
+* `pin p/98765432` pins the contact with phone number `98765432`.
+* `pin n/John Doe p/98765432` pins the contact matching both the full name and phone number.
 
 ### Deleting a person: `delete`
 
@@ -201,6 +219,26 @@ _Details coming soon ..._
 
 --------------------------------------------------------------------------------------------------------------------
 
+## Sorting the current list: `sort`
+
+Format: `sort name|group|tag [asc|desc] [cont|none]`. Defaults to `asc` and `none`.
+
+* `sort name asc` sorts names alphabetically, ignoring case; `sort name desc` reverses the order.
+* `sort group` sorts by each contact's alphabetically first group, breaking ties by name.
+  `sort group desc` reverses group order while keeping names within a group alphabetical.
+* `sort tag` uses each contact's alphabetically first tag, ignoring case and breaking ties by name.
+  `sort tag desc` reverses tag order while keeping names within a tag alphabetical.
+* Pinned contacts stay first. Sorting applies separately within the pinned and unpinned sections;
+  contacts without groups or tags appear last within their section when sorting by that field, in either direction.
+* Sorting preserves the current search filter. For example, run `find g/t09`, then `sort name`.
+* Sorting remains active for subsequent searches, additions, edits, and `list` in the current session.
+  Edited contacts move to their new sorted position. Sorting does not change saved contact order or create an undo step.
+* Add `cont` to save the sort preference on normal application exit and restore it on the next launch.
+  For example, `sort name asc cont` or `sort tag cont`. The current search filter is not saved.
+* Omitting `cont`, or specifying `none`, clears any previously saved sort preference on normal exit.
+  Sorting still stays active during the current session; the next launch uses pinned-first stored order.
+  For example, `sort group desc none`. Forced termination before saving may lose preference changes.
+
 ## Command summary
 
 Action     | Format, Examples
@@ -211,4 +249,6 @@ Action     | Format, Examples
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List**   | `list`
+**Sort**   | `sort name\|group\|tag [asc\|desc] [cont\|none]`<br> e.g., `sort name asc cont`, `sort tag`
+**Pin**    | `pin [n/NAME] [p/PHONE_NUMBER] [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...` (at least one field)<br> e.g., `pin p/98765432`
 **Help**   | `help`

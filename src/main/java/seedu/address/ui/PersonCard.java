@@ -4,13 +4,13 @@ import java.util.Comparator;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import seedu.address.model.person.Person;
 
 /**
- * A UI component that displays information of a {@code Person}.
+ * A compact contact row showing a person's name and optional team.
  */
 public class PersonCard extends UiPart<Region> {
 
@@ -27,19 +27,15 @@ public class PersonCard extends UiPart<Region> {
     public final Person person;
 
     @FXML
-    private HBox cardPane;
+    private Label initials;
     @FXML
     private Label name;
     @FXML
     private Label id;
     @FXML
-    private Label phone;
+    private Label pinnedIndicator;
     @FXML
-    private Label address;
-    @FXML
-    private Label email;
-    @FXML
-    private FlowPane tags;
+    private FlowPane groups;
 
     /**
      * Creates a {@code PersonCard} with the given {@code Person} and index to display.
@@ -49,11 +45,23 @@ public class PersonCard extends UiPart<Region> {
         this.person = person;
         id.setText(displayedIndex + ". ");
         name.setText(person.getName().fullName);
-        phone.setText(person.getPhone().value);
-        address.setText(person.getAddress().value);
-        email.setText(person.getEmail().value);
-        person.getTags().stream()
-                .sorted(Comparator.comparing(tag -> tag.tagName))
-                .forEach(tag -> tags.getChildren().add(new Label(tag.tagName)));
+        name.setTooltip(new Tooltip(person.getName().fullName));
+        pinnedIndicator.setVisible(person.isPinned());
+        pinnedIndicator.setManaged(person.isPinned());
+        pinnedIndicator.setTooltip(new Tooltip("Pinned contact"));
+        initials.setText(getInitials(person));
+        person.getGroups().stream()
+                .sorted(Comparator.comparing(group -> group.value))
+                .forEach(group -> {
+                    Label badge = new Label(group.value);
+                    badge.getStyleClass().add("team-badge");
+                    groups.getChildren().add(badge);
+                });
+    }
+
+    static String getInitials(Person person) {
+        String[] words = person.getName().fullName.trim().split("\\s+");
+        String firstInitial = words[0].substring(0, 1);
+        return words.length == 1 ? firstInitial : firstInitial + words[words.length - 1].substring(0, 1);
     }
 }

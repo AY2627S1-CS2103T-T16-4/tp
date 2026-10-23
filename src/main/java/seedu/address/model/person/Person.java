@@ -23,18 +23,45 @@ public class Person {
 
     // Data fields
     private final Address address;
+    private final Set<Group> groups = new HashSet<>();
+    private final Github github;
+    private final Linkedin linkedin;
+    private final Telegram telegram;
     private final Set<Tag> tags = new HashSet<>();
+    private final boolean isPinned;
 
     /**
-     * Every field must be present and not null.
+     * Creates an unpinned person. Every field must be present and not null.
      */
-    public Person(Name name, Phone phone, Email email, Address address, Set<Tag> tags) {
-        requireAllNonNull(name, phone, email, address, tags);
+    public Person(Name name, Phone phone, Email email, Address address, Set<Group> groups,
+            Github github, Linkedin linkedin, Telegram telegram, Set<Tag> tags) {
+        this(name, phone, email, address, groups, github, linkedin, telegram, tags, false);
+    }
+
+    /**
+     * Creates a person with the given details and pin status. Every field must be present and not null.
+     */
+    public Person(Name name, Phone phone, Email email, Address address, Set<Group> groups,
+            Github github, Linkedin linkedin, Telegram telegram, Set<Tag> tags, boolean isPinned) {
+        requireAllNonNull(name, phone, email, address, groups, github, linkedin, telegram, tags);
         this.name = name;
         this.phone = phone;
         this.email = email;
         this.address = address;
+        this.groups.addAll(groups);
+        this.github = github;
+        this.linkedin = linkedin;
+        this.telegram = telegram;
         this.tags.addAll(tags);
+        this.isPinned = isPinned;
+    }
+
+    /**
+     * Copies a person's details with the given pin status.
+     */
+    public Person(Person person, boolean isPinned) {
+        this(person.getName(), person.getPhone(), person.getEmail(), person.getAddress(), person.getGroups(),
+                person.getGithub(), person.getLinkedin(), person.getTelegram(), person.getTags(), isPinned);
     }
 
     public Name getName() {
@@ -54,11 +81,35 @@ public class Person {
     }
 
     /**
+     * Returns an immutable group set, which throws {@code UnsupportedOperationException}
+     * if modification is attempted.
+     */
+    public Set<Group> getGroups() {
+        return Collections.unmodifiableSet(groups);
+    }
+
+    public Github getGithub() {
+        return github;
+    }
+
+    public Linkedin getLinkedin() {
+        return linkedin;
+    }
+
+    public Telegram getTelegram() {
+        return telegram;
+    }
+
+    /**
      * Returns an immutable tag set, which throws {@code UnsupportedOperationException}
      * if modification is attempted.
      */
     public Set<Tag> getTags() {
         return Collections.unmodifiableSet(tags);
+    }
+
+    public boolean isPinned() {
+        return isPinned;
     }
 
     /**
@@ -71,7 +122,7 @@ public class Person {
         }
 
         return otherPerson != null
-                && otherPerson.getName().equals(getName());
+                && otherPerson.getPhone().equals(getPhone());
     }
 
     /**
@@ -93,13 +144,18 @@ public class Person {
                 && phone.equals(otherPerson.phone)
                 && email.equals(otherPerson.email)
                 && address.equals(otherPerson.address)
-                && tags.equals(otherPerson.tags);
+                && groups.equals(otherPerson.groups)
+                && github.equals(otherPerson.github)
+                && linkedin.equals(otherPerson.linkedin)
+                && telegram.equals(otherPerson.telegram)
+                && tags.equals(otherPerson.tags)
+                && isPinned == otherPerson.isPinned;
     }
 
     @Override
     public int hashCode() {
         // use this method for custom fields hashing instead of implementing your own
-        return Objects.hash(name, phone, email, address, tags);
+        return Objects.hash(name, phone, email, address, groups, github, linkedin, telegram, tags, isPinned);
     }
 
     @Override
@@ -109,6 +165,10 @@ public class Person {
                 .add("phone", phone)
                 .add("email", email)
                 .add("address", address)
+                .add("groups", groups)
+                .add("github", github)
+                .add("linkedin", linkedin)
+                .add("telegram", telegram)
                 .add("tags", tags)
                 .toString();
     }
