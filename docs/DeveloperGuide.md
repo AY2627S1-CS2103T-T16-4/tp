@@ -295,32 +295,26 @@ _{Explain here how the data archiving feature will be implemented}_
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | Scope | As a … | I want to … | So that I can …                                                                     |
-|:---------| :- | :- | :- |:------------------------------------------------------------------------------------|
-| `***`    | MVP | New user | See sample data upon launching the app | Immediately understand how a populated contact list looks and functions             |
-| `***`    | MVP | New user | Clear the sample data | Start populating the app with my own data                                           |
-| `***`    | MVP | New user | See instructions for commands | Quickly learn how to use the app and know what command formats are accepted         |
-| `***`    | MVP | User | Add my groupmate’s contacts | Keep track of their contact information for project collaboration                   |
-| `***`    | MVP | User | Delete my groupmate’s contact | Remove groupmates who I do not keep in contact with anymore                         |
-| `***`    | MVP | User | List all my contacts | See an overview of all my current group project contacts                            |
-| `***`    | MVP | User | Find my contacts | Quickly retrieve specific contact details without searching through the entire list |
-| `**`     | MVP | Second-time user | Receive clear, non-destructive error messages when I mistype a command | Correct my input without losing my progress                                         |
-| `**`     | MVP | 10th time user | To see my previous commands autofilled when I click the up arrow key | Quickly repeat or correct recent commands without having to retype them             |
-| `***`    | Beyond MVP | User | Edit my groupmate's contact details | Update outdated contact information without deleting and re-adding them             |
-| `**`     | Beyond MVP | User | Autocomplete commands by pressing Tab | Input commands faster with fewer keystrokes                                         |
-| `**`     | Beyond MVP | 10th time user | Add events for contacts under the same group | Keep track of project meetings and deadlines together.                              |
-| `**`     | Beyond MVP | 10th time user | View events for contacts under the same group | Check my group’s upcoming schedule and availability.                                |
-| `**`     | Beyond MVP | 10th time user | Edit events for contacts under the same group | Update meeting times or details when plans change.                                  |
-| `**`     | Beyond MVP | 10th time user | Delete events for contacts under the same group | Remove cancelled or outdated meetings from our schedule.                            |
-| `*`      | MVP | Experienced User | Pin contacts to appear at the top | Access important contacts quickly                                                   |
-| `*`      | Beyond MVP | Experienced User | Assign custom keyboard shortcuts to commands | Perform frequent tasks faster and tailor the application to my workflow             |
+| Priority | Scope      | As a … | I want to …                                                            | So that I can …                                                                     |
+|:---------|:-----------| :- |:-----------------------------------------------------------------------|:------------------------------------------------------------------------------------|
+| `***`    | MVP        | New user | See sample data upon launching the app                                 | Immediately understand how a populated contact list looks and functions             |
+| `***`    | MVP        | New user | Clear the sample data                                                  | Start populating the app with my own data                                           |
+| `***`    | MVP        | New user | See instructions for commands                                          | Quickly learn how to use the app and know what command formats are accepted         |
+| `***`    | MVP        | User | Add my groupmate’s contacts                                            | Keep track of their contact information for project collaboration                   |
+| `***`    | MVP        | User | Delete my groupmate’s contact                                          | Remove groupmates who I do not keep in contact with anymore                         |
+| `***`    | MVP        | User | List all my contacts                                                   | See an overview of all my current group project contacts                            |
+| `***`    | MVP        | User | Find my contacts                                                       | Quickly retrieve specific contact details without searching through the entire list |
+| `**`     | MVP        | Second-time user | Receive clear, non-destructive error messages when I mistype a command | Correct my input without losing my progress                                         |
+| `**`     | MVP        | 10th time user | To see my previous commands autofilled when I click the up arrow key   | Quickly repeat or correct recent commands without having to retype them             |
+| `***`    | Beyond MVP | User | Edit my groupmate's contact details                                    | Update outdated contact information without deleting and re-adding them             |
+| `*`      | Beyond MVP | Experienced User | Pin contacts to appear at the top                                      | Access important contacts quickly                                                   |
+| `*`      | Beyond MVP | Experienced User | Sort my contacts                                                       | Change the view of my contact list to my preferred choice                           |
 
 ### Use cases
 
 **System:** GitMate (GM)  
 **Use case:** U1. Add a contact  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -346,8 +340,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **System:** GitMate (GM)  
 **Use case:** U2. Delete a contact  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -373,14 +366,13 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 1c. GM detects multiple contacts matching the identifier.
 
-    * 1c1. GM prompts the user to specify further details to resolve ambiguity.
+    * 1c1. GM displays ambiguous contacts and prompts the user to specify further details to resolve ambiguity.
 
     * Use case ends.
  
 **System:** GitMate (GM)  
 **Use case:** U3. Find a contact  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -405,8 +397,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **System:** GitMate (GM)  
 **Use case:** U4. View help  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -425,8 +416,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **System:** GitMate (GM)  
 **Use case:** U5. List all contacts  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -446,7 +436,6 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **System:** GitMate (GM)<br>
 **Use case:** U6. Pin a contact<br>
 **Actor:** User<br>
-**Precondition:** GM is running and ready to receive commands
 
 **MSS**
 
@@ -481,8 +470,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **System:** GitMate (GM)  
 **Use case:** U7. Sort Address Book
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -500,6 +488,50 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
     * Use case ends.
 
 
+
+**System:** GitMate (GM)  
+**Use case:** U8. Edit a contact  
+**Actor:** User
+
+**MSS**
+
+1.  User enters edit command with contact details to identify the contact along with the desired updates.
+2.  GM updates the contact.
+3.  GM displays a confirmation message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. GM detects an invalid command format, invalid field values, or no fields to update.
+
+    * 1a1. GM displays an error message explaining the accepted input.
+
+    * Use case ends.
+
+* 1b. GM detects that the contact does not exist.
+
+    * 1b1. GM informs the user that no contact matches the supplied details.
+
+    * Use case ends.
+
+* 1c. GM detects multiple contacts matching the identifier.
+
+    * 1c1. GM displays ambiguous contacts and prompts the user to specify further details to resolve ambiguity.
+
+    * Use case ends.
+
+* 1d. GM detects an attempt to clear the contact's name or phone number.
+
+    * 1d1. GM informs the user that name and phone number cannot be cleared.
+
+    * Use case ends.
+
+* 1e. GM detects that the supplied phone number belongs to another contact.
+
+    * 1e1. GM informs the user of the duplicate phone number.
+
+    * Use case ends.
 
 ### Non-Functional Requirements
 
