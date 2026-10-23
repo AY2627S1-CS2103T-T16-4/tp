@@ -90,9 +90,9 @@ Here's a (partial) class diagram of the `Logic` component:
 
 <puml src="diagrams/LogicClassDiagram.puml" width="550"/>
 
-The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API call as an example.
+The sequence diagram below illustrates the high-level interactions within the `Logic` component, taking `execute("delete n/John Doe p/81231234")` as an example where exactly one contact matches all supplied criteria. The search includes contacts hidden by the current filter; undo bookkeeping, storage, and UI updates are omitted.
 
-<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `delete 1` Command" />
+<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for Deleting a Contact by Exact Field Criteria" />
 
 <box type="info" seamless>
 
