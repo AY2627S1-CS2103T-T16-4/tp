@@ -4,8 +4,10 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Deque;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
@@ -119,6 +121,13 @@ public class ModelManager implements Model {
     @Override
     public ObservableList<Person> getFilteredPersonList() {
         return displayedPersons;
+    }
+
+    @Override
+    public List<Person> getAllPersonsInDisplayOrder() {
+        List<Person> allPersons = new ArrayList<>(addressBook.getPersonList());
+        allPersons.sort(sortedPersons.getComparator());
+        return allPersons;
     }
 
     @Override

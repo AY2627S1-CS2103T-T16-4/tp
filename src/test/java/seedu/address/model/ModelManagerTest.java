@@ -7,11 +7,17 @@ import static seedu.address.model.Model.PREDICATE_SHOW_ALL_PERSONS;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
+import static seedu.address.testutil.TypicalPersons.CARL;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import seedu.address.commons.core.GuiSettings;
+import seedu.address.model.SortSettings.Field;
 import seedu.address.model.person.FindPersonDescriptor;
+import seedu.address.model.person.Person;
 import seedu.address.model.person.PersonMatchesFlagsPredicate;
 import seedu.address.testutil.AddressBookBuilder;
 
@@ -70,6 +76,68 @@ public class ModelManagerTest {
     @Test
     public void getFilteredPersonList_modifyList_throwsUnsupportedOperationException() {
         assertThrows(UnsupportedOperationException.class, () -> modelManager.getFilteredPersonList().remove(0));
+    }
+
+    @Test
+    public void getAllPersonsInDisplayOrder_noFilterOrSort_matchesFilteredPersonList() {
+        modelManager.addPerson(ALICE);
+        modelManager.addPerson(BENSON);
+
+        assertEquals(new ArrayList<>(modelManager.getFilteredPersonList()),
+                modelManager.getAllPersonsInDisplayOrder());
+    }
+
+    @Test
+    public void getAllPersonsInDisplayOrder_filterActive_stillReturnsAllPersons() {
+        modelManager.addPerson(ALICE);
+        modelManager.addPerson(BENSON);
+        modelManager.updateFilteredPersonList(person -> person.equals(ALICE));
+
+        assertEquals(1, modelManager.getFilteredPersonList().size());
+        assertEquals(List.of(ALICE, BENSON), modelManager.getAllPersonsInDisplayOrder());
+    }
+
+    @Test
+    public void getAllPersonsInDisplayOrder_pinnedPerson_listedFirst() {
+        modelManager.addPerson(ALICE);
+        modelManager.addPerson(BENSON);
+        Person pinnedBenson = new Person(BENSON, true);
+        modelManager.setPerson(BENSON, pinnedBenson);
+
+        assertEquals(List.of(pinnedBenson, ALICE), modelManager.getAllPersonsInDisplayOrder());
+    }
+
+    @Test
+    public void getAllPersonsInDisplayOrder_sortActive_followsSortOrder() {
+        modelManager.addPerson(ALICE);
+        modelManager.addPerson(BENSON);
+        modelManager.addPerson(CARL);
+        modelManager.sortFilteredPersonList(new SortSettings(Field.NAME, true), false);
+
+        assertEquals(List.of(CARL, BENSON, ALICE), modelManager.getAllPersonsInDisplayOrder());
+    }
+
+    @Test
+    public void getAllPersonsInDisplayOrder_sortAndFilterActive_matchesSortedUnfilteredOrder() {
+        modelManager.addPerson(ALICE);
+        modelManager.addPerson(BENSON);
+        modelManager.addPerson(CARL);
+        modelManager.sortFilteredPersonList(new SortSettings(Field.NAME, true), false);
+        List<Person> sortedAll = new ArrayList<>(modelManager.getFilteredPersonList());
+
+        modelManager.updateFilteredPersonList(person -> person.equals(BENSON));
+
+        assertEquals(sortedAll, modelManager.getAllPersonsInDisplayOrder());
+    }
+
+    @Test
+    public void getAllPersonsInDisplayOrder_modifyReturnedList_doesNotAffectModel() {
+        modelManager.addPerson(ALICE);
+
+        modelManager.getAllPersonsInDisplayOrder().clear();
+
+        assertTrue(modelManager.hasPerson(ALICE));
+        assertEquals(1, modelManager.getAllPersonsInDisplayOrder().size());
     }
 
     @Test
