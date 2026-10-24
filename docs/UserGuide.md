@@ -162,6 +162,16 @@ Examples:
 * `list` followed by `delete 2` deletes the 2nd person in the address book.
 * `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
 
+### Undoing previous ccommand: `undo`
+
+Restores the address book to the state before the most recent data-changing
+command.
+
+Format: `undo`
+
+* The undo command can undo data-changing commands such as add, delete, edit, and clear.
+* It does not undo view-only commands such as find, list, or sort.
+
 ### Clearing all entries: `clear`
 
 Clears all entries from the address book.
