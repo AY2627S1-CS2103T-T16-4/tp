@@ -1,8 +1,11 @@
 package seedu.address.logic.parser;
 
+import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.Messages.MESSAGE_UNKNOWN_COMMAND;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,6 +17,7 @@ import seedu.address.logic.commands.Command;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.ExitCommand;
+import seedu.address.logic.commands.ExportCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
@@ -32,6 +36,22 @@ public class AddressBookParser {
      */
     private static final Pattern BASIC_COMMAND_FORMAT = Pattern.compile("(?<commandWord>\\S+)(?<arguments>.*)");
     private static final Logger logger = LogsCenter.getLogger(AddressBookParser.class);
+
+    private final Path exportDirectory;
+
+    /**
+     * Creates a parser whose export commands write to the working directory.
+     */
+    public AddressBookParser() {
+        this(Paths.get(""));
+    }
+
+    /**
+     * Creates a parser whose export commands write to {@code exportDirectory}.
+     */
+    public AddressBookParser(Path exportDirectory) {
+        this.exportDirectory = requireNonNull(exportDirectory);
+    }
 
     /**
      * Parses user input into command for execution.
@@ -66,6 +86,7 @@ public class AddressBookParser {
             case ExitCommand.COMMAND_WORD -> new ExitCommand();
             case HelpCommand.COMMAND_WORD -> new HelpCommand();
             case UndoCommand.COMMAND_WORD -> new UndoCommandParser().parse(arguments);
+            case ExportCommand.COMMAND_WORD -> new ExportCommandParser(exportDirectory).parse(arguments);
             default -> {
                 logger.finer("This user input caused a ParseException: " + userInput);
                 throw new ParseException(MESSAGE_UNKNOWN_COMMAND);

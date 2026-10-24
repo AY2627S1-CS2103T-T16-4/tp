@@ -2,6 +2,8 @@ package seedu.address.logic;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Logger;
 
 import javafx.collections.ObservableList;
@@ -48,7 +50,16 @@ public class LogicManager implements Logic {
     public LogicManager(Model model, Storage storage) {
         this.model = model;
         this.storage = storage;
-        addressBookParser = new AddressBookParser();
+        addressBookParser = new AddressBookParser(getExportDirectory(storage.getAddressBookFilePath()));
+    }
+
+    /**
+     * Returns the folder holding {@code dataFilePath}, so exports are saved next to the data file.
+     * A bare filename has no folder part, in which case the working directory is used.
+     */
+    static Path getExportDirectory(Path dataFilePath) {
+        Path parent = dataFilePath.getParent();
+        return parent != null ? parent : Paths.get("");
     }
 
     @Override

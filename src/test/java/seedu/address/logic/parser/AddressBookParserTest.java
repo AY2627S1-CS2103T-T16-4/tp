@@ -12,6 +12,8 @@ import static seedu.address.logic.commands.EditCommand.EDIT_SEPARATOR;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.testutil.Assert.assertThrows;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.logic.commands.ExitCommand;
+import seedu.address.logic.commands.ExportCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
@@ -109,6 +112,32 @@ public class AddressBookParserTest {
     public void parseCommand_list() throws Exception {
         assertTrue(parser.parseCommand(ListCommand.COMMAND_WORD) instanceof ListCommand);
         assertTrue(parser.parseCommand(ListCommand.COMMAND_WORD + " 3") instanceof ListCommand);
+    }
+
+    @Test
+    public void parseCommand_export() throws Exception {
+        Path directory = Paths.get("exports");
+        AddressBookParser exportParser = new AddressBookParser(directory);
+
+        assertEquals(new ExportCommand(directory), exportParser.parseCommand(ExportCommand.COMMAND_WORD));
+        assertEquals(new ExportCommand(directory), exportParser.parseCommand(ExportCommand.COMMAND_WORD + "   "));
+    }
+
+    @Test
+    public void parseCommand_exportDefaultParser_usesWorkingDirectory() throws Exception {
+        assertEquals(new ExportCommand(Paths.get("")), parser.parseCommand(ExportCommand.COMMAND_WORD));
+    }
+
+    @Test
+    public void parseCommand_exportWithArguments_throwsParseException() {
+        assertThrows(ParseException.class,
+                String.format(MESSAGE_INVALID_COMMAND_FORMAT, ExportCommand.MESSAGE_USAGE), ()
+                    -> parser.parseCommand(ExportCommand.COMMAND_WORD + " contacts.csv"));
+    }
+
+    @Test
+    public void constructor_nullExportDirectory_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new AddressBookParser(null));
     }
 
     @Test
