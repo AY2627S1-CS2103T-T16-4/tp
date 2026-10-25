@@ -16,6 +16,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.FindCommand;
+import seedu.address.logic.commands.ImportCommand;
 import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.PinCommand;
 import seedu.address.logic.commands.SortCommand;
@@ -99,6 +100,7 @@ public class LogicManager implements Logic {
      */
     private static boolean shouldResetContactSelection(Command command) {
         return command instanceof AddCommand
+                || command instanceof ImportCommand
                 || command instanceof ClearCommand
                 || command instanceof DeleteCommand
                 || command instanceof EditCommand
