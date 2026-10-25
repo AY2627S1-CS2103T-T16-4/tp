@@ -239,6 +239,30 @@ Format: `sort name|group|tag [asc|desc] [cont|none]`. Defaults to `asc` and `non
   Sorting still stays active during the current session; the next launch uses pinned-first stored order.
   For example, `sort group desc none`. Forced termination before saving may lose preference changes.
 
+## Importing contacts: `import`
+
+Format: `import FILE_PATH`, for example `import data/contacts-20261025-042535.csv`.
+Use a UTF-8 CSV file with the header exported by GitMate, in the same order:
+
+```csv
+name,phone,email,address,groups,github,linkedin,telegram,tags,pinned
+```
+
+* The entire argument is the path. Spaces are allowed without surrounding quotes.
+  Relative paths start from the application's working directory; absolute paths are also accepted.
+* Import adds contacts without overwriting existing contacts. A phone number already in the address book,
+  or repeated in the file, rejects the whole batch. Invalid records also reject the whole batch.
+  Error record numbers count the header as record 1; quoted line breaks do not start new records.
+* Empty optional fields are allowed. Use semicolons between groups or tags and `true` or `false` for pinned status.
+  An empty file or a header-only file imports nothing and reports an error.
+* Pinned status is preserved. The current filter, active sort, and saved sort preference remain active.
+  Use `list` if imported contacts are hidden by the current filter.
+* One `undo` reverses the entire successful import. Contacts are saved through the normal address-book save path.
+  As with other data-changing commands, a disk-save failure can leave changes in memory; validation failures do not.
+* Export compatibility limitations: leading spreadsheet-protection apostrophes are preserved, because they cannot
+  be distinguished from literal apostrophes. Semicolons in the groups column always separate groups, so a group
+  name containing a semicolon cannot be restored unambiguously from the current export format.
+
 ## Command summary
 
 Action     | Format, Examples
@@ -249,6 +273,7 @@ Action     | Format, Examples
 **Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List**   | `list`
+**Import** | `import FILE_PATH`<br> e.g., `import data/contacts.csv`
 **Sort**   | `sort name\|group\|tag [asc\|desc] [cont\|none]`<br> e.g., `sort name asc cont`, `sort tag`
 **Pin**    | `pin [n/NAME] [p/PHONE_NUMBER] [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...` (at least one field)<br> e.g., `pin p/98765432`
 **Help**   | `help`

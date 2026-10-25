@@ -25,6 +25,7 @@ public class HelpCommand extends Command {
             SortCommand.MESSAGE_USAGE,
             UndoCommand.MESSAGE_USAGE,
             ExportCommand.MESSAGE_USAGE,
+            ImportCommand.MESSAGE_USAGE,
             MESSAGE_USAGE,
             "exit: Closes the application.\nExample: exit");
 
