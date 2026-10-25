@@ -21,6 +21,7 @@ public class HelpCommand extends Command {
             "list: Shows all contacts.\nExample: list",
             "clear: Deletes all contacts.\nExample: clear",
             PinCommand.MESSAGE_USAGE,
+            UnpinCommand.MESSAGE_USAGE,
             SortCommand.MESSAGE_USAGE,
             UndoCommand.MESSAGE_USAGE,
             MESSAGE_USAGE,

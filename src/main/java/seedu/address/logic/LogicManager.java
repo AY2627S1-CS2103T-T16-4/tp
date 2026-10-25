@@ -18,6 +18,7 @@ import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.PinCommand;
 import seedu.address.logic.commands.SortCommand;
 import seedu.address.logic.commands.UndoCommand;
+import seedu.address.logic.commands.UnpinCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.logic.parser.AddressBookParser;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -93,6 +94,7 @@ public class LogicManager implements Logic {
                 || command instanceof FindCommand
                 || command instanceof ListCommand
                 || command instanceof PinCommand
+                || command instanceof UnpinCommand
                 || command instanceof SortCommand
                 || command instanceof UndoCommand;
     }
