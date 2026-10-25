@@ -90,9 +90,9 @@ Here's a (partial) class diagram of the `Logic` component:
 
 <puml src="diagrams/LogicClassDiagram.puml" width="550"/>
 
-The sequence diagram below illustrates the interactions within the `Logic` component, taking `execute("delete 1")` API call as an example.
+The sequence diagram below illustrates the high-level interactions within the `Logic` component, taking `execute("delete n/John Doe p/81231234")` as an example where exactly one contact matches all supplied criteria. The search includes contacts hidden by the current filter; undo bookkeeping, storage, and UI updates are omitted.
 
-<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `delete 1` Command" />
+<puml src="diagrams/DeleteSequenceDiagram.puml" alt="Interactions Inside the Logic Component for Deleting a Contact by Exact Field Criteria" />
 
 <box type="info" seamless>
 
@@ -172,94 +172,42 @@ The activity diagram summarizes the flow, grouping unsuccessful requests into on
 
 <puml src="diagrams/PinActivityDiagram.puml" alt="Pin activity flow showing validation, contact replacement, display update, saving, and feedback" />
 
-### \[Proposed\] Undo/redo feature
+### Undo Command
 
-#### Proposed Implementation
+The undo feature allows users to restore the address book to the state before the most recent undoable command.
 
-The proposed undo/redo mechanism is facilitated by `VersionedAddressBook`. It extends `AddressBook` with an undo/redo history, stored internally as an `addressBookStateList` and `currentStatePointer`. Additionally, it implements the following operations:
+#### Design overview
 
-* `VersionedAddressBook#commit()` -- Saves the current address book state in its history.
-* `VersionedAddressBook#undo()` -- Restores the previous address book state from its history.
-* `VersionedAddressBook#redo()` -- Restores a previously undone address book state from its history.
+Before executing an undoable command, LogicManager creates a defensive copy of the current AddressBook. If the command executes successfully, this copy is saved in ModelManager's undoHistory. The undo history is implemented as a stack.
 
-These operations are exposed in the `Model` interface as `Model#commitAddressBook()`, `Model#undoAddressBook()` and `Model#redoAddressBook()` respectively.
+#### Undo flow
 
-Given below is an example usage scenario and how the undo/redo mechanism behaves at each step.
+The following steps occur when the user enters undo:
 
-Step 1. The user launches the application for the first time. The `VersionedAddressBook` will be initialized with the initial address book state, and the `currentStatePointer` pointing to that single address book state.
+1. AddressBookParser creates an UndoCommand.
 
-<puml src="diagrams/UndoRedoState0.puml" alt="UndoRedoState0" />
+2. UndoCommand calls Model#undo().
 
-Step 2. The user executes `delete 5` command to delete the 5th person in the address book. The `delete` command calls `Model#commitAddressBook()`, causing the modified state of the address book after the `delete 5` command executes to be saved in the `addressBookStateList`, and the `currentStatePointer` is shifted to the newly inserted address book state.
+3. ModelManager#undo() checks whether the undo history is empty.
 
-<puml src="diagrams/UndoRedoState1.puml" alt="UndoRedoState1" />
+4. If a previous state exists, it is removed from the history and restored into the current AddressBook.
 
-Step 3. The user executes `add n/David …​` to add a new person. The `add` command also calls `Model#commitAddressBook()`, causing another modified address book state to be saved into the `addressBookStateList`.
+5. The active filter is reapplied to the restored address book.
 
-<puml src="diagrams/UndoRedoState2.puml" alt="UndoRedoState2" />
+6. A success message is returned to the user.
 
-<box type="info" seamless>
+If the undo history is empty, the address book remains unchanged and the user receives a message indicating that there is nothing to undo.
 
-**Note:** If a command fails its execution, it will not call `Model#commitAddressBook()`, so the address book state will not be saved into the `addressBookStateList`.
-</box>
+#### Undoable commands
 
-Step 4. The user now decides that adding the person was a mistake, and decides to undo that action by executing the `undo` command. The `undo` command will call `Model#undoAddressBook()`, which will shift the `currentStatePointer` once to the left, pointing it to the previous address book state, and restores the address book to that state.
+Commands that modify address-book data save a state for undo. These include:
 
-<puml src="diagrams/UndoRedoState3.puml" alt="UndoRedoState3" />
+* add
+* delete
+* edit
+* clear
 
-
-<box type="info" seamless>
-
-**Note:** If the `currentStatePointer` is at index 0, pointing to the initial AddressBook state, then there are no previous AddressBook states to restore. The `undo` command uses `Model#canUndoAddressBook()` to check if this is the case. If so, it will return an error to the user rather
-than attempting to perform the undo.
-</box>
-
-The following sequence diagram shows how an undo operation goes through the `Logic` component:
-
-<puml src="diagrams/UndoSequenceDiagram-Logic.puml" alt="UndoSequenceDiagram-Logic" />
-
-<box type="info" seamless>
-
-**Note:** The lifeline for `UndoCommand` should end at the destroy marker (X), but due to a limitation of PlantUML, it continues to the end of the diagram.
-</box>
-
-Similarly, how an undo operation goes through the `Model` component is shown below:
-
-<puml src="diagrams/UndoSequenceDiagram-Model.puml" alt="UndoSequenceDiagram-Model" />
-
-The `redo` command does the opposite — it calls `Model#redoAddressBook()`, which shifts the `currentStatePointer` once to the right, pointing to the previously undone state, and restores the address book to that state.
-
-<box type="info" seamless>
-
-**Note:** If the `currentStatePointer` is at index `addressBookStateList.size() - 1`, pointing to the latest address book state, then there are no undone AddressBook states to restore. The `redo` command uses `Model#canRedoAddressBook()` to check if this is the case. If so, it will return an error to the user rather than attempting to perform the redo.
-</box>
-
-Step 5. The user then decides to execute the command `list`. Commands that do not modify the address book, such as `list`, will usually not call `Model#commitAddressBook()`, `Model#undoAddressBook()` or `Model#redoAddressBook()`. Thus, the `addressBookStateList` remains unchanged.
-
-<puml src="diagrams/UndoRedoState4.puml" alt="UndoRedoState4" />
-
-Step 6. The user executes `clear`, which calls `Model#commitAddressBook()`. Since the `currentStatePointer` is not pointing at the end of the `addressBookStateList`, all address book states after the `currentStatePointer` will be purged. Reason: It no longer makes sense to redo the `add n/David …` command. This is the behavior that most modern desktop applications follow.
-
-<puml src="diagrams/UndoRedoState5.puml" alt="UndoRedoState5" />
-
-The following activity diagram summarizes what happens when a user executes a new command:
-
-<puml src="diagrams/CommitActivityDiagram.puml" width="250" />
-
-#### Design considerations:
-
-**Aspect: How undo & redo execute:**
-
-* **Alternative 1 (current choice):** Saves the entire address book.
-  * Pros: Easy to implement.
-  * Cons: May have performance issues in terms of memory usage.
-
-* **Alternative 2:** Individual command knows how to undo/redo by
-  itself.
-  * Pros: Will use less memory (e.g. for `delete`, just save the person being deleted).
-  * Cons: We must ensure that the implementation of each individual command is correct.
-
-_{more aspects and alternatives to be added}_
+This keeps the undo history focused on changes to the address book rather than changes to the user's view.
 
 ### \[Proposed\] Data archiving
 
@@ -295,32 +243,26 @@ _{Explain here how the data archiving feature will be implemented}_
 
 Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unlikely to have) - `*`
 
-| Priority | Scope | As a … | I want to … | So that I can …                                                                     |
-|:---------| :- | :- | :- |:------------------------------------------------------------------------------------|
-| `***`    | MVP | New user | See sample data upon launching the app | Immediately understand how a populated contact list looks and functions             |
-| `***`    | MVP | New user | Clear the sample data | Start populating the app with my own data                                           |
-| `***`    | MVP | New user | See instructions for commands | Quickly learn how to use the app and know what command formats are accepted         |
-| `***`    | MVP | User | Add my groupmate’s contacts | Keep track of their contact information for project collaboration                   |
-| `***`    | MVP | User | Delete my groupmate’s contact | Remove groupmates who I do not keep in contact with anymore                         |
-| `***`    | MVP | User | List all my contacts | See an overview of all my current group project contacts                            |
-| `***`    | MVP | User | Find my contacts | Quickly retrieve specific contact details without searching through the entire list |
-| `**`     | MVP | Second-time user | Receive clear, non-destructive error messages when I mistype a command | Correct my input without losing my progress                                         |
-| `**`     | MVP | 10th time user | To see my previous commands autofilled when I click the up arrow key | Quickly repeat or correct recent commands without having to retype them             |
-| `***`    | Beyond MVP | User | Edit my groupmate's contact details | Update outdated contact information without deleting and re-adding them             |
-| `**`     | Beyond MVP | User | Autocomplete commands by pressing Tab | Input commands faster with fewer keystrokes                                         |
-| `**`     | Beyond MVP | 10th time user | Add events for contacts under the same group | Keep track of project meetings and deadlines together.                              |
-| `**`     | Beyond MVP | 10th time user | View events for contacts under the same group | Check my group’s upcoming schedule and availability.                                |
-| `**`     | Beyond MVP | 10th time user | Edit events for contacts under the same group | Update meeting times or details when plans change.                                  |
-| `**`     | Beyond MVP | 10th time user | Delete events for contacts under the same group | Remove cancelled or outdated meetings from our schedule.                            |
-| `*`      | MVP | Experienced User | Pin contacts to appear at the top | Access important contacts quickly                                                   |
-| `*`      | Beyond MVP | Experienced User | Assign custom keyboard shortcuts to commands | Perform frequent tasks faster and tailor the application to my workflow             |
+| Priority | Scope      | As a … | I want to …                                                            | So that I can …                                                                     |
+|:---------|:-----------| :- |:-----------------------------------------------------------------------|:------------------------------------------------------------------------------------|
+| `***`    | MVP        | New user | See sample data upon launching the app                                 | Immediately understand how a populated contact list looks and functions             |
+| `***`    | MVP        | New user | Clear the sample data                                                  | Start populating the app with my own data                                           |
+| `***`    | MVP        | New user | See instructions for commands                                          | Quickly learn how to use the app and know what command formats are accepted         |
+| `***`    | MVP        | User | Add my groupmate’s contacts                                            | Keep track of their contact information for project collaboration                   |
+| `***`    | MVP        | User | Delete my groupmate’s contact                                          | Remove groupmates who I do not keep in contact with anymore                         |
+| `***`    | MVP        | User | List all my contacts                                                   | See an overview of all my current group project contacts                            |
+| `***`    | MVP        | User | Find my contacts                                                       | Quickly retrieve specific contact details without searching through the entire list |
+| `**`     | MVP        | Second-time user | Receive clear, non-destructive error messages when I mistype a command | Correct my input without losing my progress                                         |
+| `**`     | MVP        | 10th time user | To see my previous commands autofilled when I click the up arrow key   | Quickly repeat or correct recent commands without having to retype them             |
+| `***`    | Beyond MVP | User | Edit my groupmate's contact details                                    | Update outdated contact information without deleting and re-adding them             |
+| `*`      | Beyond MVP | Experienced User | Pin contacts to appear at the top                                      | Access important contacts quickly                                                   |
+| `*`      | Beyond MVP | Experienced User | Sort my contacts                                                       | Change the view of my contact list to my preferred choice                           |
 
 ### Use cases
 
 **System:** GitMate (GM)  
 **Use case:** U1. Add a contact  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -346,8 +288,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **System:** GitMate (GM)  
 **Use case:** U2. Delete a contact  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -373,14 +314,13 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 1c. GM detects multiple contacts matching the identifier.
 
-    * 1c1. GM prompts the user to specify further details to resolve ambiguity.
+    * 1c1. GM displays ambiguous contacts and prompts the user to specify further details to resolve ambiguity.
 
     * Use case ends.
  
 **System:** GitMate (GM)  
 **Use case:** U3. Find a contact  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -405,8 +345,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **System:** GitMate (GM)  
 **Use case:** U4. View help  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -425,8 +364,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **System:** GitMate (GM)  
 **Use case:** U5. List all contacts  
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -446,7 +384,6 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 **System:** GitMate (GM)<br>
 **Use case:** U6. Pin a contact<br>
 **Actor:** User<br>
-**Precondition:** GM is running and ready to receive commands
 
 **MSS**
 
@@ -461,28 +398,32 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * 1a. GM detects missing or invalid contact criteria.
 
     * 1a1. GM displays an error explaining the accepted input.
+    
     * Use case ends.
 
 * 1b. GM finds no contact matching the supplied criteria.
 
     * 1b1. GM informs the user that no contact matches.
+    
     * Use case ends.
 
 * 1c. GM finds multiple matching contacts.
 
     * 1c1. GM displays the matching contacts and requests additional details. No contact is pinned.
+    
     * 1c2. User supplies further details to identify one contact.
+    
     * Use case resumes at step 1.
 
 * 1d. GM finds that the contact is already pinned.
 
     * 1d1. GM informs the user that the contact is already pinned.
+    
     * Use case ends.
 
 **System:** GitMate (GM)  
 **Use case:** U7. Sort Address Book
-**Actor:** User  
-**Precondition:** GM is running and ready to receive commands
+**Actor:** User
 
 **MSS**
 
@@ -497,9 +438,72 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * 1a. User enters an unsupported field
 
     * 1a1. GM displays an error explaining the accepted input.
+
     * Use case ends.
 
+**System:** GitMate (GM)  
+**Use case:** U8. Edit a contact  
+**Actor:** User
 
+**MSS**
+
+1.  User enters edit command with contact details to identify the contact along with the desired updates.
+2.  GM updates the contact.
+3.  GM displays a confirmation message.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. GM detects an invalid command format, invalid field values, or no fields to update.
+
+    * 1a1. GM displays an error message explaining the accepted input.
+
+    * Use case ends.
+
+* 1b. GM detects that the contact does not exist.
+
+    * 1b1. GM informs the user that no contact matches the supplied details.
+
+    * Use case ends.
+
+* 1c. GM detects multiple contacts matching the identifier.
+
+    * 1c1. GM displays ambiguous contacts and prompts the user to specify further details to resolve ambiguity.
+
+    * Use case ends.
+
+* 1d. GM detects an attempt to clear the contact's name or phone number.
+
+    * 1d1. GM informs the user that name and phone number cannot be cleared.
+
+    * Use case ends.
+
+* 1e. GM detects that the supplied phone number belongs to another contact.
+
+    * 1e1. GM informs the user of the duplicate phone number.
+
+    * Use case ends.
+    
+**System:** GitMate (GM)  
+**Use case:** U9. Undo most recent command  
+**Actor:** User  
+**Precondition:** GM is running and ready to receive commands
+
+**MSS**
+
+1.  User enters the undo command.
+2.  GM restores most recent saved state.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. There is no previous state to restore.
+
+    * 1a1. The system displays an error message.
+
+    * Use case ends.
 
 ### Non-Functional Requirements
 
