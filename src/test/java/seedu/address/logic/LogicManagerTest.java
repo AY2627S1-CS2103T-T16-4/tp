@@ -22,8 +22,11 @@ import static seedu.address.testutil.TypicalPersons.AMY;
 
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +38,7 @@ import seedu.address.logic.commands.CommandResult;
 import seedu.address.logic.commands.DeleteCommand;
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.ExitCommand;
+import seedu.address.logic.commands.ExportCommand;
 import seedu.address.logic.commands.FindCommand;
 import seedu.address.logic.commands.HelpCommand;
 import seedu.address.logic.commands.ListCommand;
@@ -125,6 +129,34 @@ public class LogicManagerTest {
         assertFalse(result.isShowHelp());
         assertFalse(result.isExit());
         assertEquals(HelpCommand.SHOWING_HELP_MESSAGE, result.getFeedbackToUser());
+    }
+
+    @Test
+    public void execute_export_writesCsvNextToDataFileWithoutSelectionReset() throws Exception {
+        model.addPerson(AMY);
+
+        CommandResult result = logic.execute(ExportCommand.COMMAND_WORD);
+
+        assertFalse(result.shouldResetContactSelection());
+        assertFalse(result.isShowHelp());
+        assertFalse(result.isExit());
+        try (Stream<Path> files = Files.list(temporaryFolder)) {
+            List<Path> csvFiles = files.filter(file -> file.toString().endsWith(".csv")).toList();
+            assertEquals(1, csvFiles.size());
+            assertTrue(result.getFeedbackToUser().contains(csvFiles.get(0).toString()));
+            assertEquals(2, Files.readAllLines(csvFiles.get(0)).size());
+        }
+        assertEquals(List.of(AMY), model.getAddressBook().getPersonList());
+    }
+
+    @Test
+    public void getExportDirectory_dataFileInFolder_returnsThatFolder() {
+        assertEquals(Paths.get("data"), LogicManager.getExportDirectory(Paths.get("data", "addressbook.json")));
+    }
+
+    @Test
+    public void getExportDirectory_bareFilename_returnsWorkingDirectory() {
+        assertEquals(Paths.get(""), LogicManager.getExportDirectory(Paths.get("addressbook.json")));
     }
 
     @Test

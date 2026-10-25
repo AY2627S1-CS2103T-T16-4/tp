@@ -1,5 +1,6 @@
 package seedu.address.model;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
@@ -62,6 +63,12 @@ public interface Model {
 
     /** Returns an unmodifiable filtered list, pinned first and sorted within each section. */
     ObservableList<Person> getFilteredPersonList();
+
+    /**
+     * Returns a copy of every contact in the order shown to the user: pinned first, then the active sort,
+     * then the order added. Unlike {@link #getFilteredPersonList()}, the current filter is ignored.
+     */
+    List<Person> getAllPersonsInDisplayOrder();
 
     /**
      * Updates the filter of the filtered person list to filter by the given {@code predicate}.
