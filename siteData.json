@@ -53,6 +53,7 @@
         "implementation": "Implementation",
         "edit-command": "Edit command",
         "delete-command": "Delete command",
+        "find-command": "Find command",
         "pinned-contacts": "Pinned contacts",
         "undo-command": "Undo Command",
         "documentation-logging-testing-dev-ops": "Documentation, logging, testing, dev-ops",
@@ -66,6 +67,7 @@
         "launch-and-shutdown": "Launch and shutdown",
         "deleting-a-person": "Deleting a person",
         "editing-a-person": "Editing a person",
+        "finding-a-person": "Finding a person",
         "saving-data": "Saving data"
       },
       "headingKeywords": {}
@@ -117,7 +119,7 @@
         "adding-a-person-add": "Adding a person: add",
         "listing-all-persons-list": "Listing all persons: list",
         "editing-a-person-edit": "Editing a person: edit",
-        "locating-persons-by-name-find": "Locating persons by name: find",
+        "locating-persons-by-fields-find": "Locating persons by fields: find",
         "pinning-a-contact-pin": "Pinning a contact: pin",
         "deleting-a-person-delete": "Deleting a person: delete",
         "undoing-previous-ccommand-undo": "Undoing previous ccommand: undo",
