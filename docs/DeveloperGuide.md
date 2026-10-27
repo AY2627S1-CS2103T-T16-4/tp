@@ -159,6 +159,21 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Add command
+
+The `add` command creates a new contact from the details provided by the user. For example:
+
+```text
+add n/John Doe p/81231234 a/123 Clementi Ave 3 e/john.doe@example.com gh/johndoe li/john-doe tg/johndoe g/ProjectTeam t/active t/colleague
+```
+Its implementation has five main parts:
+
+* **Parsing:** `AddCommandParser` tokenizes the input using the supported prefixes: name `n/`, phone `p/`, address `a/`, email `e/`, GitHub `gh/`, LinkedIn `li/`, Telegram `tg/`, group `g/`, and tag `t/`. The name and phone prefixes are required. Unsupported text, missing required fields, invalid values, and repeated single-value prefixes are rejected.
+* **Field validation:** `ParserUtil` validates each field according to its corresponding model class. Names must contain only alphanumeric characters and spaces. Phone numbers must contain exactly eight digits and begin with `8` or `9`. Emails and tags must follow their respective validation rules, while optional fields may be omitted.
+* **Repeated fields:** Group and tag prefixes may be repeated to assign multiple groups or tags to a contact. For example, `g/Friends g/Project` assigns two groups, while `t/active t/colleague` assigns two tags. The values are stored as sets.
+* **Contact creation:** After parsing and validating the input, `AddCommandParser` creates a Person object containing the supplied details. Fields that were not provided are represented using their default empty values.
+* **Duplicate prevention and persistence:** When executed, `AddCommand` checks whether the phone number is already associated with an existing contact. If it is, the command is rejected with a duplicate-phone error. Otherwise, the new contact is added to the model. Since `AddCommand` is undoable, the previous address book state is saved before the change and the updated address book is saved through Storage.
+
 ### Edit command
 
 The `edit` command updates exactly one contact identified by exact field criteria. The `>>` separator distinguishes the search criteria from the requested updates, for example:
@@ -194,8 +209,9 @@ Its implementation has four main parts:
 
 ### Pinned contacts
 
-The `pin` command marks one matching contact as pinned. Its implementation has four main parts:
+The `pin` command marks one matching contact as pinned.
 
+Its implementation has four main parts:
 * **Shared targeting:** `PinCommandParser` uses `ExactPersonMatchParser` to validate criteria, and `PersonTarget` resolves them against all contacts using `PersonMatchesExactFieldsPredicate`. These classes are shared with `edit` and `delete`. All supplied fields must match. Ambiguous matches are displayed for refinement; unsuccessful requests leave contact data unchanged.
 * **Pin state:** `PinCommand` replaces the contact with an immutable copy whose `isPinned` flag is `true`, preserving its other details. Editing retains this flag.
 * **Display:** `ModelManager` sorts the filtered view with pinned contacts first, preserving addition order within each section. The stored list stays in addition order. `PersonCard` shows a star for pinned contacts. 
@@ -205,42 +221,34 @@ The activity diagram summarizes the flow, grouping unsuccessful requests into on
 
 <puml src="diagrams/PinActivityDiagram.puml" alt="Pin activity flow showing validation, contact replacement, display update, saving, and feedback" />
 
-### Undo Command
+### Undo command
 
-The undo feature allows users to restore the address book to the state before the most recent undoable command.
+The `undo` command restores the address book to the state before the most recent undoable command.
 
-#### Design overview
+```text
+undo
+```
 
-Before executing an undoable command, LogicManager creates a defensive copy of the current AddressBook. If the command executes successfully, this copy is saved in ModelManager's undoHistory. The undo history is implemented as a stack.
+Its implementation has four main parts:
 
-#### Undo flow
-
-The following steps occur when the user enters undo:
-
-1. AddressBookParser creates an UndoCommand.
-
-2. UndoCommand calls Model#undo().
-
-3. ModelManager#undo() checks whether the undo history is empty.
-
-4. If a previous state exists, it is removed from the history and restored into the current AddressBook.
-
-5. The active filter is reapplied to the restored address book.
-
-6. A success message is returned to the user.
-
-If the undo history is empty, the address book remains unchanged and the user receives a message indicating that there is nothing to undo.
+* **Command parsing:** When the user enters `undo`, `AddressBookParser` creates an `UndoCommand` object. The command does not require any prefixes or additional arguments.
+* **State history:** Before an undoable command is executed, `LogicManager` creates a defensive copy of the current address book. After the command executes successfully, the copy is stored in `ModelManager`'s `undoHistory`. The history is implemented as a stack, so the most recent state is restored first.
+* **State restoration:** `UndoCommand` calls `Model#undo()`. `ModelManager` checks whether `undoHistory` contains a saved state. If a state exists, it is removed from the stack and restored as the current address book. The active filtered contact list is then updated to reflect the restored data.
+* **Feedback and persistence:** If a state is successfully restored, the command returns `The previous command was undone.` If no state is available, the address book remains unchanged and the command returns `There is nothing to undo.` The restored address book is saved through `Storage`.
 
 #### Undoable commands
 
 Commands that modify address-book data save a state for undo. These include:
 
-* add
-* delete
-* edit
-* clear
+* `add`
+* `delete`
+* `edit`
+* `clear`
+* `import`
+* `pin`
+* `unpin`
 
-This keeps the undo history focused on changes to the address book rather than changes to the user's view.
+Commands that only change the current view, such as `find`, `list`, and `sort`, do not create an undo state.
 
 --------------------------------------------------------------------------------------------------------------------
 
