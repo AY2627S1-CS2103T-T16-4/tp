@@ -265,7 +265,8 @@ _Details coming soon ..._
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous AddressBook home folder.
+**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous AddressBook home folder.<br>
+Alternatively, run [`export`](#exporting-contacts-export) to save your contacts to a CSV file, copy that file to the other computer, and load it there with [`import`](#importing-contacts-import). This transfers only your contacts.
 
 --------------------------------------------------------------------------------------------------------------------
 
