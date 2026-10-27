@@ -159,6 +159,37 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Edit command
+
+The `edit` command updates exactly one contact identified by exact field criteria. The `>>` separator distinguishes the search criteria from the requested updates, for example:
+
+```text
+edit n/John Doe p/81231234 >> p/91234567 e/john@example.com
+```
+
+Its implementation has five main parts:
+
+* **Parsing:** `EditCommandParser` requires exactly one `>>`, at least one search flag, and at least one update flag. It delegates search parsing to `ExactPersonMatchParser` and stores updates in an `EditPersonDescriptor`. Supported fields are name (`n/`), phone (`p/`), email (`e/`), address (`a/`), GitHub (`gh/`), LinkedIn (`li/`), Telegram (`tg/`), groups (`g/`), and tags (`t/`). Unsupported flags, unexpected preamble text, invalid values, and repeated scalar prefixes are rejected.
+* **Shared targeting:** `PersonTarget` applies `PersonMatchesExactFieldsPredicate` to the entire address book, including contacts hidden by the current filter. All supplied scalar fields must equal the stored values; contacts must belong to every supplied group and have every supplied tag. Search values cannot be empty. If no contact matches, the command reports an error. If multiple contacts match, it displays those contacts and requests more criteria without changing contact data.
+* **Field updates:** `EditCommand` creates a replacement `Person`, preserving unspecified fields and the existing pin state. Scalar updates replace their existing values. Empty optional field values clear those fields, while empty name or phone updates are rejected. A nonempty tag or group update toggles each supplied value's membership once; a bare `t/` or `g/` clears the corresponding set. Mixing an empty value with another occurrence of the same set prefix is rejected. The descriptor defensively copies tag and group sets.
+* **Duplicate prevention:** Before calling `Model#setPerson`, the command checks whether a changed phone number already identifies another contact. Such an update is rejected without changing contact data, since phone numbers define contact identity.
+* **Persistence and undo:** `EditCommand#isUndoable` returns `true`. `LogicManager` copies the address book before execution, saves that snapshot to undo history after successful execution, and saves the updated address book through `Storage`. The command returns a success message containing the updated contact's details.
+
+### Delete command
+
+The `delete` command removes exactly one contact identified by exact field criteria, for example:
+
+```text
+delete n/John Doe p/81231234
+```
+
+Its implementation has four main parts:
+
+* **Parsing:** `DeleteCommandParser` delegates to `ExactPersonMatchParser`, using delete-specific usage and error messages. It accepts the same search fields as `edit` and requires at least one nonempty search flag. Unsupported flags, unexpected preamble text, invalid values, and repeated scalar prefixes are rejected; group and tag prefixes may be repeated.
+* **Shared targeting:** `DeleteCommand` uses `PersonTarget` and `PersonMatchesExactFieldsPredicate` to resolve the criteria against all contacts, including those hidden by the current filter. Every supplied criterion must match. No match produces an error; multiple matches are displayed for refinement. Neither failure changes contact data.
+* **Deletion:** Once exactly one contact is resolved, `DeleteCommand` calls `Model#deletePerson` and returns a success message containing the deleted contact's details. Criteria matching multiple contacts never trigger a bulk deletion.
+* **Persistence and undo:** `DeleteCommand#isUndoable` returns `true`. `LogicManager` saves the pre-execution address book snapshot to undo history after successful execution and persists the updated address book through `Storage`. Undo can therefore restore the deleted contact with its previous details and pin state.
+
 ### Pinned contacts
 
 The `pin` command marks one matching contact as pinned. Its implementation has four main parts:
