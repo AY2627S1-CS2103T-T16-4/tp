@@ -192,6 +192,21 @@ Its implementation has four main parts:
 * **Deletion:** Once exactly one contact is resolved, `DeleteCommand` calls `Model#deletePerson` and returns a success message containing the deleted contact's details. Criteria matching multiple contacts never trigger a bulk deletion.
 * **Persistence and undo:** `DeleteCommand#isUndoable` returns `true`. `LogicManager` saves the pre-execution address book snapshot to undo history after successful execution and persists the updated address book through `Storage`. Undo can therefore restore the deleted contact with its previous details and pin state.
 
+### Find command
+
+The `find` command lists the contacts whose fields start with the supplied values, for example:
+
+```text
+find n/Alex g/T09
+```
+
+Its implementation has four main parts:
+
+* **Parsing:** `FindCommandParser` accepts the name (`n/`), phone (`p/`), address (`a/`), email (`e/`), GitHub (`gh/`), LinkedIn (`li/`), Telegram (`tg/`), group (`g/`), and tag (`t/`) flags, and requires at least one. It rejects unexpected preamble text, unsupported flag-like tokens such as `x/`, empty values, and repeated scalar prefixes; group and tag prefixes may be repeated. The unsupported-flag check is needed because `ArgumentTokenizer` only splits on known prefixes, so an unknown flag would otherwise be absorbed into the value of the preceding flag. The values are stored as raw search text in a `FindPersonDescriptor`. They are not validated as full field values, so that partial values such as `p/98` are accepted.
+* **Matching:** `PersonMatchesFlagsPredicate` tests a `Person` against the descriptor. Every supplied flag must match (an `AND` search), and each value must be a prefix of the corresponding field. Matching ignores letter case except for GitHub usernames, which are case-sensitive. For groups and tags, each supplied value must be a prefix of at least one of the person's groups or tags. This differs from `PersonMatchesExactFieldsPredicate`, which `edit`, `delete`, and `pin` use to match full values, so `find` does not share `PersonTarget` or `ExactPersonMatchParser` with them.
+* **Display:** `FindCommand` calls `Model#updateFilteredPersonList` with the predicate. This replaces any existing filter instead of narrowing it, and `ModelManager` keeps the predicate as the current filter, so it stays active until `list` is run and is reapplied after `undo`. The displayed list still shows pinned contacts first. If no contact matches, `FindCommand` returns an error message naming the flags that were searched.
+* **No persistence or undo:** `FindCommand` does not override `Command#isUndoable`, which returns `false`, so `LogicManager` saves no undo snapshot. `find` changes only the filtered view, not the contact data.
+
 ### Pinned contacts
 
 The `pin` command marks one matching contact as pinned. Its implementation has four main parts:
