@@ -192,6 +192,21 @@ Its implementation has four main parts:
 * **Deletion:** Once exactly one contact is resolved, `DeleteCommand` calls `Model#deletePerson` and returns a success message containing the deleted contact's details. Criteria matching multiple contacts never trigger a bulk deletion.
 * **Persistence and undo:** `DeleteCommand#isUndoable` returns `true`. `LogicManager` saves the pre-execution address book snapshot to undo history after successful execution and persists the updated address book through `Storage`. Undo can therefore restore the deleted contact with its previous details and pin state.
 
+### Find command
+
+The `find` command lists the contacts whose fields start with the supplied values, for example:
+
+```text
+find n/Alex g/T09
+```
+
+Its implementation has four main parts:
+
+* **Parsing:** `FindCommandParser` accepts the name (`n/`), phone (`p/`), address (`a/`), email (`e/`), GitHub (`gh/`), LinkedIn (`li/`), Telegram (`tg/`), group (`g/`), and tag (`t/`) flags, and requires at least one. It rejects unexpected preamble text, unsupported flag-like tokens such as `x/`, empty values, and repeated scalar prefixes; group and tag prefixes may be repeated. The unsupported-flag check is needed because `ArgumentTokenizer` only splits on known prefixes, so an unknown flag would otherwise be absorbed into the value of the preceding flag. The values are stored as raw search text in a `FindPersonDescriptor`. They are not validated as full field values, so that partial values such as `p/98` are accepted.
+* **Matching:** `PersonMatchesFlagsPredicate` tests a `Person` against the descriptor. Every supplied flag must match (an `AND` search), and each value must be a prefix of the corresponding field. Matching ignores letter case except for GitHub usernames, which are case-sensitive. For groups and tags, each supplied value must be a prefix of at least one of the person's groups or tags. This differs from `PersonMatchesExactFieldsPredicate`, which `edit`, `delete`, and `pin` use to match full values, so `find` does not share `PersonTarget` or `ExactPersonMatchParser` with them.
+* **Display:** `FindCommand` calls `Model#updateFilteredPersonList` with the predicate. This replaces any existing filter instead of narrowing it, and `ModelManager` keeps the predicate as the current filter, so it stays active until `list` is run and is reapplied after `undo`. The displayed list still shows pinned contacts first. If no contact matches, `FindCommand` returns an error message naming the flags that were searched.
+* **No persistence or undo:** `FindCommand` does not override `Command#isUndoable`, which returns `false`, so `LogicManager` saves no undo snapshot. `find` changes only the filtered view, not the contact data.
+
 ### Pinned contacts
 
 The `pin` command marks one matching contact as pinned. Its implementation has four main parts:
@@ -359,15 +374,15 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **Extensions**
 
-* 1a. GM detects an invalid command format.
+* 1a. GM detects an invalid command format, missing search criteria, an unsupported flag, a repeated flag that may appear only once, or an empty search value.
 
-    * 1a1. GM displays an error message with the correct format.
+    * 1a1. GM displays an error message explaining the accepted input.
 
     * Use case ends.
 
 * 1b. GM detects that there are no matching contacts.
 
-    * 1b1. GM displays an empty list and informs user that there are no matching contacts.
+    * 1b1. GM displays an empty list and informs the user that no contact matches the flags searched.
 
     * Use case ends.
 
@@ -712,6 +727,99 @@ Use the three contacts created for the delete tests, with all deletions undone. 
 
    1. Close and relaunch the app, then run `list`.<br>
       Expected: The updated email and pin state are retained. Undo history is not needed to verify persistence; this case finishes with the updated, pinned test contact saved.
+
+### Finding a person
+
+Run these tests in a separate test copy of the app. The edit tests change the Manual contacts, so remove them and add them again. Run `delete p/81110001`, `delete p/81110002`, and `delete p/81110003` (each reports `No contact matches the supplied criteria.` if the contact is absent), then add these contacts:
+
+```text
+add n/Manual Alex p/81110001 e/alex@example.com a/10 Test Road gh/manualalex li/manualalex tg/manualalex g/manualteam t/backend t/testing
+add n/Manual Alex p/81110002 e/alexother@example.com g/manualteam t/backend
+add n/Manual Beth p/81110003 g/otherteam t/design
+```
+
+The sample contacts may still be present, so the cases below use values that only the Manual contacts have. Each `find` replaces the previous filter, so no cleanup is needed between cases. Rejected commands leave the displayed list unchanged. Run `list` at the end.
+
+1. Matching the start of a single field
+
+   1. Test case: `find n/Manual`<br>
+      Expected: All three Manual contacts are listed.
+
+   1. Test case: `find n/manual al`<br>
+      Expected: Only the two Manual Alex contacts are listed. The match is case-insensitive and may continue past a space.
+
+   1. Test case: `find n/Alex`<br>
+      Expected: No contact is listed, because no name starts with `Alex`. The status message reads `No contact was found. Please check the n/ provided.`
+
+   1. Test cases: `find p/8111000` and `find p/81110002`.<br>
+      Expected: The first lists all three Manual contacts. The second lists only the contact with phone `81110002`.
+
+   1. Test cases: `find e/alex@` and `find e/alexo`.<br>
+      Expected: The first lists only the contact with phone `81110001`. The second lists only the contact with phone `81110002`.
+
+   1. Test case: `find a/10`<br>
+      Expected: Only the contact with phone `81110001` is listed.
+
+   1. Test cases: `find gh/manual`, `find li/manual`, and `find tg/manual`.<br>
+      Expected: Each lists only the contact with phone `81110001`.
+
+1. Letter case
+
+   1. Test cases: `find n/MANUAL ALEX`, `find li/MANUAL`, and `find tg/MANUAL`.<br>
+      Expected: The first lists both Manual Alex contacts. The second and third list only the contact with phone `81110001`.
+
+   1. Test case: `find gh/MANUAL`<br>
+      Expected: No contact is listed, because GitHub usernames are case-sensitive. The status message names `gh/`. `find gh/manual` lists the contact with phone `81110001`.
+
+1. Matching groups and tags
+
+   1. Test cases: `find g/manual` and `find g/OTHER`.<br>
+      Expected: The first lists the contacts with phones `81110001` and `81110002`. The second lists only the contact with phone `81110003`.
+
+   1. Test case: `find t/back`<br>
+      Expected: The contacts with phones `81110001` and `81110002` are listed.
+
+   1. Test case: `find t/back t/test`<br>
+      Expected: Only the contact with phone `81110001` is listed. Each supplied value must be a prefix of at least one of the contact's tags.
+
+   1. Test case: `find t/back t/design`<br>
+      Expected: No contact is listed, because no contact has a tag starting with each value.
+
+1. Combining flags
+
+   1. Test case: `find n/Manual Alex p/81110002`<br>
+      Expected: Only the contact with phone `81110002` is listed.
+
+   1. Test case: `find g/manualteam t/testing`<br>
+      Expected: Only the contact with phone `81110001` is listed.
+
+   1. Test case: `find n/Manual Beth p/81110001`<br>
+      Expected: No contact is listed. Flags that match different contacts cannot be combined to select a contact. The status message names `n/ p/`.
+
+1. Viewing and clearing the results
+
+   1. Test case: `find n/Manual`, then `list`.<br>
+      Expected: After `find`, only the Manual contacts are shown. After `list`, all contacts are shown again.
+
+   1. Test case: `find n/Manual`, then `sort name`.<br>
+      Expected: The list is still limited to the Manual contacts and is sorted by name.
+
+   1. Run `pin p/81110002`, then `find n/Manual`.<br>
+      Expected: The pinned Manual Alex with phone `81110002` is listed first, with a star. Run `undo`, then `list`, to unpin it.
+
+1. Rejecting invalid input
+
+   1. Test cases: `find`, `find Manual`, and `find n/Manual x/value`.<br>
+      Expected: Each reports an invalid command format and displays usage guidance. Keyword search and unsupported flags are rejected.
+
+   1. Test cases: `find n/` and `find n/Manual p/`.<br>
+      Expected: Each reports `Please provide a value for` the empty flag (`n/` and `p/` respectively) `to search for.`
+
+   1. Test case: `find n/Manual n/Alex`<br>
+      Expected: An error reports the repeated name prefix. `find t/back t/test` is allowed, because tag prefixes may be repeated.
+
+   1. Test case: `find p/abc`<br>
+      Expected: No contact is listed and the status message names `p/`. The value is searched as text and is not validated as a phone number.
 
 ### Saving data
 
