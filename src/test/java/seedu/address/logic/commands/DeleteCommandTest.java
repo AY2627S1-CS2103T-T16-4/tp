@@ -10,6 +10,7 @@ import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
 import static seedu.address.testutil.TypicalPersons.DANIEL;
 import static seedu.address.testutil.TypicalPersons.DANIEL_TWIN;
+import static seedu.address.testutil.TypicalPersons.GEORGE;
 import static seedu.address.testutil.TypicalPersons.JACK;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
@@ -37,6 +38,80 @@ public class DeleteCommandTest {
 
     private Model model = new ModelManager(getTypicalAddressBook(), new UserPrefs());
     private Model expectedModel = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+
+    @Test
+    public void constructor_nullPredicate_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> new DeleteCommand(null));
+    }
+
+    @Test
+    public void execute_nullModel_throwsNullPointerException() {
+        DeleteCommand command = new DeleteCommand(
+                predicateWith(d -> d.setName(ALICE.getName())));
+
+        assertThrows(NullPointerException.class, () -> command.execute(null));
+    }
+
+    @Test
+    public void execute_uniqueMatchHiddenByFilter_successAndPreservesFilter() {
+        model.updateFilteredPersonList(person -> person.equals(BENSON));
+        expectedModel.updateFilteredPersonList(person -> person.equals(BENSON));
+        assertEquals(List.of(BENSON), model.getFilteredPersonList());
+
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setName(ALICE.getName()));
+
+        assertDeleteSuccess(predicate, ALICE);
+
+        assertEquals(List.of(BENSON), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_multipleMatchesWithOnlyOneVisible_showsAllWithoutDeleting() {
+        model.updateFilteredPersonList(person -> person.equals(DANIEL));
+        assertEquals(List.of(DANIEL), model.getFilteredPersonList());
+
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setName(DANIEL.getName()));
+
+        assertAmbiguousFailure(predicate, List.of(DANIEL, DANIEL_TWIN));
+    }
+
+    @Test
+    public void execute_noMatchWithActiveFilter_preservesFilter() {
+        model.updateFilteredPersonList(person -> person.equals(BENSON));
+        assertEquals(List.of(BENSON), model.getFilteredPersonList());
+
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setName(new Name("Unknown Person")));
+
+        assertCommandFailure(new DeleteCommand(predicate), model,
+                DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
+    }
+
+    @Test
+    public void execute_groupOnlyOneMatch_success() {
+        AddressBook addressBook = new AddressBook();
+        addressBook.addPerson(ALICE);
+        addressBook.addPerson(GEORGE);
+
+        model = new ModelManager(addressBook, new UserPrefs());
+        expectedModel = new ModelManager(
+                new AddressBook(addressBook), new UserPrefs());
+
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setGroups(ALICE.getGroups()));
+
+        assertDeleteSuccess(predicate, ALICE);
+    }
+
+    @Test
+    public void execute_personWithAllOptionalFieldsBlank_success() {
+        PersonMatchesExactFieldsPredicate predicate =
+                predicateWith(d -> d.setPhone(GEORGE.getPhone()));
+
+        assertDeleteSuccess(predicate, GEORGE);
+    }
 
     @Test
     public void execute_nameOnlyOneMatch_success() {
@@ -179,6 +254,17 @@ public class DeleteCommandTest {
                 predicateWith(d -> d.setName(DANIEL.getName()));
 
         assertAmbiguousFailure(predicate, List.of(DANIEL, DANIEL_TWIN));
+    }
+
+    @Test
+    public void hashCode_equalCommands_sameHashCode() {
+        DeleteCommand firstCommand = new DeleteCommand(
+                predicateWith(d -> d.setName(ALICE.getName())));
+        DeleteCommand secondCommand = new DeleteCommand(
+                predicateWith(d -> d.setName(ALICE.getName())));
+
+        assertEquals(firstCommand, secondCommand);
+        assertEquals(firstCommand.hashCode(), secondCommand.hashCode());
     }
 
     @Test
