@@ -81,16 +81,25 @@ Format: `help`
 
 Adds a person to the address book.
 
-Format: `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... `
+Format: `add n/NAME p/PHONE [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]... `
 
 <box type="tip" seamless>
 
-**Tip:** A person can have any number of tags, including zero.
+**Notes:**
+* A person can have any number of groups and tags, including zero.
+* Prefixes are case-sensitive. For example, use `n/`, not `N/`.
 </box>
 
+For more information about valid input rules, click [here](#prefix-table).
+
 Examples:
+* `add n/John Dow p/81231234`
 * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
 * `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+
+**Expected result**
+
+When the contact is added successfully, application displays: `New contact added`
 
 ### Listing all persons: `list`
 
@@ -203,15 +212,16 @@ Each example is independent and assumes the specified contact exists.
 * `delete p/98765432` deletes the contact with phone number `98765432`.
 * `delete n/John Doe p/98765432` deletes the contact matching both the full name and phone number. A contact matching only one criterion is not deleted.
 
-### Undoing previous ccommand: `undo`
+### Undoing previous command: `undo`
 
 Restores the address book to the state before the most recent data-changing
 command.
 
 Format: `undo`
 
-* The undo command can undo data-changing commands such as add, delete, edit, and clear.
-* It does not undo view-only commands such as find, list, or sort.
+* The undo command can undo data-changing commands such as `add`, `delete`, `edit`, `clear`, `import`, `pin`, or `unpin` command.
+* It does not undo view-only commands such as `find`, `list`, or `sort`.
+* Running `undo` when there is no previous undoable command does not change the address book.
 
 ### Clearing all entries: `clear`
 
@@ -333,6 +343,20 @@ name,phone,email,address,groups,github,linkedin,telegram,tags,pinned
 * Export compatibility limitations: leading spreadsheet-protection apostrophes are preserved, because they cannot
   be distinguished from literal apostrophes. Semicolons in the groups column always separate groups, so a group
   name containing a semicolon cannot be restored unambiguously from the current export format.
+
+## Prefix table
+
+| **Prefix** | **Valid input**                                                      | **Can be repeated?** |
+|---|----------------------------------------------------------------------|---|
+| `n/NAME` | Letters, numbers, and spaces; must not be blank. Saved in uppercase. | No |
+| `p/PHONE` | Exactly 8 digits and must begin with `8` or `9`.                     | No |
+| `a/ADDRESS` | Any non-blank text. Stored in lowercase.                             | No |
+| `e/EMAIL` | An email address with `@` and `.domain`. Stored in lowercase.            | No |
+| `gh/GITHUB` | Any text. Case-sensitive.                                            | No |
+| `li/LINKEDIN` | Any text. Stored in lowercase.                                       | No |
+| `tg/TELEGRAM` | Any text except `@`. Stored in lowercase.                            | No |
+| `g/GROUP` | Any text. Stored in lowercase.                                       | Yes |
+| `t/TAG` | Letters and numbers only. Stored in lowercase.                       | Yes |
 
 ## Command summary
 
