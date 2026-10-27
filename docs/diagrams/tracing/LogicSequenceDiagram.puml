@@ -11,10 +11,12 @@ Participant "command:EditCommand" as ec LOGIC_COLOR
 activate logic
 logic -> abp ++: parseCommand(commandText)
 create ecp
-abp -> ecp
+abp -> ecp ++: EditCommandParser()
+ecp --> abp --
+
 abp -> ecp ++: parse(arguments)
 create ec
-ecp -> ec ++: index, editPersonDescriptor
+ecp -> ec ++: new EditCommand(predicate, editPersonDescriptor)
 ec --> ecp --
 ecp --> abp --: command
 abp --> logic --: command

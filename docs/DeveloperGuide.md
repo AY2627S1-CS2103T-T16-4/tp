@@ -50,7 +50,7 @@ The bulk of the app's work is done by the following four components:
 
 **How the architecture components interact with each other**
 
-The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete 1`.
+The *Sequence Diagram* below shows how the components interact with each other for the scenario where the user issues the command `delete n/John Doe p/81231234` and exactly one contact matches. Contact resolution and undo bookkeeping are omitted for simplicity.
 
 <puml src="diagrams/ArchitectureSequenceDiagram.puml" width="574" />
 
@@ -175,6 +175,8 @@ Its implementation has five main parts:
 * **Duplicate prevention:** Before calling `Model#setPerson`, the command checks whether a changed phone number already identifies another contact. Such an update is rejected without changing contact data, since phone numbers define contact identity.
 * **Persistence and undo:** `EditCommand#isUndoable` returns `true`. `LogicManager` copies the address book before execution, saves that snapshot to undo history after successful execution, and saves the updated address book through `Storage`. The command returns a success message containing the updated contact's details.
 
+Exact matching uses the field types' normalized values: names are converted to uppercase, while tags and groups are converted to lowercase, for both stored contacts and parsed criteria. Matching these fields is therefore case-insensitive, but still requires the full value rather than a partial match. The same normalization applies to `delete` targeting.
+
 ### Delete command
 
 The `delete` command removes exactly one contact identified by exact field criteria, for example:
@@ -194,9 +196,9 @@ Its implementation has four main parts:
 
 The `pin` command marks one matching contact as pinned. Its implementation has four main parts:
 
-* **Shared targeting:** `PinCommandParser` uses `ExactPersonMatchParser` to validate criteria, and `PersonTarget` resolves them against all contacts using `PersonMatchesExactFieldsPredicate`. These classes are shared with `delete`. All supplied fields must match. Ambiguous matches are displayed for refinement; unsuccessful requests leave contact data unchanged.
+* **Shared targeting:** `PinCommandParser` uses `ExactPersonMatchParser` to validate criteria, and `PersonTarget` resolves them against all contacts using `PersonMatchesExactFieldsPredicate`. These classes are shared with `edit` and `delete`. All supplied fields must match. Ambiguous matches are displayed for refinement; unsuccessful requests leave contact data unchanged.
 * **Pin state:** `PinCommand` replaces the contact with an immutable copy whose `isPinned` flag is `true`, preserving its other details. Editing retains this flag.
-* **Display:** `ModelManager` sorts the filtered view with pinned contacts first, preserving addition order within each section. The stored list stays in addition order. The UI and `edit` use the same displayed list, and `PersonCard` shows a star for pinned contacts.
+* **Display:** `ModelManager` sorts the filtered view with pinned contacts first, preserving addition order within each section. The stored list stays in addition order. `PersonCard` shows a star for pinned contacts. 
 * **Persistence and undo:** `JsonAdaptedPerson` stores `isPinned`, defaulting to `false` for older files. Successful pins save an undo snapshot through `LogicManager`, allowing the existing undo mechanism to restore the previous state.
 
 The activity diagram summarizes the flow, grouping unsuccessful requests into one path.
@@ -326,9 +328,9 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **Extensions**
 
-* 1a. GM detects an invalid command format.
+* 1a. GM detects an invalid command format, missing search criteria, or invalid field values.
 
-    * 1a1. GM displays an error message with the correct format.
+    * 1a1. GM displays an error explaining the accepted input. 
 
     * Use case ends.
 
@@ -481,7 +483,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **Extensions**
 
-* 1a. GM detects an invalid command format, invalid field values, or no fields to update.
+* 1a. GM detects an invalid command format, missing search criteria, invalid field values, or no fields to update.
 
     * 1a1. GM displays an error message explaining the accepted input.
 
