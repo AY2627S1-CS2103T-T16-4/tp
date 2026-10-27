@@ -240,11 +240,6 @@ Commands that modify address-book data save a state for undo. These include:
 
 This keeps the undo history focused on changes to the address book rather than changes to the user's view.
 
-### \[Proposed\] Data archiving
-
-_{Explain here how the data archiving feature will be implemented}_
-
-
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Documentation, logging, testing, dev-ops**
@@ -323,7 +318,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **MSS**
 
-1.  User enters delete command with contact details. 
+1.  User enters the delete command with contact details. 
 2.  GM deletes the contact. 
 3.  GM displays a confirmation message.
 
@@ -594,20 +589,127 @@ testers are expected to do more *exploratory* testing.
 
 ### Deleting a person
 
-1. Deleting a person while all persons are being shown
+Run these tests in a separate test copy of the app. Before starting, ensure that the following names and phone numbers are unused, then add these contacts:
 
-   1. Prerequisites: List all persons using the `list` command, with multiple persons in the list.
+```text
+add n/Manual Alex p/81110001 e/alex@example.com a/10 Test Road gh/manualalex li/manualalex tg/manualalex g/manualteam t/backend t/testing
+add n/Manual Alex p/81110002 e/alexother@example.com g/manualteam t/backend
+add n/Manual Beth p/81110003 g/otherteam t/design
+```
 
-   1. Test case: `delete 1`<br>
-      Expected: The first contact is deleted from the list. The status message shows the deleted contact's details.
+Run the cases in order. After each successful deletion, run `undo` immediately, then `list`, to restore the fixtures for the next case. Do not run `undo` after a rejected command, as it would undo an earlier successful change.
 
-   1. Test case: `delete 0`<br>
-      Expected: No person is deleted. The status message shows error details.
+1. Deleting exactly one matching contact
 
-   1. Other incorrect delete commands to try: `delete`, `delete x`, `...` (where x is larger than the list size)<br>
-      Expected: Similar to previous.
+   1. Test case: `delete p/81110001`<br>
+      Expected: Only the contact with phone `81110001` is deleted. The status message begins with `Deleted person:` and shows that contact's details. `undo` restores all of those details.
 
-1. _{ more test cases … }_
+   1. Test case: `delete n/Manual Alex p/81110002`<br>
+      Expected: Only the second Manual Alex is deleted, because both supplied fields must match the same contact.
+
+   1. Test cases (restore after each): `delete e/alex@example.com`, `delete a/10 Test Road`, `delete gh/manualalex`, `delete li/manualalex`, and `delete tg/manualalex`.<br>
+      Expected: Each command deletes only the contact with phone `81110001`.
+
+   1. Test case: `delete g/manualteam t/backend t/testing`<br>
+      Expected: Only the contact with phone `81110001` is deleted. A contact must have the supplied group and every supplied tag.
+
+1. Resolving ambiguous and unmatched criteria
+
+   1. Test case: `delete n/Manual Alex`<br>
+      Expected: Both Manual Alex contacts are displayed. The status message reports multiple matches and asks for additional prefixes. Neither contact is deleted.
+
+   1. Test case: `delete n/Manual Alex p/81110001`<br>
+      Expected: The additional phone criterion resolves the ambiguity and only the intended contact is deleted. Restore it with `undo`, then run `list`.
+
+   1. Test cases: `delete n/Manual`, `delete n/Manual Missing`, and `delete n/Manual Alex p/81110003`.<br>
+      Expected: Each reports `No contact matches the supplied criteria.` No contact is deleted. Partial names do not match, and criteria belonging to different contacts cannot be combined to select a contact.
+
+1. Deleting a contact hidden by the current filter
+
+   1. Run `find p/81110003`, then `delete p/81110001`, then `list`.<br>
+      Expected: The hidden contact with phone `81110001` is deleted; Manual Beth remains. Targeting searches the entire address book. Run `undo`, then `list`, to restore the fixtures.
+
+1. Rejecting invalid input
+
+   1. Test cases: `delete`, `delete 1`, and `delete n/Manual Alex x/value`.<br>
+      Expected: Each reports an invalid command format and displays usage guidance. Index-based deletion is rejected.
+
+   1. Test case: `delete p/`<br>
+      Expected: An error requests a nonempty phone search value.
+
+   1. Test cases: `delete p/abc` and `delete p/81110001 p/81110002`.<br>
+      Expected: The first reports an invalid phone value; the second reports a repeated phone prefix. Neither deletes a contact.
+
+### Editing a person
+
+Use the three contacts created for the delete tests, with all deletions undone. If testing this section independently, add those contacts first. Run the cases in order. After each successful edit, run `undo` immediately, then `list`, unless the case specifies otherwise. Rejected commands must leave contact data unchanged and should not be followed by `undo`.
+
+1. Updating scalar fields while preserving other details
+
+   1. Test case: `edit n/Manual Alex p/81110001 >> n/Manual Alex Updated p/81110004 e/updated@example.com a/20 Test Road gh/manualalexnew li/manualalexnew tg/manualalexnew`<br>
+      Expected: Only the contact with phone `81110001` is updated with all supplied values. Its tags and groups remain unchanged. The status message begins with `Edited person:` and shows the updated details. `undo` restores the original contact and all original values.
+
+   1. Test case: `edit p/81110001 >> e/updated@example.com`<br>
+      Expected: Only the email changes; all other fields remain unchanged.
+
+1. Clearing optional fields and protecting mandatory fields
+
+   1. Test case: `edit p/81110001 >> e/ a/ gh/ li/ tg/`<br>
+      Expected: Email, address, GitHub, LinkedIn, and Telegram are cleared. Name, phone, tags, and groups remain unchanged.
+
+   1. Test cases: `edit p/81110001 >> n/` and `edit p/81110001 >> p/`.<br>
+      Expected: Each reports that name and phone cannot be cleared. No contact details change.
+
+1. Toggling and clearing tags and groups
+
+   1. Test case: `edit p/81110001 >> t/backend t/frontend g/manualteam g/newteam`<br>
+      Expected: The existing `backend` tag and `manualteam` group are removed, while `frontend` and `newteam` are added. The `testing` tag remains.
+
+   1. Test case: `edit p/81110001 >> t/ g/`<br>
+      Expected: All tags and groups are cleared, while scalar fields remain unchanged.
+
+   1. Test cases: `edit p/81110001 >> t/ t/backend` and `edit p/81110001 >> g/ g/manualteam`.<br>
+      Expected: Each reports that clearing and toggling cannot be mixed for the same field. No contact details change.
+
+1. Resolving ambiguous and unmatched criteria
+
+   1. Test case: `edit n/Manual Alex >> e/updated@example.com`<br>
+      Expected: Both Manual Alex contacts are displayed with a multiple-match error. Neither is edited.
+
+   1. Test case: `edit n/Manual Alex p/81110001 >> e/updated@example.com`<br>
+      Expected: Adding the phone criterion identifies exactly one contact, whose email is updated.
+
+   1. Test cases: `edit n/Manual >> e/updated@example.com` and `edit n/Manual Alex p/81110003 >> e/updated@example.com`.<br>
+      Expected: Each reports `No contact matches the supplied criteria.` No contact details change.
+
+1. Editing a contact hidden by the current filter
+
+   1. Run `find p/81110003`, then `edit p/81110001 >> e/updated@example.com`, then `list`.<br>
+      Expected: The hidden contact's email is updated. Manual Beth remains unchanged. Run `undo`, then `list`, to restore the original email.
+
+1. Preventing duplicate phone numbers
+
+   1. Test case: `edit p/81110001 >> p/81110002`<br>
+      Expected: A duplicate-phone error is displayed. Both contacts retain their original phone numbers and details.
+
+1. Rejecting invalid syntax and values
+
+   1. Test cases: `edit p/81110001 e/updated@example.com`, `edit >> e/updated@example.com`, and `edit p/81110001 >> e/updated@example.com >> t/testing`.<br>
+      Expected: Each reports an invalid command format because exactly one separator and nonempty search criteria are required.
+
+   1. Test case: `edit p/81110001 >>`<br>
+      Expected: An error requests at least one update field after `>>`.
+
+   1. Test cases: `edit p/ >> e/updated@example.com`, `edit p/81110001 >> e/invalid`, `edit p/81110001 >> x/value`, and `edit p/81110001 >> p/81110004 p/81110005`.<br>
+      Expected: Respectively, an empty search value, invalid email, unsupported flag, and repeated scalar prefix are rejected.
+
+1. Retaining pin state and saving changes
+
+   1. Run `pin p/81110001`, then `edit p/81110001 >> e/updated@example.com`.<br>
+      Expected: The contact retains its pinned indicator and has the new email.
+
+   1. Close and relaunch the app, then run `list`.<br>
+      Expected: The updated email and pin state are retained. Undo history is not needed to verify persistence; this case finishes with the updated, pinned test contact saved.
 
 ### Saving data
 
