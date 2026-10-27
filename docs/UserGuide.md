@@ -33,7 +33,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
    * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01` : Adds a contact named `John Doe` to the Address Book.
 
-   * `delete 3` : Deletes the 3rd contact shown in the current list.
+   * `delete p/98765432` : Deletes the contact added above, identified by its phone number.
 
    * `clear` : Deletes all contacts.
 
@@ -60,6 +60,7 @@ AddressBook Level 3 (AB3) is a **desktop application for managing contacts, opti
 
 * Parameters can be in any order.<br>
   For example, if the command specifies `n/NAME p/PHONE_NUMBER`, `p/PHONE_NUMBER n/NAME` is also acceptable.
+  For `edit`, flags may be reordered within each side of `>>`, but search flags must come before it and update flags after it.
 
 * Extraneous parameters for commands that take no parameters, such as `help`, `list`, `exit`, and `clear`, are ignored.<br>
   For example, `help 123` is interpreted as `help`.
@@ -100,19 +101,40 @@ Format: `list`
 
 ### Editing a person: `edit`
 
-Edits an existing person in the address book.
+Edits exactly one contact matching the supplied field values.
 
-Format: `edit INDEX [n/NAME] [p/PHONE] [e/EMAIL] [a/ADDRESS] [t/TAG]... `
+Format: `edit SEARCH_FLAGS >> UPDATE_FLAGS`
 
-* Edits the person at the specified `INDEX`. The index refers to the index number shown in the displayed person list. The index **must be a positive integer** 1, 2, 3, ...
-* At least one of the optional fields must be provided.
-* Existing values will be updated to the input values.
-* When editing tags, all of the person's existing tags are removed; adding tags is not cumulative.
-* To remove all of a person's tags, enter `t/` without a tag after it.
+Use any of the following flags on either side of `>>`:
+
+`[n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...`
+
+**Identifying the contact:**
+
+* Provide at least one search flag before `>>` and at least one update flag after it. Include exactly one `>>` separator. List indices are not accepted.
+* Every search value must be nonempty and match in full. For example, `n/John` does not match `John Doe`. Matching ignores letter case except for GitHub usernames (`gh/`).
+* All supplied search criteria must match the same contact. Repeated `g/` and `t/` search flags require membership in every supplied group and tag.
+* Searches all contacts, including those hidden by the current search filter. The filter remains active after a successful edit; use `list` if the updated contact is hidden.
+* If no contact matches, an error is displayed. If several match, GitMate displays them and prompts the user to enter more search criteria. Neither case changes contact data.
+* Each flag other than `g/` and `t/` may appear at most once on each side of `>>`. For example, using `p/` once to identify a contact and once to change its phone number is allowed. Unsupported flags and invalid field values are rejected.
+
+**Applying updates:**
+
+* Supplied name, phone, email, address, GitHub, LinkedIn, and Telegram values replace the existing values. Unspecified fields and pin status remain unchanged.
+* An empty optional update value clears that field, for example `e/` clears the email. Name and phone are compulsory fields and cannot be cleared.
+* A phone number already belonging to another contact is rejected without changing contact data.
+* Tag and group values toggle membership: an existing value is removed, and an absent value is added. Unmentioned tags and groups remain unchanged. Repeating the same value toggles it only once.
+* To clear all tags or groups, use a bare `t/` or `g/` after `>>`. Do not combine a clearing flag with another occurrence of the same prefix, such as `t/ t/backend`.
+* Successful edits are saved automatically and can be reversed with `undo`.
 
 Examples:
-*  `edit 1 p/91234567 e/johndoe@example.com` Edits the phone number and email address of the 1st person to be `91234567` and `johndoe@example.com` respectively.
-*  `edit 2 n/Betsy Crower t/` Edits the name of the 2nd person to be `Betsy Crower` and clears all existing tags.
+
+Each example is independent and assumes the specified contact exists. The name-based example assumes exactly one contact has that name.
+
+* `edit p/98765432 >> p/91234567 e/johndoe@example.com` changes that contact's phone and email, provided the new phone number is unused.
+* `edit n/Betsy Crowe >> n/Betsy Crower t/` changes Betsy's name and clears all her tags.
+* `edit p/98765432 >> t/backend g/cs2103` removes the `backend` tag and `cs2103` group if present, or adds them if absent. Other tags and groups are preserved.
+* `edit p/98765432 >> e/` clears that contact's email.
 
 ### Locating persons by name: `find`
 
@@ -150,17 +172,23 @@ Examples:
 
 ### Deleting a person: `delete`
 
-Deletes the specified person from the address book.
+Deletes exactly one contact matching the supplied field values.
 
-Format: `delete INDEX`
+Format: `delete [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...`
 
-* Deletes the person at the specified `INDEX`.
-* The index refers to the index number shown in the displayed person list.
-* The index **must be a positive integer** 1, 2, 3, ...
+* Provide at least one search flag. Every supplied search value must be nonempty.
+* All supplied criteria must match the same contact in full. Partial values do not match. Matching ignores letter case except for GitHub usernames (`gh/`).
+* A contact must belong to every supplied group and have every supplied tag. Repeating `g/` or `t/` is allowed; other prefixes may appear at most once. Unsupported flags and invalid field values are rejected.
+* Searches the entire address book, including contacts hidden by the current search filter. Running `find` first does not restrict which contacts can be deleted.
+* If no contact matches, an error is displayed. If several match, GitMate displays them and prompts the user to enter more search criteria. No contact is deleted in either case; matching several contacts never triggers a bulk deletion.
+* Successful deletions are saved automatically and can be reversed with `undo`.
 
 Examples:
-* `list` followed by `delete 2` deletes the 2nd person in the address book.
-* `find Betsy` followed by `delete 1` deletes the 1st person in the results of the `find` command.
+
+Each example is independent and assumes the specified contact exists.
+
+* `delete p/98765432` deletes the contact with phone number `98765432`.
+* `delete n/John Doe p/98765432` deletes the contact matching both the full name and phone number. A contact matching only one criterion is not deleted.
 
 ### Undoing previous ccommand: `undo`
 
@@ -269,8 +297,8 @@ Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 **Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... ` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
 **Clear**  | `clear`
-**Delete** | `delete INDEX`<br> e.g., `delete 3`
-**Edit**   | `edit INDEX [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [t/TAG]... `<br> e.g.,`edit 2 n/James Lee e/jameslee@example.com`
+**Delete** | `delete [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...` (at least one field)<br> e.g., `delete p/98765432`
+**Edit**   | `edit SEARCH_FLAGS >> UPDATE_FLAGS` (at least one flag on each side)<br>Supported flags: `[n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...`<br> e.g., `edit p/98765432 >> n/James Lee e/jameslee@example.com`
 **Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
 **List**   | `list`
 **Import** | `import FILE_PATH`<br> e.g., `import data/contacts.csv`
