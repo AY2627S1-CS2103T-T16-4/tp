@@ -219,6 +219,35 @@ Clears all entries from the address book.
 
 Format: `clear`
 
+### Exporting contacts: `export`
+
+Saves all contacts to a new CSV file, for backup or use in a spreadsheet.
+
+Format: `export`
+
+* Takes no parameters. `export` does not ignore extra text: it is rejected as an invalid command format and no file is created.
+* Exports every contact, including contacts hidden by the current search filter, in the order shown on screen: pinned contacts first, then the active sort, then the order added.
+* Creates a file named `contacts-yyyyMMdd-HHmmss.csv` in the same folder as the data file, which is `data` by default. The folder is created if it is missing.
+* Never overwrites an existing file. If a file with the same name already exists, such as after two exports in the same second, an error is displayed. Run `export` again.
+* The success message shows the number of contacts exported and the full path of the file. An empty address book produces a file with only the header row.
+* Does not change any contact data, so it cannot be reversed with `undo`.
+
+**File contents:**
+
+* The file is a UTF-8 CSV with a header row, so spreadsheet applications open it correctly. The columns are:
+
+```csv
+name,phone,email,address,groups,github,linkedin,telegram,tags,pinned
+```
+
+* Names appear in capital letters, GitHub usernames keep their letter case, and all other text appears in lowercase, as GitMate stores them. Multiple groups or tags share one cell, separated by semicolons in alphabetical order. Pinned status is `true` or `false`.
+* A cell that starts with `=`, `+`, `-`, `@`, a tab, or a carriage return gets a leading apostrophe, so that spreadsheet applications do not treat it as a formula.
+* The file can be loaded again with [`import`](#importing-contacts-import).
+
+Examples:
+
+* `export` creates a file such as `data/contacts-20261025-042535.csv` containing all contacts.
+
 ### Exiting the program: `exit`
 
 Exits the program.
@@ -249,7 +278,8 @@ _Details coming soon ..._
 ## FAQ
 
 **Q**: How do I transfer my data to another computer?<br>
-**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous AddressBook home folder.
+**A**: Install the app on the other computer and overwrite the data file it creates with the data file from your previous AddressBook home folder.<br>
+Alternatively, run [`export`](#exporting-contacts-export) to save your contacts to a CSV file, copy that file to the other computer, and load it there with [`import`](#importing-contacts-import). This transfers only your contacts.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -315,6 +345,7 @@ Action     | Format, Examples
 **Find**   | `find [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...` (at least one flag)<br> e.g., `find n/Alex g/T09`
 **List**   | `list`
 **Import** | `import FILE_PATH`<br> e.g., `import data/contacts.csv`
+**Export** | `export`
 **Sort**   | `sort name\|group\|tag [asc\|desc] [cont\|none]`<br> e.g., `sort name asc cont`, `sort tag`
 **Pin**    | `pin [n/NAME] [p/PHONE_NUMBER] [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...` (at least one field)<br> e.g., `pin p/98765432`
 **Help**   | `help`

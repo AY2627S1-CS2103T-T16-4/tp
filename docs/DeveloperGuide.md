@@ -257,6 +257,21 @@ Commands that modify address-book data save a state for undo. These include:
 
 This keeps the undo history focused on changes to the address book rather than changes to the user's view.
 
+### Export command
+
+The `export` command saves all contacts to a new timestamped CSV file next to the data file, for example:
+
+```text
+export
+```
+
+Its implementation has four main parts:
+
+* **Parsing:** `ExportCommandParser` takes no arguments and rejects any non-empty arguments with an invalid command format error. Unlike the other parsers, it is created with the folder to export into. `LogicManager` derives this folder from the parent of the data file path, or the working directory if the path has no folder part, and passes it to `AddressBookParser`, which gives it to `ExportCommandParser`. The folder is supplied this way because `Command#execute(Model)` has no access to `Storage`, so the `Command` API is unchanged.
+* **Selecting contacts:** `ExportCommand` calls `Model#getAllPersonsInDisplayOrder`. This copies every contact in the address book, including those hidden by the current filter, and sorts the copy with the same comparator as the displayed list: pinned contacts first, then the active sort, then the order added. The file therefore matches what the user sees on screen, without the filter.
+* **Writing:** `CsvExporter#write` creates any missing parent folder, then opens the file with `CREATE_NEW`, so an existing file is never overwritten. `ExportCommand` names the file `contacts-yyyyMMdd-HHmmss.csv` from a `Clock`, which tests replace with a fixed one. `CsvExporter` writes a byte order mark, the header row, and one CRLF-terminated row per contact. Groups and tags are sorted alphabetically and joined with semicolons. A cell starting with `=`, `+`, `-`, `@`, a tab, or a carriage return gets a leading apostrophe to prevent spreadsheet formula injection, and a cell containing a comma, quote, or line break is quoted. `CsvImporter` checks its header against `CsvExporter.HEADER`, so the two stay in step.
+* **Errors and no undo:** `CsvExporter#write` throws `FileAlreadyExistsException` both when the file exists (from `CREATE_NEW`) and when the export folder is actually a regular file (from creating the folder), so `ExportCommand` checks `Files.exists` to choose between the file-exists message and the general failure message. Other `IOException`s also give the failure message. `ExportCommand` does not override `Command#isUndoable`, which returns `false`, and leaves the model unchanged. The new file is its only effect.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Documentation, logging, testing, dev-ops**
@@ -300,6 +315,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `***`    | Beyond MVP | User | Edit my groupmate's contact details                                    | Update outdated contact information without deleting and re-adding them             |
 | `*`      | Beyond MVP | Experienced User | Pin contacts to appear at the top                                      | Access important contacts quickly                                                   |
 | `*`      | Beyond MVP | Experienced User | Sort my contacts                                                       | Change the view of my contact list to my preferred choice                           |
+| `*`      | Beyond MVP | User             | Export my contacts to a CSV file                                       | Back up my contacts or open them in a spreadsheet                                   |
 
 ### Use cases
 
@@ -545,6 +561,38 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * 1a. There is no previous state to restore.
 
     * 1a1. The system displays an error message.
+
+    * Use case ends.
+
+**System:** GitMate (GM)  
+**Use case:** U10. Export contacts  
+**Actor:** User
+
+**MSS**
+
+1.  User enters the export command.
+2.  GM saves all contacts to a new timestamped CSV file.
+3.  GM displays the number of contacts exported and the location of the file.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. GM detects an invalid command format, such as extra text after the command word.
+
+    * 1a1. GM displays an error message explaining the accepted input.
+
+    * Use case ends.
+
+* 2a. GM detects that a file with the same name already exists.
+
+    * 2a1. GM displays an error asking the user to try again. The existing file is kept.
+
+    * Use case ends.
+
+* 2b. GM cannot write the file, for example because the folder cannot be written to.
+
+    * 2b1. GM displays an error message with the reason.
 
     * Use case ends.
 
@@ -828,3 +876,63 @@ The sample contacts may still be present, so the cases below use values that onl
    1. _{Explain how to simulate missing or corrupted data files and state the expected behavior.}_
 
 1. _{ more test cases … }_
+
+### Exporting contacts
+
+Run these tests in a separate test copy of the app. Exported files are saved in the `data` folder next to `addressbook.json`; open them in a text editor to check them. Remove any earlier Manual contacts, then add the fixtures. Run `delete p/81110001`, `delete p/81110002`, `delete p/81110003`, and `delete p/81110006` (each reports `No contact matches the supplied criteria.` if the contact is absent), then add these contacts:
+
+```text
+add n/Manual Alex p/81110001 e/alex@example.com a/10 Test Road gh/manualalex li/manualalex tg/manualalex g/manualteam t/backend t/testing
+add n/Manual Alex p/81110002 e/alexother@example.com g/manualteam t/backend
+add n/Manual Beth p/81110003 g/otherteam t/design
+```
+
+Run the cases in order. Exported files are not removed by the app, so delete them from the `data` folder when you have finished.
+
+1. Exporting all contacts
+
+   1. Test case: `export`<br>
+      Expected: The status message reads `Exported N contact(s) to ` followed by the full path of `data/contacts-<yyyyMMdd-HHmmss>.csv`, where `N` is the number of contacts in the app. The file exists at that path.
+
+   1. Open the exported file.<br>
+      Expected: The first row is `name,phone,email,address,groups,github,linkedin,telegram,tags,pinned`. It contains these rows for the Manual contacts, with names in capital letters and all other text, except the GitHub username, in lowercase:
+
+      ```csv
+      MANUAL ALEX,81110001,alex@example.com,10 test road,manualteam,manualalex,manualalex,manualalex,backend;testing,false
+      MANUAL ALEX,81110002,alexother@example.com,,manualteam,,,,backend,false
+      MANUAL BETH,81110003,,,otherteam,,,,design,false
+      ```
+
+   1. Wait at least one second, then run `export` again.<br>
+      Expected: A second file with a later timestamp is created. The first file is unchanged.
+
+1. Exporting special characters
+
+   1. Run `add n/Manual Quote p/81110006 a/1 Test Road, #02-01 gh/=cmd`, then `export`.<br>
+      Expected: The new file contains the row `MANUAL QUOTE,81110006,,"1 test road, #02-01",,'=cmd,,,,false`. The address is quoted because it contains a comma, and the GitHub value starts with an apostrophe because it starts with `=`. Run `undo` to remove the contact.
+
+1. Exporting while the list is filtered, pinned, or sorted
+
+   1. Run `find n/Manual`, then `export`.<br>
+      Expected: The status message gives the number of all contacts in the app, not 3, and the file contains the contacts hidden by the filter. Run `list` afterwards.
+
+   1. Run `pin p/81110003`, then `export`.<br>
+      Expected: The `MANUAL BETH` row is the first row after the header, and its `pinned` value is `true`. Run `undo`, then `list`.
+
+   1. Run `sort name desc`, then `export`.<br>
+      Expected: The rows are in the same order as the contact list on screen, so the `MANUAL BETH` row comes before both `MANUAL ALEX` rows. The sort stays active for the rest of the session.
+
+1. Exporting an empty address book and importing the export
+
+   1. Run `export` and note the name of the new file. Then run `clear` and `export` again.<br>
+      Expected: The second status message reads `Exported 0 contact(s) to ` followed by the path. The second file contains only the header row.
+
+   1. Run `import data/FILE_NAME`, where `FILE_NAME` is the file from the first step.<br>
+      Expected: All contacts from the first export are restored, with the same details and pin status.
+
+1. Rejecting invalid input
+
+   1. Test cases: `export x` and `export 1`.<br>
+      Expected: Each reports an invalid command format and displays usage guidance. No new file appears in the `data` folder.
+
+The errors for a file name that already exists and for a folder that cannot be written to are hard to trigger by hand. `ExportCommandTest` covers them.
