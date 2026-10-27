@@ -374,15 +374,15 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 **Extensions**
 
-* 1a. GM detects an invalid command format.
+* 1a. GM detects an invalid command format, missing search criteria, an unsupported flag, a repeated flag that may appear only once, or an empty search value.
 
-    * 1a1. GM displays an error message with the correct format.
+    * 1a1. GM displays an error message explaining the accepted input.
 
     * Use case ends.
 
 * 1b. GM detects that there are no matching contacts.
 
-    * 1b1. GM displays an empty list and informs user that there are no matching contacts.
+    * 1b1. GM displays an empty list and informs the user that no contact matches the flags searched.
 
     * Use case ends.
 
