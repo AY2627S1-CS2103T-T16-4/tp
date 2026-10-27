@@ -768,3 +768,63 @@ Use the three contacts created for the delete tests, with all deletions undone. 
    1. _{Explain how to simulate missing or corrupted data files and state the expected behavior.}_
 
 1. _{ more test cases … }_
+
+### Exporting contacts
+
+Run these tests in a separate test copy of the app. Exported files are saved in the `data` folder next to `addressbook.json`; open them in a text editor to check them. Remove any earlier Manual contacts, then add the fixtures. Run `delete p/81110001`, `delete p/81110002`, `delete p/81110003`, and `delete p/81110006` (each reports `No contact matches the supplied criteria.` if the contact is absent), then add these contacts:
+
+```text
+add n/Manual Alex p/81110001 e/alex@example.com a/10 Test Road gh/manualalex li/manualalex tg/manualalex g/manualteam t/backend t/testing
+add n/Manual Alex p/81110002 e/alexother@example.com g/manualteam t/backend
+add n/Manual Beth p/81110003 g/otherteam t/design
+```
+
+Run the cases in order. Exported files are not removed by the app, so delete them from the `data` folder when you have finished.
+
+1. Exporting all contacts
+
+   1. Test case: `export`<br>
+      Expected: The status message reads `Exported N contact(s) to ` followed by the full path of `data/contacts-<yyyyMMdd-HHmmss>.csv`, where `N` is the number of contacts in the app. The file exists at that path.
+
+   1. Open the exported file.<br>
+      Expected: The first row is `name,phone,email,address,groups,github,linkedin,telegram,tags,pinned`. It contains these rows for the Manual contacts, with names in capital letters and all other text, except the GitHub username, in lowercase:
+
+      ```csv
+      MANUAL ALEX,81110001,alex@example.com,10 test road,manualteam,manualalex,manualalex,manualalex,backend;testing,false
+      MANUAL ALEX,81110002,alexother@example.com,,manualteam,,,,backend,false
+      MANUAL BETH,81110003,,,otherteam,,,,design,false
+      ```
+
+   1. Wait at least one second, then run `export` again.<br>
+      Expected: A second file with a later timestamp is created. The first file is unchanged.
+
+1. Exporting special characters
+
+   1. Run `add n/Manual Quote p/81110006 a/1 Test Road, #02-01 gh/=cmd`, then `export`.<br>
+      Expected: The new file contains the row `MANUAL QUOTE,81110006,,"1 test road, #02-01",,'=cmd,,,,false`. The address is quoted because it contains a comma, and the GitHub value starts with an apostrophe because it starts with `=`. Run `undo` to remove the contact.
+
+1. Exporting while the list is filtered, pinned, or sorted
+
+   1. Run `find n/Manual`, then `export`.<br>
+      Expected: The status message gives the number of all contacts in the app, not 3, and the file contains the contacts hidden by the filter. Run `list` afterwards.
+
+   1. Run `pin p/81110003`, then `export`.<br>
+      Expected: The `MANUAL BETH` row is the first row after the header, and its `pinned` value is `true`. Run `undo`, then `list`.
+
+   1. Run `sort name desc`, then `export`.<br>
+      Expected: The rows are in the same order as the contact list on screen, so the `MANUAL BETH` row comes before both `MANUAL ALEX` rows. The sort stays active for the rest of the session.
+
+1. Exporting an empty address book and importing the export
+
+   1. Run `export` and note the name of the new file. Then run `clear` and `export` again.<br>
+      Expected: The second status message reads `Exported 0 contact(s) to ` followed by the path. The second file contains only the header row.
+
+   1. Run `import data/FILE_NAME`, where `FILE_NAME` is the file from the first step.<br>
+      Expected: All contacts from the first export are restored, with the same details and pin status.
+
+1. Rejecting invalid input
+
+   1. Test cases: `export x` and `export 1`.<br>
+      Expected: Each reports an invalid command format and displays usage guidance. No new file appears in the `data` folder.
+
+The errors for a file name that already exists and for a folder that cannot be written to are hard to trigger by hand. `ExportCommandTest` covers them.

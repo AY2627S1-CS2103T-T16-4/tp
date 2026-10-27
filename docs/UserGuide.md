@@ -227,7 +227,7 @@ Format: `export`
 name,phone,email,address,groups,github,linkedin,telegram,tags,pinned
 ```
 
-* Names appear in capital letters and groups and tags in lowercase, as GitMate stores them. Multiple groups or tags share one cell, separated by semicolons in alphabetical order. Pinned status is `true` or `false`.
+* Names appear in capital letters, GitHub usernames keep their letter case, and all other text appears in lowercase, as GitMate stores them. Multiple groups or tags share one cell, separated by semicolons in alphabetical order. Pinned status is `true` or `false`.
 * A cell that starts with `=`, `+`, `-`, `@`, a tab, or a carriage return gets a leading apostrophe, so that spreadsheet applications do not treat it as a formula.
 * The file can be loaded again with [`import`](#importing-contacts-import).
 
