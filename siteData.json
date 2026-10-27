@@ -51,9 +51,10 @@
         "storage-component": "Storage component",
         "common-classes": "Common classes",
         "implementation": "Implementation",
+        "edit-command": "Edit command",
+        "delete-command": "Delete command",
         "pinned-contacts": "Pinned contacts",
         "undo-command": "Undo Command",
-        "proposed-data-archiving": "[Proposed] Data archiving",
         "documentation-logging-testing-dev-ops": "Documentation, logging, testing, dev-ops",
         "appendix-requirements": "Appendix: Requirements",
         "product-scope": "Product scope",
@@ -64,6 +65,7 @@
         "appendix-instructions-for-manual-testing": "Appendix: Instructions for manual testing",
         "launch-and-shutdown": "Launch and shutdown",
         "deleting-a-person": "Deleting a person",
+        "editing-a-person": "Editing a person",
         "saving-data": "Saving data"
       },
       "headingKeywords": {}
