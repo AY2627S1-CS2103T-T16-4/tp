@@ -300,6 +300,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 | `***`    | Beyond MVP | User | Edit my groupmate's contact details                                    | Update outdated contact information without deleting and re-adding them             |
 | `*`      | Beyond MVP | Experienced User | Pin contacts to appear at the top                                      | Access important contacts quickly                                                   |
 | `*`      | Beyond MVP | Experienced User | Sort my contacts                                                       | Change the view of my contact list to my preferred choice                           |
+| `*`      | Beyond MVP | User             | Export my contacts to a CSV file                                       | Back up my contacts or open them in a spreadsheet                                   |
 
 ### Use cases
 
@@ -545,6 +546,38 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * 1a. There is no previous state to restore.
 
     * 1a1. The system displays an error message.
+
+    * Use case ends.
+
+**System:** GitMate (GM)  
+**Use case:** U10. Export contacts  
+**Actor:** User
+
+**MSS**
+
+1.  User enters the export command.
+2.  GM saves all contacts to a new timestamped CSV file.
+3.  GM displays the number of contacts exported and the location of the file.
+
+    Use case ends.
+
+**Extensions**
+
+* 1a. GM detects an invalid command format, such as extra text after the command word.
+
+    * 1a1. GM displays an error message explaining the accepted input.
+
+    * Use case ends.
+
+* 2a. GM detects that a file with the same name already exists.
+
+    * 2a1. GM displays an error asking the user to try again. The existing file is kept.
+
+    * Use case ends.
+
+* 2b. GM cannot write the file, for example because the folder cannot be written to.
+
+    * 2b1. GM displays an error message with the reason.
 
     * Use case ends.
 
