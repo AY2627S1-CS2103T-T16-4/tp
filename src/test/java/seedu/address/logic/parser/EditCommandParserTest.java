@@ -42,6 +42,9 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
 
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 
 import seedu.address.logic.Messages;
@@ -106,14 +109,21 @@ public class EditCommandParserTest {
 
     @Test
     public void parse_emptySearchValue_failure() {
-        assertParseFailure(parser,
-                " " + PREFIX_NAME + SEPARATOR + PHONE_DESC_BOB,
-                String.format(EditCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_NAME));
+        // Unlike updates, every search field requires a nonempty value.
+        for (Prefix prefix : List.of(PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS,
+                PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM, PREFIX_GROUP, PREFIX_TAG)) {
+            assertParseFailure(parser,
+                    " " + prefix + SEPARATOR + NAME_DESC_AMY,
+                    String.format(EditCommand.MESSAGE_EMPTY_FLAG_VALUE, prefix));
+        }
+    }
 
-        // Optional fields must also have a value when used as search criteria.
+    @Test
+    public void parse_unknownFlag_failure() {
         assertParseFailure(parser,
-                " " + PREFIX_EMAIL + SEPARATOR + NAME_DESC_AMY,
-                String.format(EditCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_EMAIL));
+                PHONE_DESC_AMY + " x/value" + SEPARATOR + NAME_DESC_AMY, MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser,
+                SEARCH_AND_SEPARATOR + NAME_DESC_AMY + " x/value", MESSAGE_INVALID_FORMAT);
     }
 
     @Test
@@ -172,6 +182,36 @@ public class EditCommandParserTest {
                 .withPhone(VALID_PHONE_BOB)
                 .withEmail(VALID_EMAIL_AMY)
                 .build();
+
+        assertParseSuccess(parser, userInput, expectedCommand(descriptor));
+    }
+
+    @Test
+    public void parse_singleUpdateField_success() {
+        assertParseSuccess(parser, SEARCH_AND_SEPARATOR + NAME_DESC_AMY,
+                expectedCommand(new EditPersonDescriptorBuilder().withName(VALID_NAME_AMY).build()));
+        assertParseSuccess(parser, SEARCH_AND_SEPARATOR + PHONE_DESC_BOB,
+                expectedCommand(new EditPersonDescriptorBuilder().withPhone(VALID_PHONE_BOB).build()));
+        assertParseSuccess(parser, SEARCH_AND_SEPARATOR + EMAIL_DESC_AMY,
+                expectedCommand(new EditPersonDescriptorBuilder().withEmail(VALID_EMAIL_AMY).build()));
+        assertParseSuccess(parser, SEARCH_AND_SEPARATOR + ADDRESS_DESC_AMY,
+                expectedCommand(new EditPersonDescriptorBuilder().withAddress(VALID_ADDRESS_AMY).build()));
+        assertParseSuccess(parser, SEARCH_AND_SEPARATOR + GITHUB_DESC_AMY,
+                expectedCommand(new EditPersonDescriptorBuilder().withGithub(VALID_GITHUB_AMY).build()));
+        assertParseSuccess(parser, SEARCH_AND_SEPARATOR + LINKEDIN_DESC_AMY,
+                expectedCommand(new EditPersonDescriptorBuilder().withLinkedin(VALID_LINKEDIN_AMY).build()));
+        assertParseSuccess(parser, SEARCH_AND_SEPARATOR + TELEGRAM_DESC_AMY,
+                expectedCommand(new EditPersonDescriptorBuilder().withTelegram(VALID_TELEGRAM_AMY).build()));
+        assertParseSuccess(parser, SEARCH_AND_SEPARATOR + GROUP_DESC_AMY,
+                expectedCommand(new EditPersonDescriptorBuilder().withGroups(VALID_GROUP_AMY).build()));
+        assertParseSuccess(parser, SEARCH_AND_SEPARATOR + TAG_DESC_FRIEND,
+                expectedCommand(new EditPersonDescriptorBuilder().withTags(VALID_TAG_FRIEND).build()));
+    }
+
+    @Test
+    public void parse_separatorWithoutSurroundingSpaces_success() {
+        String userInput = PHONE_DESC_AMY.trim() + EDIT_SEPARATOR + NAME_DESC_AMY.trim();
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName(VALID_NAME_AMY).build();
 
         assertParseSuccess(parser, userInput, expectedCommand(descriptor));
     }
@@ -249,16 +289,62 @@ public class EditCommandParserTest {
         assertParseFailure(parser,
                 SEARCH_AND_SEPARATOR + GROUP_DESC_AMY + GROUP_EMPTY,
                 String.format(EditCommand.MESSAGE_MIXED_CLEAR_AND_TOGGLE, PREFIX_GROUP));
+
+        // Empty values are invalid in either order when another occurrence is present.
+        assertParseFailure(parser,
+                SEARCH_AND_SEPARATOR + TAG_EMPTY + TAG_DESC_FRIEND,
+                String.format(EditCommand.MESSAGE_MIXED_CLEAR_AND_TOGGLE, PREFIX_TAG));
+        assertParseFailure(parser,
+                SEARCH_AND_SEPARATOR + GROUP_EMPTY + GROUP_DESC_AMY,
+                String.format(EditCommand.MESSAGE_MIXED_CLEAR_AND_TOGGLE, PREFIX_GROUP));
+    }
+
+    @Test
+    public void parse_repeatedEmptySetFields_failure() {
+        assertParseFailure(parser,
+                SEARCH_AND_SEPARATOR + TAG_EMPTY + TAG_EMPTY,
+                String.format(EditCommand.MESSAGE_MIXED_CLEAR_AND_TOGGLE, PREFIX_TAG));
+        assertParseFailure(parser,
+                SEARCH_AND_SEPARATOR + GROUP_EMPTY + GROUP_EMPTY,
+                String.format(EditCommand.MESSAGE_MIXED_CLEAR_AND_TOGGLE, PREFIX_GROUP));
+    }
+
+    @Test
+    public void parse_repeatedNonemptySetFields_success() {
+        String userInput = SEARCH_AND_SEPARATOR + TAG_DESC_FRIEND + TAG_DESC_FRIEND
+                + GROUP_DESC_AMY + GROUP_DESC_AMY;
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder()
+                .withTags(VALID_TAG_FRIEND).withGroups(VALID_GROUP_AMY).build();
+
+        assertParseSuccess(parser, userInput, expectedCommand(descriptor));
     }
 
     @Test
     public void parse_repeatedScalarFields_failure() {
-        // repeated search prefix
+        Map<Prefix, String> scalarFields = Map.of(
+                PREFIX_NAME, NAME_DESC_AMY,
+                PREFIX_PHONE, PHONE_DESC_AMY,
+                PREFIX_EMAIL, EMAIL_DESC_AMY,
+                PREFIX_ADDRESS, ADDRESS_DESC_AMY,
+                PREFIX_GITHUB, GITHUB_DESC_AMY,
+                PREFIX_LINKEDIN, LINKEDIN_DESC_AMY,
+                PREFIX_TELEGRAM, TELEGRAM_DESC_AMY);
+
+        scalarFields.forEach((prefix, field) -> {
+            assertParseFailure(parser,
+                    field + field + SEPARATOR + NAME_DESC_AMY,
+                    Messages.getErrorMessageForDuplicatePrefixes(prefix));
+            assertParseFailure(parser,
+                    SEARCH_AND_SEPARATOR + field + field,
+                    Messages.getErrorMessageForDuplicatePrefixes(prefix));
+        });
+    }
+
+    @Test
+    public void parse_repeatedScalarFieldWithDifferentValues_failure() {
         assertParseFailure(parser,
                 PHONE_DESC_AMY + PHONE_DESC_BOB + SEPARATOR + NAME_DESC_AMY,
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_PHONE));
-
-        // repeated update prefix
         assertParseFailure(parser,
                 SEARCH_AND_SEPARATOR + PHONE_DESC_AMY + PHONE_DESC_BOB,
                 Messages.getErrorMessageForDuplicatePrefixes(PREFIX_PHONE));
