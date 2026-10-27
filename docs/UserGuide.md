@@ -136,22 +136,35 @@ Each example is independent and assumes the specified contact exists. The name-b
 * `edit p/98765432 >> t/backend g/cs2103` removes the `backend` tag and `cs2103` group if present, or adds them if absent. Other tags and groups are preserved.
 * `edit p/98765432 >> e/` clears that contact's email.
 
-### Locating persons by name: `find`
+### Locating persons by fields: `find`
 
-Finds persons whose names contain any of the given keywords.
+Finds contacts whose fields start with the supplied values.
 
-Format: `find KEYWORD [MORE_KEYWORDS]`
+Format: `find [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...`
 
-* The search is case-insensitive; for example, `hans` matches `Hans`.
-* Keyword order does not matter; for example, `Hans Bo` matches `Bo Hans`.
-* The search considers only names.
-* Only full words match; for example, `Han` does not match `Hans`.
-* Persons matching at least one keyword are returned (an `OR` search); for example, `Hans Bo` returns `Hans Gruber` and `Bo Yang`.
+**Matching contacts:**
+
+* Provide at least one flag, and every supplied value must be nonempty.
+* A contact is listed only if it matches every supplied flag (an `AND` search).
+* Find uses prefix matching: each value is matched against the start of the contact's field. For example, `n/Al` matches `Alex Yeoh`, and `p/9876` matches `98765432`. A value from the middle of a field does not match, so `n/Yeoh` does not match `Alex Yeoh`.
+* Matching ignores letter case except for GitHub usernames (`gh/`), which are case-sensitive.
+* Repeating `g/` or `t/` requires the contact to have, for each supplied value, at least one group or tag that starts with it. Other flags may appear at most once.
+* Unsupported flags, such as `x/`, and text before the first flag are rejected.
+
+**Viewing results:**
+
+* The contact list shows only the matching contacts, with pinned contacts first. If no contact matches, an error names the flags searched.
+* The filter stays active when you run other commands, such as `sort`. Use `list` to show all contacts again.
+* `find` only changes the contacts shown, so it cannot be reversed with `undo`.
 
 Examples:
-* `find John` returns `john` and `John Doe`
-* `find alex david` returns `Alex Yeoh`, `David Li`<br>
-  ![result for 'find alex david'](images/findAlexDavidResult.png)
+
+Each example is independent.
+
+* `find n/Alex` lists every contact whose name starts with `Alex`, such as `Alex Yeoh`.
+* `find p/98 g/T09` lists contacts whose phone number starts with `98` and who belong to a group starting with `T09`.
+* `find t/friend t/col` lists contacts with a tag starting with `friend` and a tag starting with `col`.
+* `find gh/Alice` lists contacts whose GitHub username starts with `Alice`. A contact with the username `alice` is not listed.
 
 ### Pinning a contact: `pin`
 
@@ -299,7 +312,7 @@ Action     | Format, Examples
 **Clear**  | `clear`
 **Delete** | `delete [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...` (at least one field)<br> e.g., `delete p/98765432`
 **Edit**   | `edit SEARCH_FLAGS >> UPDATE_FLAGS` (at least one flag on each side)<br>Supported flags: `[n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...`<br> e.g., `edit p/98765432 >> n/James Lee e/jameslee@example.com`
-**Find**   | `find KEYWORD [MORE_KEYWORDS]`<br> e.g., `find James Jake`
+**Find**   | `find [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...` (at least one flag)<br> e.g., `find n/Alex g/T09`
 **List**   | `list`
 **Import** | `import FILE_PATH`<br> e.g., `import data/contacts.csv`
 **Sort**   | `sort name\|group\|tag [asc\|desc] [cont\|none]`<br> e.g., `sort name asc cont`, `sort tag`
