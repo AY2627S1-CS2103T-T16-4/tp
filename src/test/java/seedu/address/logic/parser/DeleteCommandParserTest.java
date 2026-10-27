@@ -5,13 +5,16 @@ import static seedu.address.logic.Messages.getErrorMessageForDuplicatePrefixes;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GITHUB;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_GROUP;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_LINKEDIN;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
 
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -31,11 +34,9 @@ import seedu.address.model.person.Telegram;
 import seedu.address.model.tag.Tag;
 
 /**
- * As we are only doing white-box testing, our test cases do not cover path variations
- * outside of the DeleteCommand code. For example, inputs "1" and "1 abc" take the
- * same path through the DeleteCommand, and therefore we test only one of them.
- * The path variation for those two cases occurs inside the ParserUtil, and
- * therefore should be covered by the ParserUtilTest.
+ * Tests parsing of delete criteria using the shared exact-match parser and field parsers.
+ * Covers argument validation and construction of the expected command; detailed field-value
+ * boundaries are covered by ParserUtilTest and the corresponding value-class tests.
  */
 public class DeleteCommandParserTest {
 
@@ -124,6 +125,96 @@ public class DeleteCommandParserTest {
                 commandWith(d -> d.setGroups(Set.of(new Group("T09")))));
         assertParseSuccess(parser, " t/friend",
                 commandWith(d -> d.setTags(Set.of(new Tag("friend")))));
+    }
+
+    @Test
+    public void parse_emptyFlagValue_throwsParseException() {
+        List<Prefix> prefixes = List.of(
+                PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS,
+                PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM,
+                PREFIX_GROUP, PREFIX_TAG);
+        for (int i = 0; i < prefixes.size(); i++) {
+            Prefix prefix = prefixes.get(i);
+            assertParseFailure(parser, " " + prefix,
+                    String.format(DeleteCommand.MESSAGE_EMPTY_FLAG_VALUE, prefix));
+        }
+    }
+
+    @Test
+    public void parse_whitespaceOnlyFlagValue_throwsParseException() {
+        assertParseFailure(parser, " n/   ",
+                String.format(DeleteCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_NAME));
+    }
+
+    @Test
+    public void parse_emptyFlagValueWithValidField_throwsParseException() {
+        assertParseFailure(parser, " n/Alice p/",
+                String.format(DeleteCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_PHONE));
+    }
+
+    @Test
+    public void parse_repeatedGroupWithEmptyValue_throwsParseException() {
+        String expectedMessage = String.format(DeleteCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_GROUP);
+
+        assertParseFailure(parser, " g/ g/T09", expectedMessage);
+        assertParseFailure(parser, " g/T09 g/", expectedMessage);
+    }
+
+    @Test
+    public void parse_repeatedTagWithEmptyValue_throwsParseException() {
+        String expectedMessage = String.format(DeleteCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_TAG);
+
+        assertParseFailure(parser, " t/ t/friend", expectedMessage);
+        assertParseFailure(parser, " t/friend t/", expectedMessage);
+    }
+
+    @Test
+    public void parse_allPrefixes_returnsDeleteCommand() {
+        String args = " n/Alice p/91234567 a/123 Clementi Ave e/alice@example.com"
+                + " gh/AliceGh li/alice-li tg/alicetg g/T09 t/friend";
+        DeleteCommand expectedCommand = commandWith(d -> {
+            d.setName(new Name("Alice"));
+            d.setPhone(new Phone("91234567"));
+            d.setAddress(new Address("123 Clementi Ave"));
+            d.setEmail(new Email("alice@example.com"));
+            d.setGithub(new Github("AliceGh"));
+            d.setLinkedin(new Linkedin("alice-li"));
+            d.setTelegram(new Telegram("alicetg"));
+            d.setGroups(Set.of(new Group("T09")));
+            d.setTags(Set.of(new Tag("friend")));
+        });
+
+        assertParseSuccess(parser, args, expectedCommand);
+    }
+
+    @Test
+    public void parse_multipleGroups_returnsDeleteCommandWithAllGroups() {
+        assertParseSuccess(parser, " g/T09 g/T10",
+                commandWith(d -> d.setGroups(Set.of(new Group("T09"), new Group("T10")))));
+    }
+
+    @Test
+    public void parse_multipleTags_returnsDeleteCommandWithAllTags() {
+        assertParseSuccess(parser, " t/friend t/colleague",
+                commandWith(d -> d.setTags(Set.of(new Tag("friend"), new Tag("colleague")))));
+    }
+
+    @Test
+    public void parse_repeatedIdenticalGroup_returnsDeleteCommandWithOneGroup() {
+        assertParseSuccess(parser, " g/T09 g/T09",
+                commandWith(d -> d.setGroups(Set.of(new Group("T09")))));
+    }
+
+    @Test
+    public void parse_repeatedIdenticalTag_returnsDeleteCommandWithOneTag() {
+        assertParseSuccess(parser, " t/friend t/friend",
+                commandWith(d -> d.setTags(Set.of(new Tag("friend")))));
+    }
+
+    @Test
+    public void parse_valueWithSurroundingWhitespace_returnsDeleteCommandWithTrimmedValue() {
+        assertParseSuccess(parser, " n/  Alice Pauline   ",
+                commandWith(d -> d.setName(new Name("Alice Pauline"))));
     }
 
     /**
