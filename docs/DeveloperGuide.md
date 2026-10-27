@@ -242,6 +242,21 @@ Commands that modify address-book data save a state for undo. These include:
 
 This keeps the undo history focused on changes to the address book rather than changes to the user's view.
 
+### Export command
+
+The `export` command saves all contacts to a new timestamped CSV file next to the data file, for example:
+
+```text
+export
+```
+
+Its implementation has four main parts:
+
+* **Parsing:** `ExportCommandParser` takes no arguments and rejects any non-empty arguments with an invalid command format error. Unlike the other parsers, it is created with the folder to export into. `LogicManager` derives this folder from the parent of the data file path, or the working directory if the path has no folder part, and passes it to `AddressBookParser`, which gives it to `ExportCommandParser`. The folder is supplied this way because `Command#execute(Model)` has no access to `Storage`, so the `Command` API is unchanged.
+* **Selecting contacts:** `ExportCommand` calls `Model#getAllPersonsInDisplayOrder`. This copies every contact in the address book, including those hidden by the current filter, and sorts the copy with the same comparator as the displayed list: pinned contacts first, then the active sort, then the order added. The file therefore matches what the user sees on screen, without the filter.
+* **Writing:** `CsvExporter#write` creates any missing parent folder, then opens the file with `CREATE_NEW`, so an existing file is never overwritten. `ExportCommand` names the file `contacts-yyyyMMdd-HHmmss.csv` from a `Clock`, which tests replace with a fixed one. `CsvExporter` writes a byte order mark, the header row, and one CRLF-terminated row per contact. Groups and tags are sorted alphabetically and joined with semicolons. A cell starting with `=`, `+`, `-`, `@`, a tab, or a carriage return gets a leading apostrophe to prevent spreadsheet formula injection, and a cell containing a comma, quote, or line break is quoted. `CsvImporter` checks its header against `CsvExporter.HEADER`, so the two stay in step.
+* **Errors and no undo:** `CsvExporter#write` throws `FileAlreadyExistsException` both when the file exists (from `CREATE_NEW`) and when the export folder is actually a regular file (from creating the folder), so `ExportCommand` checks `Files.exists` to choose between the file-exists message and the general failure message. Other `IOException`s also give the failure message. `ExportCommand` does not override `Command#isUndoable`, which returns `false`, and leaves the model unchanged. The new file is its only effect.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Documentation, logging, testing, dev-ops**
