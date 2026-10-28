@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.Messages.MESSAGE_QUOTED_VALUE_HINT;
 import static seedu.address.logic.Messages.getErrorMessageForDuplicatePrefixes;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
@@ -42,6 +43,7 @@ public class DeleteCommandParserTest {
 
     private static final String MESSAGE_INVALID_FORMAT =
             String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE);
+    private static final String MESSAGE_UNKNOWN_FLAG = MESSAGE_INVALID_FORMAT + "\n" + MESSAGE_QUOTED_VALUE_HINT;
 
     private DeleteCommandParser parser = new DeleteCommandParser();
 
@@ -59,19 +61,19 @@ public class DeleteCommandParserTest {
 
     @Test
     public void parse_unknownPrefix_throwsParseException() {
-        assertParseFailure(parser, " x/foo", MESSAGE_INVALID_FORMAT);
-        assertParseFailure(parser, " x/foo n/Alice", MESSAGE_INVALID_FORMAT);
-        assertParseFailure(parser, " n/Alice x/foo g/T09", MESSAGE_INVALID_FORMAT);
-        assertParseFailure(parser, " n/Alice g/T09 x/foo", MESSAGE_INVALID_FORMAT);
-        assertParseFailure(parser, " n/Alice ph/91234567", MESSAGE_INVALID_FORMAT);
-        assertParseFailure(parser, " g/T09 N/Alice", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, " x/foo", MESSAGE_UNKNOWN_FLAG);
+        assertParseFailure(parser, " x/foo n/Alice", MESSAGE_UNKNOWN_FLAG);
+        assertParseFailure(parser, " n/Alice x/foo g/T09", MESSAGE_UNKNOWN_FLAG);
+        assertParseFailure(parser, " n/Alice g/T09 x/foo", MESSAGE_UNKNOWN_FLAG);
+        assertParseFailure(parser, " n/Alice ph/91234567", MESSAGE_UNKNOWN_FLAG);
+        assertParseFailure(parser, " g/T09 N/Alice", MESSAGE_UNKNOWN_FLAG);
     }
 
     @Test
     public void parse_unknownPrefixWithInvalidValue_reportsInvalidFormat() {
         // Unknown prefixes are checked before empty or invalid field values.
-        assertParseFailure(parser, " n/ x/foo", MESSAGE_INVALID_FORMAT);
-        assertParseFailure(parser, " p/1234 x/foo", MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, " n/ x/foo", MESSAGE_UNKNOWN_FLAG);
+        assertParseFailure(parser, " p/1234 x/foo", MESSAGE_UNKNOWN_FLAG);
     }
 
     @Test

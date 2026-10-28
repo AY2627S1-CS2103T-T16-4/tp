@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.Messages.MESSAGE_QUOTED_VALUE_HINT;
 import static seedu.address.logic.commands.EditCommand.EDIT_SEPARATOR;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
@@ -49,22 +50,27 @@ public class EditCommandParser implements Parser<EditCommand> {
     public EditCommand parse(String args) throws ParseException {
         requireNonNull(args);
 
-        String[] sections = args.split(EDIT_SEPARATOR, -1);
+        String unquoted = ArgumentTokenizer.maskQuotedValues(args);
+        int separatorIndex = unquoted.indexOf(EDIT_SEPARATOR);
 
-        if (sections.length != 2 || sections[0].isBlank()) {
+        if (separatorIndex == -1 || separatorIndex != unquoted.lastIndexOf(EDIT_SEPARATOR)) {
             throw createInvalidFormatException();
         }
 
         // Prefix recognition requires a preceding space.
-        String searchArgs = " " + sections[0].trim();
-        String updateArgs = " " + sections[1].trim();
+        String searchArgs = " " + args.substring(0, separatorIndex).trim();
+        String updateArgs = " " + args.substring(separatorIndex + EDIT_SEPARATOR.length()).trim();
 
         PersonMatchesExactFieldsPredicate predicate = targetParser.parse(searchArgs);
 
+        if (containsUnknownFlag(updateArgs)) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE)
+                    + "\n" + MESSAGE_QUOTED_VALUE_HINT);
+        }
         ArgumentMultimap updates = ArgumentTokenizer.tokenize(
                 updateArgs, EDITABLE_PREFIXES.toArray(new Prefix[0]));
 
-        validateUpdates(updateArgs, updates);
+        validateUpdates(updates);
 
         EditPersonDescriptor descriptor = parseUpdates(updates);
 
@@ -78,13 +84,11 @@ public class EditCommandParser implements Parser<EditCommand> {
     /**
      * Validates update syntax while allowing empty optional fields.
      *
-     * @param args Update arguments to check for unsupported flags.
      * @param updates Tokenized updates to check for preamble text, duplicate flags, and required field values.
      * @throws ParseException If the updates contain invalid syntax, duplicate scalar flags, or empty required fields.
      */
-    private static void validateUpdates(
-            String args, ArgumentMultimap updates) throws ParseException {
-        if (!updates.getPreamble().isEmpty() || containsUnknownFlag(args)) {
+    private static void validateUpdates(ArgumentMultimap updates) throws ParseException {
+        if (!updates.getPreamble().isEmpty()) {
             throw createInvalidFormatException();
         }
 
@@ -218,8 +222,8 @@ public class EditCommandParser implements Parser<EditCommand> {
      * Returns true if the arguments contain an unsupported flag-like token absorbed into a field value.
      * Uses the same detection rule as {@link ExactPersonMatchParser}.
      */
-    private static boolean containsUnknownFlag(String args) {
-        Matcher matcher = FLAG_LIKE_TOKEN.matcher(args);
+    private static boolean containsUnknownFlag(String args) throws ParseException {
+        Matcher matcher = FLAG_LIKE_TOKEN.matcher(ArgumentTokenizer.maskQuotedValues(args));
 
         while (matcher.find()) {
             String token = matcher.group();

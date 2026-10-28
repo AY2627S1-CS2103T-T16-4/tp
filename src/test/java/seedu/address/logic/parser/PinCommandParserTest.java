@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.Messages.MESSAGE_QUOTED_VALUE_HINT;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
 
@@ -26,7 +27,8 @@ public class PinCommandParserTest {
     public void parse_invalidArguments_usesPinSpecificMessages() {
         assertParseFailure(parser, "", String.format(MESSAGE_INVALID_COMMAND_FORMAT, PinCommand.MESSAGE_USAGE));
         assertParseFailure(parser, " g/", String.format(PinCommand.MESSAGE_EMPTY_FLAG_VALUE, CliSyntax.PREFIX_GROUP));
-        assertParseFailure(parser, " x/foo", String.format(MESSAGE_INVALID_COMMAND_FORMAT, PinCommand.MESSAGE_USAGE));
+        assertParseFailure(parser, " x/foo", String.format(MESSAGE_INVALID_COMMAND_FORMAT, PinCommand.MESSAGE_USAGE)
+                + "\n" + MESSAGE_QUOTED_VALUE_HINT);
     }
 
 }

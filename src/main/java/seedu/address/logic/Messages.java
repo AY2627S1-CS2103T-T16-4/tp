@@ -14,6 +14,10 @@ public class Messages {
 
     public static final String MESSAGE_UNKNOWN_COMMAND = "Unknown command.";
     public static final String MESSAGE_INVALID_COMMAND_FORMAT = "Invalid command format!\n%1$s";
+    public static final String MESSAGE_QUOTED_VALUE_HINT =
+            "If a field value contains flag-like text, enclose it in double quotes, e.g. a/\"10 Road c/o Bob\".";
+    public static final String MESSAGE_INVALID_QUOTES =
+            "Enclose the entire field value in matching double quotes; use \\\" for a literal quote.";
     public static final String MESSAGE_INVALID_PERSON_DISPLAYED_INDEX = "The person index provided is invalid.";
     public static final String MESSAGE_PERSONS_LISTED_OVERVIEW = "%1$d person(s) listed!";
     public static final String MESSAGE_DUPLICATE_FIELDS =

@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.Messages.MESSAGE_QUOTED_VALUE_HINT;
 import static seedu.address.logic.commands.FindCommand.MESSAGE_EMPTY_FLAG_VALUE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
@@ -45,6 +46,10 @@ public class FindCommandParser implements Parser<FindCommand> {
      */
     public FindCommand parse(String args) throws ParseException {
         logger.fine("Parsing find arguments: " + args);
+        if (containsUnknownFlag(args)) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE)
+                    + "\n" + MESSAGE_QUOTED_VALUE_HINT);
+        }
         ArgumentMultimap argMultimap =
                 ArgumentTokenizer.tokenize(args, SEARCHABLE_PREFIXES.toArray(new Prefix[0]));
 
@@ -52,7 +57,7 @@ public class FindCommandParser implements Parser<FindCommand> {
                 .filter(prefix -> !argMultimap.getAllValues(prefix).isEmpty())
                 .toList();
 
-        if (!argMultimap.getPreamble().isEmpty() || usedPrefixes.isEmpty() || containsUnknownFlag(args)) {
+        if (!argMultimap.getPreamble().isEmpty() || usedPrefixes.isEmpty()) {
             logger.info("Rejected find input: missing, unknown or non-flag arguments");
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, FindCommand.MESSAGE_USAGE));
         }
@@ -91,9 +96,9 @@ public class FindCommandParser implements Parser<FindCommand> {
      * accepted by {@code find}. The tokenizer does not split on such tokens, so they would otherwise be
      * absorbed into the value of the preceding flag.
      */
-    private static boolean containsUnknownFlag(String args) {
+    private static boolean containsUnknownFlag(String args) throws ParseException {
         assert args != null;
-        Matcher matcher = FLAG_LIKE_TOKEN.matcher(args);
+        Matcher matcher = FLAG_LIKE_TOKEN.matcher(ArgumentTokenizer.maskQuotedValues(args));
         while (matcher.find()) {
             String token = matcher.group();
             if (SEARCHABLE_PREFIXES.stream().noneMatch(prefix -> prefix.getPrefix().equals(token))) {

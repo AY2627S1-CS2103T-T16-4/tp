@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.Messages.MESSAGE_QUOTED_VALUE_HINT;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.GITHUB_DESC_AMY;
@@ -68,6 +69,7 @@ public class EditCommandParserTest {
 
     private static final String MESSAGE_INVALID_FORMAT =
             String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE);
+    private static final String MESSAGE_UNKNOWN_FLAG = MESSAGE_INVALID_FORMAT + "\n" + MESSAGE_QUOTED_VALUE_HINT;
 
     private final EditCommandParser parser = new EditCommandParser();
 
@@ -121,9 +123,9 @@ public class EditCommandParserTest {
     @Test
     public void parse_unknownFlag_failure() {
         assertParseFailure(parser,
-                PHONE_DESC_AMY + " x/value" + SEPARATOR + NAME_DESC_AMY, MESSAGE_INVALID_FORMAT);
+                PHONE_DESC_AMY + " x/value" + SEPARATOR + NAME_DESC_AMY, MESSAGE_UNKNOWN_FLAG);
         assertParseFailure(parser,
-                SEARCH_AND_SEPARATOR + NAME_DESC_AMY + " x/value", MESSAGE_INVALID_FORMAT);
+                SEARCH_AND_SEPARATOR + NAME_DESC_AMY + " x/value", MESSAGE_UNKNOWN_FLAG);
     }
 
     @Test

@@ -3,7 +3,12 @@ package seedu.address.logic.parser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import seedu.address.logic.Messages;
+import seedu.address.logic.parser.exceptions.ParseException;
 
 /**
  * Tokenizes arguments string of the form: {@code preamble <prefix>value <prefix>value ...}<br>
@@ -15,6 +20,8 @@ import java.util.stream.Collectors;
  */
 public class ArgumentTokenizer {
 
+    private static final Pattern QUOTED_VALUE = Pattern.compile("\"(?:\\\\.|[^\"\\\\])*\"");
+
     /**
      * Tokenizes an arguments string and returns an {@code ArgumentMultimap} object that maps prefixes to their
      * respective argument values. Only the given prefixes will be recognized in the arguments string.
@@ -22,10 +29,31 @@ public class ArgumentTokenizer {
      * @param argsString Arguments string of the form: {@code preamble <prefix>value <prefix>value ...}
      * @param prefixes   Prefixes to tokenize the arguments string with
      * @return           ArgumentMultimap object that maps prefixes to their arguments
+     * @throws ParseException if a quoted value is incomplete or followed by unquoted text.
      */
-    public static ArgumentMultimap tokenize(String argsString, Prefix... prefixes) {
-        List<PrefixPosition> positions = findAllPrefixPositions(argsString, prefixes);
+    public static ArgumentMultimap tokenize(String argsString, Prefix... prefixes) throws ParseException {
+        List<PrefixPosition> positions = findAllPrefixPositions(maskQuotedValues(argsString), prefixes);
         return extractArguments(argsString, positions);
+    }
+
+    /**
+     * Masks quoted text, preserving positions and word boundaries for flag and separator detection.
+     * Escaped quotes and backslashes inside quoted values are treated as literal characters.
+     *
+     * @throws ParseException if any double quote is unmatched.
+     */
+    static String maskQuotedValues(String args) throws ParseException {
+        Matcher matcher = QUOTED_VALUE.matcher(args);
+        StringBuilder unquoted = new StringBuilder(args);
+        while (matcher.find()) {
+            for (int i = matcher.start(); i < matcher.end(); i++) {
+                unquoted.setCharAt(i, '\0');
+            }
+        }
+        if (unquoted.indexOf("\"") != -1) {
+            throw new ParseException(Messages.MESSAGE_INVALID_QUOTES);
+        }
+        return unquoted.toString();
     }
 
     /**
@@ -84,7 +112,8 @@ public class ArgumentTokenizer {
      * @param prefixPositions Zero-based positions of all prefixes in {@code argsString}
      * @return                ArgumentMultimap object that maps prefixes to their arguments
      */
-    private static ArgumentMultimap extractArguments(String argsString, List<PrefixPosition> prefixPositions) {
+    private static ArgumentMultimap extractArguments(String argsString, List<PrefixPosition> prefixPositions)
+            throws ParseException {
 
         // Sort by start position
         prefixPositions.sort((prefix1, prefix2) -> prefix1.getStartPosition() - prefix2.getStartPosition());
@@ -115,13 +144,19 @@ public class ArgumentTokenizer {
      */
     private static String extractArgumentValue(String argsString,
                                         PrefixPosition currentPrefixPosition,
-                                        PrefixPosition nextPrefixPosition) {
+                                        PrefixPosition nextPrefixPosition) throws ParseException {
         Prefix prefix = currentPrefixPosition.getPrefix();
 
         int valueStartPos = currentPrefixPosition.getStartPosition() + prefix.getPrefix().length();
-        String value = argsString.substring(valueStartPos, nextPrefixPosition.getStartPosition());
+        String value = argsString.substring(valueStartPos, nextPrefixPosition.getStartPosition()).trim();
 
-        return value.trim();
+        if (!prefix.getPrefix().isEmpty() && value.startsWith("\"")) {
+            if (!QUOTED_VALUE.matcher(value).matches()) {
+                throw new ParseException(Messages.MESSAGE_INVALID_QUOTES);
+            }
+            return value.substring(1, value.length() - 1).replaceAll("\\\\([\"\\\\])", "$1").trim();
+        }
+        return value;
     }
 
     /**

@@ -2,6 +2,7 @@ package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.Messages.MESSAGE_QUOTED_VALUE_HINT;
 import static seedu.address.logic.Messages.getErrorMessageForDuplicatePrefixes;
 import static seedu.address.logic.commands.CommandTestUtil.NAME_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
@@ -51,8 +52,10 @@ public class UnpinCommandParserTest {
     @Test
     public void parse_missingOrUnknownArguments_usesUnpinUsage() {
         assertParseFailure(parser, "", MESSAGE_INVALID_FORMAT);
-        assertParseFailure(parser, UNKNOWN_PREFIX_ARGUMENT, MESSAGE_INVALID_FORMAT);
-        assertParseFailure(parser, NAME_DESC_AMY + UNKNOWN_PREFIX_ARGUMENT, MESSAGE_INVALID_FORMAT);
+        assertParseFailure(parser, UNKNOWN_PREFIX_ARGUMENT,
+                MESSAGE_INVALID_FORMAT + "\n" + MESSAGE_QUOTED_VALUE_HINT);
+        assertParseFailure(parser, NAME_DESC_AMY + UNKNOWN_PREFIX_ARGUMENT,
+                MESSAGE_INVALID_FORMAT + "\n" + MESSAGE_QUOTED_VALUE_HINT);
     }
 
     @Test
