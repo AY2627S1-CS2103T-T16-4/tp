@@ -280,6 +280,18 @@ Its implementation has four main parts:
 * **Writing:** `CsvExporter#write` creates any missing parent folder, then opens the file with `CREATE_NEW`, so an existing file is never overwritten. `ExportCommand` names the file `contacts-yyyyMMdd-HHmmss.csv` from a `Clock`, which tests replace with a fixed one. `CsvExporter` writes a byte order mark, the header row, and one CRLF-terminated row per contact. Groups and tags are sorted alphabetically and joined with semicolons. A cell starting with `=`, `+`, `-`, `@`, a tab, or a carriage return gets a leading apostrophe to prevent spreadsheet formula injection, and a cell containing a comma, quote, or line break is quoted. `CsvImporter` checks its header against `CsvExporter.HEADER`, so the two stay in step.
 * **Errors and no undo:** `CsvExporter#write` throws `FileAlreadyExistsException` both when the file exists (from `CREATE_NEW`) and when the export folder is actually a regular file (from creating the folder), so `ExportCommand` checks `Files.exists` to choose between the file-exists message and the general failure message. Other `IOException`s also give the failure message. `ExportCommand` does not override `Command#isUndoable`, which returns `false`, and leaves the model unchanged. The new file is its only effect.
 
+### Command history
+
+The command history feature allows users to reuse successfully executed commands with the `↑` and `↓` arrow keys.
+
+Its implementation has three main parts:
+
+* **Command storage:** `CommandHistory` stores successfully executed commands in an ordered list. Commands are added only after `CommandExecutor#execute` completes successfully. Empty commands and commands that throw an exception are not stored.
+* **History navigation:** `CommandHistory` maintains an index representing the current position in the history. `previous()` moves backward through the list and returns the previous command. `next()` moves forward through the list and returns the next command. Navigating beyond the oldest command keeps returning the oldest command, while navigating beyond the newest command returns an empty string.
+* **User interface handling:** `CommandBox` listens for `KeyCode.UP` and `KeyCode.DOWN` events. The `↑` key calls `CommandHistory#previous`, while the `↓` key calls `CommandHistory#next`. The returned command is placed in the input field and the caret is moved to the end of the text. The key event is consumed so that the text field does not perform its default cursor movement.
+
+Command history is stored only in memory and is cleared when the application is restarted.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Documentation, logging, testing, dev-ops**
@@ -601,6 +613,39 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * 2b. GM cannot write the file, for example because the folder cannot be written to.
 
     * 2b1. GM displays an error message with the reason.
+
+    * Use case ends.
+
+**System:** GitMate (GM)  
+**Use case:** U11. Reuse a previous command  
+**Actor:** User
+
+**MSS**
+
+1. User presses the `↑` key in the command box.
+2. GM displays the most recent successfully executed command.
+3. User presses `↑` or `↓` to navigate through the command history.
+4. GM displays the corresponding command in the command box.
+
+   Use case ends.
+
+**Extensions**
+
+* 1a. There are no previous commands.
+
+    * 1a1. GM leaves the command box empty.
+
+    * Use case ends.
+
+* 1b. User presses `↓` while viewing the newest command.
+
+    * 1b1. GM clears the command box.
+
+    * Use case ends.
+
+* 1c. The previous command failed.
+
+    * 1c1. GM does not save the failed command in the history.
 
     * Use case ends.
 
