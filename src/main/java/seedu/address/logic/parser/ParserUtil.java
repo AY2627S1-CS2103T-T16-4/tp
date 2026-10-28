@@ -120,33 +120,45 @@ public class ParserUtil {
      * Parses a {@code String github} into an {@code Github}.
      * Leading and trailing whitespaces will be trimmed.
      */
-    public static Github parseGithub(String github) {
+    public static Github parseGithub(String github) throws ParseException {
         requireNonNull(github);
-        return new Github(github.trim());
+        String trimmedGithub = github.trim();
+        if (!Github.isValidGithub(trimmedGithub)) {
+            throw new ParseException(Github.MESSAGE_CONSTRAINTS);
+        }
+        return new Github(trimmedGithub);
     }
 
     /**
      * Parses a {@code String linkedin} into an {@code Linkedin}.
      * Leading and trailing whitespaces will be trimmed.
      */
-    public static Linkedin parseLinkedin(String linkedin) {
+    public static Linkedin parseLinkedin(String linkedin) throws ParseException {
         requireNonNull(linkedin);
-        return new Linkedin(linkedin.trim());
+        String trimmedLinkedin = linkedin.trim();
+        if (!Linkedin.isValidLinkedin(trimmedLinkedin)) {
+            throw new ParseException(Linkedin.MESSAGE_CONSTRAINTS);
+        }
+        return new Linkedin(trimmedLinkedin);
     }
 
     /**
      * Parses a {@code String group} into an {@code Group}.
      * Leading and trailing whitespaces will be trimmed.
      */
-    public static Group parseGroup(String group) {
+    public static Group parseGroup(String group) throws ParseException {
         requireNonNull(group);
-        return new Group(group.trim());
+        String trimmedGroup = group.trim();
+        if (!Group.isValidGroup(trimmedGroup)) {
+            throw new ParseException(Group.MESSAGE_CONSTRAINTS);
+        }
+        return new Group(trimmedGroup);
     }
 
     /**
      * Parses {@code Collection<String> groups} into a {@code Set<Group>}.
      */
-    public static Set<Group> parseGroups(Collection<String> groups) {
+    public static Set<Group> parseGroups(Collection<String> groups) throws ParseException {
         requireNonNull(groups);
 
         final Set<Group> groupSet = new HashSet<>();

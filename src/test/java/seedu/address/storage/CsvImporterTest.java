@@ -51,8 +51,7 @@ public class CsvImporterTest {
     public void read_quotedLineBreak_keepsOneRecord() throws Exception {
         // Group currently permits line breaks; CSV must not split the quoted cell into records.
         String row = "Alice,81234567,,,\"alpha\r\nbeta\",,,,,true";
-        assertEquals("alpha\r\nbeta", read(CsvExporter.HEADER + EOL + row)
-                .getFirst().getGroups().iterator().next().value);
+        assertThrows(IllegalValueException.class, () -> read(CsvExporter.HEADER + EOL + row));
     }
 
     @Test

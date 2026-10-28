@@ -20,6 +20,7 @@ public class AddressTest {
 
         // invalid addresses
         assertFalse(Address.isValidAddress(" ")); // spaces only
+        assertFalse(Address.isValidAddress("123/45 Main Street"));
 
         // valid addresses
         assertTrue(Address.isValidAddress("Blk 456, Den Road, #01-355"));
