@@ -181,13 +181,13 @@ Keeps an important contact above unpinned contacts, with a star beside its name.
 
 Format: `pin [n/NAME] [p/PHONE_NUMBER] [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...`
 
-* Provide at least one field. All supplied values must match in full, ignoring letter case except for GitHub usernames (`gh/`).
-* If several contacts match, GitMate displays them and requests more details. No contact is pinned unless exactly one matches. An already-pinned contact produces an error.
+* Provide at least one nonempty field. All supplied values must match in full, ignoring letter case except for GitHub usernames (`gh/`).
+* If no contact matches, an error is displayed. If several match, GitMate displays them and requests more details. Neither case changes pin status. An already-pinned contact produces an error.
 * Pinned contacts appear above unpinned contacts. Within each section, contacts follow the active sort order, or addition order if no sort is active.
 * Searches all contacts without clearing the current search after success. Use `list` to see a pinned contact hidden by the search.
-* Pins are saved automatically and retained after editing or restarting. Use `unpin` to remove a pin.
+* Pins are saved automatically and retained after editing or restarting. Use `unpin` to remove a pin, or `undo` to reverse a successful pin.
 
-Examples:
+Examples (assuming the matching contact exists and is unpinned):
 
 * `pin p/98765432` pins the contact with phone number `98765432`.
 * `pin n/John Doe p/98765432` pins the contact matching both the full name and phone number.
@@ -200,9 +200,9 @@ Format: `unpin [n/NAME] [p/PHONE_NUMBER] [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/L
 
 * Uses the same [matching rules as `pin`](#pinning-a-contact-pin): provide at least one field identifying exactly one contact. An already-unpinned contact produces an error.
 * The contact follows the active sort order, or returns to its original addition order among unpinned contacts if no sort is active. Remaining pinned contacts stay above it.
-* The current search filter stays active. Changes are saved automatically and can be reversed with `undo`.
+* A successful unpin preserves the current search filter. Changes are saved automatically and can be reversed with `undo`.
 
-Example:
+Example (assuming the contact is pinned):
 
 * `unpin p/98765432` unpins the contact with phone number `98765432`.
 
