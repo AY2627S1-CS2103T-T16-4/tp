@@ -158,7 +158,7 @@ public class ArgumentTokenizerTest {
     @Test
     public void tokenize_invalidQuotes_throwsParseException() {
         for (String args : new String[] {" p/\"unfinished", " p/\"value\" extra", " p/\"one\"\"two\"",
-            " p/\"value\"-tother"}) {
+            " p/\"value\"-tother", " p/before \"quoted\"", " p/before\"quoted\"after"}) {
             ParseException exception = assertThrows(ParseException.class, () ->
                     ArgumentTokenizer.tokenize(args, pSlash, dashT));
             assertEquals(Messages.MESSAGE_INVALID_QUOTES, exception.getMessage());

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.logic.Messages.MESSAGE_INVALID_QUOTES;
 import static seedu.address.logic.Messages.MESSAGE_QUOTED_VALUE_HINT;
 
 import java.util.List;
@@ -14,7 +15,9 @@ import seedu.address.logic.commands.PinCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.ModelManager;
 
-/** Tests quoted values across commands that create, search, and modify contacts. */
+/**
+ * Tests quoted values across commands that create, search, and modify contacts.
+ */
 public class QuotedArgumentsTest {
     private static final String ADDRESS = "10 Road c/o Bob a/Annex";
     private static final String ADDRESS_ARGUMENT = " a/\"" + ADDRESS + "\"";
@@ -77,6 +80,17 @@ public class QuotedArgumentsTest {
         ParseException exception = assertThrows(ParseException.class, () ->
                 parser.parseCommand("pin a/10 Road c/o Bob"));
         assertTrue(exception.getMessage().contains(MESSAGE_QUOTED_VALUE_HINT));
+    }
+
+    @Test
+    public void parse_partiallyQuotedValue_rejectsWithQuoteError() {
+        String address = " a/10 \"Road c/o Bob\"";
+        for (String command : List.of("add n/Alice p/81110001" + address, "pin" + address,
+                "unpin" + address, "delete" + address, "find" + address,
+                "edit" + address + " >> n/Alice", "edit p/81110001 >>" + address)) {
+            ParseException exception = assertThrows(ParseException.class, () -> parser.parseCommand(command));
+            assertEquals(MESSAGE_INVALID_QUOTES, exception.getMessage());
+        }
     }
 
     @Test

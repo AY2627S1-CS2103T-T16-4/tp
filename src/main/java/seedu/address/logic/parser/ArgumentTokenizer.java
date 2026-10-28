@@ -150,7 +150,7 @@ public class ArgumentTokenizer {
         int valueStartPos = currentPrefixPosition.getStartPosition() + prefix.getPrefix().length();
         String value = argsString.substring(valueStartPos, nextPrefixPosition.getStartPosition()).trim();
 
-        if (!prefix.getPrefix().isEmpty() && value.startsWith("\"")) {
+        if (!prefix.getPrefix().isEmpty() && value.contains("\"")) {
             if (!QUOTED_VALUE.matcher(value).matches()) {
                 throw new ParseException(Messages.MESSAGE_INVALID_QUOTES);
             }
