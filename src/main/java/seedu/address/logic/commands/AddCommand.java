@@ -39,6 +39,8 @@ public class AddCommand extends Command {
     public static final String MESSAGE_SUCCESS = "New contact added";
     public static final String MESSAGE_DUPLICATE_PERSON = "Phone number is already in use";
     public static final String MESSAGE_MISSING_NAME = "Contact requires a name";
+    public static final String MESSAGE_EMPTY_FLAG_VALUE = "Please provide value(s) for %1$s.";
+    public static final String MESSAGE_UNKNOWN_PREFIXES = "Unknown prefix(es): %1$s. Please use supported prefixes.";
 
     private final Person toAdd;
 
