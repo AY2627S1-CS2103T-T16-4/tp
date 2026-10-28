@@ -52,13 +52,6 @@ public class AddCommand extends Command {
         toAdd = person;
     }
 
-    /**
-     * Adds the contact to the model if its phone number is not already in use.
-     *
-     * @param model The model to add the contact to.
-     * @return A result containing the success message.
-     * @throws CommandException If the contact's phone number is already in use.
-     */
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
@@ -85,21 +78,11 @@ public class AddCommand extends Command {
         return toAdd.equals(otherAddCommand.toAdd);
     }
 
-    /**
-     * Returns whether executing this command should create an undo state.
-     *
-     * @return {@code true}, because adding a contact changes the address book.
-     */
     @Override
     public boolean isUndoable() {
         return true;
     }
 
-    /**
-     * Returns a text representation of this command.
-     *
-     * @return A string containing the contact to be added.
-     */
     @Override
     public String toString() {
         return new ToStringBuilder(this)
