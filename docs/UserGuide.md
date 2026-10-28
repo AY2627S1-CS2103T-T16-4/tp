@@ -264,6 +264,42 @@ Exits the program.
 
 Format: `exit`
 
+### Reusing previous commands
+
+The command box stores successfully executed commands during the current application session.
+
+* Press the `↑` key to display the previous command.
+* Press `↑` repeatedly to move further back through command history.
+* Press the `↓` key to move forward through command history.
+* Pressing `↓` after the newest command clears the command box.
+* Failed commands and empty commands are not saved.
+* Command history is cleared when the application is closed.
+
+For example, if the following commands were successfully executed:
+
+```text
+list
+find n/Alice
+```
+
+Pressing `↑` displays:
+
+```text
+find n/Alice
+```
+
+Pressing `↑` again displays:
+
+```text
+list
+```
+
+Pressing `↓` displays:
+
+```text
+find n/Alice
+```
+
 ### Saving the data
 
 AddressBook automatically saves data after every command. You do not need to save manually.
