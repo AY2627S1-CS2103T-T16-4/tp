@@ -47,7 +47,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_nullModel_throwsNullPointerException() {
         DeleteCommand command = new DeleteCommand(
-                predicateWith(d -> d.setName(ALICE.getName())));
+                createPredicateWith(d -> d.setName(ALICE.getName())));
 
         assertThrows(NullPointerException.class, () -> command.execute(null));
     }
@@ -59,7 +59,7 @@ public class DeleteCommandTest {
         assertEquals(List.of(BENSON), model.getFilteredPersonList());
 
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setName(ALICE.getName()));
+                createPredicateWith(d -> d.setName(ALICE.getName()));
 
         assertDeleteSuccess(predicate, ALICE);
 
@@ -72,7 +72,7 @@ public class DeleteCommandTest {
         assertEquals(List.of(DANIEL), model.getFilteredPersonList());
 
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setName(DANIEL.getName()));
+                createPredicateWith(d -> d.setName(DANIEL.getName()));
 
         assertAmbiguousFailure(predicate, List.of(DANIEL, DANIEL_TWIN));
     }
@@ -83,7 +83,7 @@ public class DeleteCommandTest {
         assertEquals(List.of(BENSON), model.getFilteredPersonList());
 
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setName(new Name("Unknown Person")));
+                createPredicateWith(d -> d.setName(new Name("Unknown Person")));
 
         assertCommandFailure(new DeleteCommand(predicate), model,
                 DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
@@ -100,7 +100,7 @@ public class DeleteCommandTest {
                 new AddressBook(addressBook), new UserPrefs());
 
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setGroups(ALICE.getGroups()));
+                createPredicateWith(d -> d.setGroups(ALICE.getGroups()));
 
         assertDeleteSuccess(predicate, ALICE);
     }
@@ -108,7 +108,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_personWithAllOptionalFieldsBlank_success() {
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setPhone(GEORGE.getPhone()));
+                createPredicateWith(d -> d.setPhone(GEORGE.getPhone()));
 
         assertDeleteSuccess(predicate, GEORGE);
     }
@@ -116,7 +116,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_nameOnlyOneMatch_success() {
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setName(ALICE.getName()));
+                createPredicateWith(d -> d.setName(ALICE.getName()));
 
         assertDeleteSuccess(predicate, ALICE);
     }
@@ -124,7 +124,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_phoneOnlyOneMatch_success() {
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setPhone(ALICE.getPhone()));
+                createPredicateWith(d -> d.setPhone(ALICE.getPhone()));
 
         assertDeleteSuccess(predicate, ALICE);
     }
@@ -132,7 +132,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_emailOnlyOneMatch_success() {
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setEmail(ALICE.getEmail()));
+                createPredicateWith(d -> d.setEmail(ALICE.getEmail()));
 
         assertDeleteSuccess(predicate, ALICE);
     }
@@ -140,7 +140,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_addressOnlyOneMatch_success() {
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setAddress(ALICE.getAddress()));
+                createPredicateWith(d -> d.setAddress(ALICE.getAddress()));
 
         assertDeleteSuccess(predicate, ALICE);
     }
@@ -148,7 +148,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_githubOnlyOneMatch_success() {
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setGithub(ALICE.getGithub()));
+                createPredicateWith(d -> d.setGithub(ALICE.getGithub()));
 
         assertDeleteSuccess(predicate, ALICE);
     }
@@ -156,7 +156,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_linkedinOnlyOneMatch_success() {
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setLinkedin(ALICE.getLinkedin()));
+                createPredicateWith(d -> d.setLinkedin(ALICE.getLinkedin()));
 
         assertDeleteSuccess(predicate, ALICE);
     }
@@ -164,7 +164,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_telegramOnlyOneMatch_success() {
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setTelegram(ALICE.getTelegram()));
+                createPredicateWith(d -> d.setTelegram(ALICE.getTelegram()));
 
         assertDeleteSuccess(predicate, ALICE);
     }
@@ -172,7 +172,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_multipleFlagsOneMatch_success() {
         // ALICE, BENSON and JACK share a group, but only JACK has this tag.
-        PersonMatchesExactFieldsPredicate predicate = predicateWith(d -> {
+        PersonMatchesExactFieldsPredicate predicate = createPredicateWith(d -> {
             d.setGroups(JACK.getGroups());
             d.setTags(JACK.getTags());
         });
@@ -184,7 +184,7 @@ public class DeleteCommandTest {
     public void execute_multipleTagsOneMatch_success() {
         // Only BENSON has both "friends" and "owesMoney".
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setTags(BENSON.getTags()));
+                createPredicateWith(d -> d.setTags(BENSON.getTags()));
 
         assertDeleteSuccess(predicate, BENSON);
     }
@@ -192,7 +192,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_sameNameAndMatchingPhone_success() {
         // DANIEL and DANIEL_TWIN have the same name.
-        PersonMatchesExactFieldsPredicate predicate = predicateWith(d -> {
+        PersonMatchesExactFieldsPredicate predicate = createPredicateWith(d -> {
             d.setName(DANIEL.getName());
             d.setPhone(DANIEL.getPhone());
         });
@@ -204,7 +204,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_unknownName_throwsCommandException() {
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setName(new Name("Unknown Person")));
+                createPredicateWith(d -> d.setName(new Name("Unknown Person")));
 
         assertCommandFailure(new DeleteCommand(predicate), model,
                 DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
@@ -212,7 +212,7 @@ public class DeleteCommandTest {
 
     @Test
     public void execute_fieldsBelongingToDifferentPersons_throwsCommandException() {
-        PersonMatchesExactFieldsPredicate predicate = predicateWith(d -> {
+        PersonMatchesExactFieldsPredicate predicate = createPredicateWith(d -> {
             d.setName(ALICE.getName());
             d.setPhone(BENSON.getPhone());
         });
@@ -224,7 +224,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_partialName_throwsCommandException() {
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setName(new Name("Alice")));
+                createPredicateWith(d -> d.setName(new Name("Alice")));
 
         assertCommandFailure(new DeleteCommand(predicate), model,
                 DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
@@ -234,7 +234,7 @@ public class DeleteCommandTest {
     public void execute_emptyAddressBook_throwsCommandException() {
         Model emptyModel = new ModelManager();
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setName(ALICE.getName()));
+                createPredicateWith(d -> d.setName(ALICE.getName()));
 
         assertCommandFailure(new DeleteCommand(predicate), emptyModel,
                 DeleteCommand.MESSAGE_PERSON_NOT_FOUND);
@@ -243,7 +243,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_multipleMatches_showsMatchesWithoutDeleting() {
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setGroups(ALICE.getGroups()));
+                createPredicateWith(d -> d.setGroups(ALICE.getGroups()));
 
         assertAmbiguousFailure(predicate, List.of(ALICE, BENSON, JACK));
     }
@@ -251,7 +251,7 @@ public class DeleteCommandTest {
     @Test
     public void execute_sameNameMultipleMatches_showsBothWithoutDeleting() {
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setName(DANIEL.getName()));
+                createPredicateWith(d -> d.setName(DANIEL.getName()));
 
         assertAmbiguousFailure(predicate, List.of(DANIEL, DANIEL_TWIN));
     }
@@ -259,9 +259,9 @@ public class DeleteCommandTest {
     @Test
     public void hashCode_equalCommands_sameHashCode() {
         DeleteCommand firstCommand = new DeleteCommand(
-                predicateWith(d -> d.setName(ALICE.getName())));
+                createPredicateWith(d -> d.setName(ALICE.getName())));
         DeleteCommand secondCommand = new DeleteCommand(
-                predicateWith(d -> d.setName(ALICE.getName())));
+                createPredicateWith(d -> d.setName(ALICE.getName())));
 
         assertEquals(firstCommand, secondCommand);
         assertEquals(firstCommand.hashCode(), secondCommand.hashCode());
@@ -270,11 +270,11 @@ public class DeleteCommandTest {
     @Test
     public void equals() {
         PersonMatchesExactFieldsPredicate firstPredicate =
-                predicateWith(d -> d.setName(ALICE.getName()));
+                createPredicateWith(d -> d.setName(ALICE.getName()));
         PersonMatchesExactFieldsPredicate samePredicate =
-                predicateWith(d -> d.setName(ALICE.getName()));
+                createPredicateWith(d -> d.setName(ALICE.getName()));
         PersonMatchesExactFieldsPredicate secondPredicate =
-                predicateWith(d -> d.setName(BENSON.getName()));
+                createPredicateWith(d -> d.setName(BENSON.getName()));
 
         DeleteCommand firstCommand = new DeleteCommand(firstPredicate);
 
@@ -285,7 +285,7 @@ public class DeleteCommandTest {
         assertFalse(firstCommand.equals(new DeleteCommand(secondPredicate)));
 
         PersonMatchesExactFieldsPredicate additionalFieldPredicate =
-                predicateWith(d -> {
+                createPredicateWith(d -> {
                     d.setName(ALICE.getName());
                     d.setPhone(ALICE.getPhone());
                 });
@@ -296,7 +296,7 @@ public class DeleteCommandTest {
     @Test
     public void isUndoable_returnsTrue() {
         DeleteCommand command = new DeleteCommand(
-                predicateWith(d -> d.setName(ALICE.getName())));
+                createPredicateWith(d -> d.setName(ALICE.getName())));
 
         assertTrue(command.isUndoable());
     }
@@ -304,7 +304,7 @@ public class DeleteCommandTest {
     @Test
     public void toStringMethod() {
         PersonMatchesExactFieldsPredicate predicate =
-                predicateWith(d -> d.setName(ALICE.getName()));
+                createPredicateWith(d -> d.setName(ALICE.getName()));
         DeleteCommand command = new DeleteCommand(predicate);
 
         String expected = DeleteCommand.class.getCanonicalName()
@@ -349,7 +349,7 @@ public class DeleteCommandTest {
     /**
      * Builds an exact-match predicate using the same pattern as FindCommandTest.
      */
-    private static PersonMatchesExactFieldsPredicate predicateWith(
+    private static PersonMatchesExactFieldsPredicate createPredicateWith(
             Consumer<ExactPersonMatchDescriptor> setup) {
         ExactPersonMatchDescriptor descriptor = new ExactPersonMatchDescriptor();
         setup.accept(descriptor);

@@ -136,7 +136,7 @@ public class EditPersonDescriptorTest {
 
     @Test
     public void copyConstructor_differentUpdateStates_preservesAllFields() {
-        for (EditPersonDescriptor original : descriptorStates()) {
+        for (EditPersonDescriptor original : createDescriptorStates()) {
             EditPersonDescriptor copy = new EditPersonDescriptor(original);
 
             assertDescriptorFieldsEqual(original, copy);
@@ -154,7 +154,7 @@ public class EditPersonDescriptorTest {
 
     @Test
     public void copyConstructor_subsequentChanges_areIndependent() {
-        for (Consumer<EditPersonDescriptor> update : bobFieldUpdates()) {
+        for (Consumer<EditPersonDescriptor> update : createBobFieldUpdates()) {
             EditPersonDescriptor original = new EditPersonDescriptorBuilder(AMY).build();
             EditPersonDescriptor copy = new EditPersonDescriptor(original);
             EditPersonDescriptor expected = new EditPersonDescriptorBuilder(AMY).build();
@@ -172,7 +172,7 @@ public class EditPersonDescriptorTest {
 
     @Test
     public void equals_differentPopulatedField_returnsFalse() {
-        for (Consumer<EditPersonDescriptor> update : bobFieldUpdates()) {
+        for (Consumer<EditPersonDescriptor> update : createBobFieldUpdates()) {
             EditPersonDescriptor original = new EditPersonDescriptorBuilder(AMY).build();
             EditPersonDescriptor changed = new EditPersonDescriptorBuilder(AMY).build();
             update.accept(changed);
@@ -332,7 +332,7 @@ public class EditPersonDescriptorTest {
     /**
      * Returns fresh descriptors covering absent, partial, populated, and explicit-clear updates.
      */
-    private static List<EditPersonDescriptor> descriptorStates() {
+    private static List<EditPersonDescriptor> createDescriptorStates() {
         return List.of(new EditPersonDescriptor(), new EditPersonDescriptor(DESC_AMY),
                 new EditPersonDescriptorBuilder(AMY).build(),
                 new EditPersonDescriptorBuilder().withEmail(EMPTY_FIELD_VALUE).withAddress(EMPTY_FIELD_VALUE)
@@ -343,7 +343,7 @@ public class EditPersonDescriptorTest {
     /**
      * Returns independent updates that each change exactly one populated AMY field.
      */
-    private static List<Consumer<EditPersonDescriptor>> bobFieldUpdates() {
+    private static List<Consumer<EditPersonDescriptor>> createBobFieldUpdates() {
         return List.of(descriptor -> descriptor.setName(BOB.getName()),
                 descriptor -> descriptor.setPhone(BOB.getPhone()),
                 descriptor -> descriptor.setEmail(BOB.getEmail()),

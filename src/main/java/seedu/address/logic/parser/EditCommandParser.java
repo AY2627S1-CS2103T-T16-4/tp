@@ -52,7 +52,7 @@ public class EditCommandParser implements Parser<EditCommand> {
         String[] sections = args.split(EDIT_SEPARATOR, -1);
 
         if (sections.length != 2 || sections[0].isBlank()) {
-            throw invalidFormat();
+            throw createInvalidFormatException();
         }
 
         // Prefix recognition requires a preceding space.
@@ -85,7 +85,7 @@ public class EditCommandParser implements Parser<EditCommand> {
     private static void validateUpdates(
             String args, ArgumentMultimap updates) throws ParseException {
         if (!updates.getPreamble().isEmpty() || containsUnknownFlag(args)) {
-            throw invalidFormat();
+            throw createInvalidFormatException();
         }
 
         updates.verifyNoDuplicatePrefixesFor(
@@ -235,7 +235,7 @@ public class EditCommandParser implements Parser<EditCommand> {
     /**
      * Creates a parse exception containing the invalid format message and edit command usage.
      */
-    private static ParseException invalidFormat() {
+    private static ParseException createInvalidFormatException() {
         return new ParseException(
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE));
     }
