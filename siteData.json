@@ -125,6 +125,7 @@
         "editing-a-person-edit": "Editing a person: edit",
         "locating-persons-by-fields-find": "Locating persons by fields: find",
         "pinning-a-contact-pin": "Pinning a contact: pin",
+        "unpinning-a-contact-unpin": "Unpinning a contact: unpin",
         "deleting-a-person-delete": "Deleting a person: delete",
         "undoing-previous-command-undo": "Undoing previous command: undo",
         "clearing-all-entries-clear": "Clearing all entries: clear",
