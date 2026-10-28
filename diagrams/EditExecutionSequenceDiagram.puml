@@ -1,0 +1,60 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+participant ":LogicManager" as LogicManager LOGIC_COLOR
+participant ":EditCommand" as EditCommand LOGIC_COLOR
+participant "target:PersonTarget" as PersonTarget LOGIC_COLOR
+participant "model:Model" as Model MODEL_COLOR
+
+note over LogicManager, Model
+  Execution after parsing; exactly one contact matches.
+  LogicManager has copied the address book for undo.
+  Parsing, persistence, and UI updates are omitted.
+end note
+
+LogicManager -> EditCommand : execute(model)
+activate EditCommand
+EditCommand -> PersonTarget : resolve(model, messageNotFound, messageAmbiguous)
+activate PersonTarget
+PersonTarget -> Model : getAddressBook()
+activate Model
+Model --> PersonTarget : addressBook
+deactivate Model
+note right of PersonTarget
+  Apply the exact-match predicate
+  to all contacts, including those
+  hidden by the current filter.
+end note
+PersonTarget --> EditCommand : personToEdit
+deactivate PersonTarget
+
+EditCommand -> EditCommand : createEditedPerson(personToEdit, editPersonDescriptor)
+activate EditCommand
+note right of EditCommand
+  Construct a replacement Person.
+  Preserve unspecified fields and pin state.
+  Clear or toggle tags/groups as requested.
+end note
+EditCommand --> EditCommand : editedPerson
+deactivate EditCommand
+
+alt changed phone number is already in use
+  EditCommand --> LogicManager : throws CommandException(MESSAGE_DUPLICATE_PERSON)
+  note over LogicManager, Model
+    Contact data is unchanged.
+    No undo state is recorded and no save is attempted.
+  end note
+else phone number unchanged or phone number is available
+  EditCommand -> Model : setPerson(personToEdit, editedPerson)
+  activate Model
+  Model --> EditCommand
+  deactivate Model
+  EditCommand --> LogicManager : CommandResult with updated contact details
+  note over LogicManager, Model
+    LogicManager records the pre-execution snapshot
+    for undo, then attempts to save through Storage.
+  end note
+end
+deactivate EditCommand
+@enduml

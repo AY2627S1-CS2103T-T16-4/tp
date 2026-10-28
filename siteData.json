@@ -40,7 +40,7 @@
       "src": "DeveloperGuide.md",
       "title": "Developer Guide",
       "headings": {
-        "ab-3-developer-guide": "AB-3 Developer Guide",
+        "gitmate-developer-guide": "GitMate Developer Guide",
         "acknowledgements": "Acknowledgements",
         "setting-up-getting-started": "Setting up, getting started",
         "design": "Design",
@@ -52,8 +52,8 @@
         "common-classes": "Common classes",
         "implementation": "Implementation",
         "add-command": "Add command",
-        "edit-command": "Edit command",
         "delete-command": "Delete command",
+        "edit-command": "Edit command",
         "find-command": "Find command",
         "pinned-contacts": "Pinned contacts",
         "undo-command": "Undo command",
