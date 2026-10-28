@@ -29,8 +29,13 @@ import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_FRIEND;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_GITHUB;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_GROUP;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_LINKEDIN;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
 import static seedu.address.testutil.TypicalPersons.AMY;
@@ -71,7 +76,7 @@ public class AddCommandParserTest {
     }
 
     @Test
-    public void parse_repeatedNonTagValue_failure() {
+    public void parse_repeatedValue_failure() {
         String validExpectedPersonString = NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB
                 + ADDRESS_DESC_BOB + TAG_DESC_FRIEND;
 
@@ -128,12 +133,68 @@ public class AddCommandParserTest {
     }
 
     @Test
-    public void parse_optionalFieldsMissing_success() {
-        // zero tags
-        Person expectedPerson = new PersonBuilder(AMY).withTags().build();
-        assertParseSuccess(parser, NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY
-                + GROUP_DESC_AMY + GITHUB_DESC_AMY + LINKEDIN_DESC_AMY + TELEGRAM_DESC_AMY,
-                new AddCommand(expectedPerson));
+    public void parse_missingOptionalField_success() {
+        // Missing address
+        assertParseSuccess(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY
+                        + GITHUB_DESC_AMY + LINKEDIN_DESC_AMY + TELEGRAM_DESC_AMY
+                        + GROUP_DESC_AMY + TAG_DESC_FRIEND,
+                new AddCommand(new PersonBuilder(AMY)
+                        .withAddress("")
+                        .build()));
+
+        // Missing email
+        assertParseSuccess(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + ADDRESS_DESC_AMY
+                        + GITHUB_DESC_AMY + LINKEDIN_DESC_AMY + TELEGRAM_DESC_AMY
+                        + GROUP_DESC_AMY + TAG_DESC_FRIEND,
+                new AddCommand(new PersonBuilder(AMY)
+                        .withEmail("")
+                        .build()));
+
+        // Missing GitHub
+        assertParseSuccess(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY
+                        + LINKEDIN_DESC_AMY + TELEGRAM_DESC_AMY
+                        + GROUP_DESC_AMY + TAG_DESC_FRIEND,
+                new AddCommand(new PersonBuilder(AMY)
+                        .withGithub("")
+                        .build()));
+
+        // Missing LinkedIn
+        assertParseSuccess(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY
+                        + GITHUB_DESC_AMY + TELEGRAM_DESC_AMY
+                        + GROUP_DESC_AMY + TAG_DESC_FRIEND,
+                new AddCommand(new PersonBuilder(AMY)
+                        .withLinkedin("")
+                        .build()));
+
+        // Missing Telegram
+        assertParseSuccess(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY
+                        + GITHUB_DESC_AMY + LINKEDIN_DESC_AMY
+                        + GROUP_DESC_AMY + TAG_DESC_FRIEND,
+                new AddCommand(new PersonBuilder(AMY)
+                        .withTelegram("")
+                        .build()));
+
+        // Missing groups
+        assertParseSuccess(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY
+                        + GITHUB_DESC_AMY + LINKEDIN_DESC_AMY + TELEGRAM_DESC_AMY
+                        + TAG_DESC_FRIEND,
+                new AddCommand(new PersonBuilder(AMY)
+                        .withGroups()
+                        .build()));
+
+        // Missing tags
+        assertParseSuccess(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + EMAIL_DESC_AMY + ADDRESS_DESC_AMY
+                        + GROUP_DESC_AMY + GITHUB_DESC_AMY + LINKEDIN_DESC_AMY + TELEGRAM_DESC_AMY,
+                new AddCommand(new PersonBuilder(AMY)
+                        .withTags()
+                        .build()));
     }
 
     @Test
@@ -175,5 +236,72 @@ public class AddCommandParserTest {
         assertParseFailure(parser, PREAMBLE_NON_EMPTY + NAME_DESC_BOB + PHONE_DESC_BOB + EMAIL_DESC_BOB
                 + ADDRESS_DESC_BOB + TAG_DESC_HUSBAND + TAG_DESC_FRIEND,
                 String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_emptyValues_failure() {
+
+        // address prefix without value
+        assertParseFailure(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + " " + PREFIX_ADDRESS,
+                String.format(AddCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_ADDRESS));
+
+        // email prefix without value
+        assertParseFailure(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + " " + PREFIX_EMAIL,
+                String.format(AddCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_EMAIL));
+
+        // github prefix without value
+        assertParseFailure(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + " " + PREFIX_GITHUB,
+                String.format(AddCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_GITHUB));
+
+        // linkedin prefix without value
+        assertParseFailure(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + " " + PREFIX_LINKEDIN,
+                String.format(AddCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_LINKEDIN));
+
+        // telegram prefix without value
+        assertParseFailure(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + " " + PREFIX_TELEGRAM,
+                String.format(AddCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_TELEGRAM));
+
+        // group prefix without value
+        assertParseFailure(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + " " + PREFIX_GROUP,
+                String.format(AddCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_GROUP));
+
+        // tag prefix without value
+        assertParseFailure(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + " " + PREFIX_TAG,
+                String.format(AddCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_TAG));
+    }
+
+    @Test
+    public void parse_whitespaceOnlyValue_failure() {
+
+        // white space value for group field
+        assertParseFailure(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + " " + PREFIX_GROUP + "   ",
+                String.format(AddCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_GROUP));
+
+        // white space value for name field
+        assertParseFailure(parser,
+                " " + PREFIX_NAME + "   " + PHONE_DESC_AMY,
+                String.format(AddCommand.MESSAGE_EMPTY_FLAG_VALUE, PREFIX_NAME));
+    }
+
+    @Test
+    public void parse_unknownPrefix_failure() {
+
+        // unknown prefix x/
+        assertParseFailure(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + " x/test",
+                String.format(AddCommand.MESSAGE_UNKNOWN_PREFIXES, "x/"));
+
+        // multiple unknown prefix x/, y/
+        assertParseFailure(parser,
+                NAME_DESC_AMY + PHONE_DESC_AMY + " x/test y/value",
+                String.format(AddCommand.MESSAGE_UNKNOWN_PREFIXES, "x/, y/"));
     }
 }

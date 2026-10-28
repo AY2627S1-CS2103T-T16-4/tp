@@ -39,6 +39,8 @@ public class AddCommand extends Command {
     public static final String MESSAGE_SUCCESS = "New contact added";
     public static final String MESSAGE_DUPLICATE_PERSON = "Phone number is already in use";
     public static final String MESSAGE_MISSING_NAME = "Contact requires a name";
+    public static final String MESSAGE_EMPTY_FLAG_VALUE = "Please provide value(s) for %1$s.";
+    public static final String MESSAGE_UNKNOWN_PREFIXES = "Unknown prefix(es): %1$s. Please use supported prefixes.";
 
     private final Person toAdd;
 
@@ -50,6 +52,13 @@ public class AddCommand extends Command {
         toAdd = person;
     }
 
+    /**
+     * Adds the contact to the model if its phone number is not already in use.
+     *
+     * @param model The model to add the contact to.
+     * @return A result containing the success message.
+     * @throws CommandException If the contact's phone number is already in use.
+     */
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
@@ -76,11 +85,21 @@ public class AddCommand extends Command {
         return toAdd.equals(otherAddCommand.toAdd);
     }
 
+    /**
+     * Returns whether executing this command should create an undo state.
+     *
+     * @return {@code true}, because adding a contact changes the address book.
+     */
     @Override
     public boolean isUndoable() {
         return true;
     }
 
+    /**
+     * Returns a text representation of this command.
+     *
+     * @return A string containing the contact to be added.
+     */
     @Override
     public String toString() {
         return new ToStringBuilder(this)
