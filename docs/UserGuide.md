@@ -396,23 +396,23 @@ name,phone,email,address,groups,github,linkedin,telegram,tags,pinned
 
 ## Prefix table
 
-| **Prefix** | **Valid input**                                                      | **Can be repeated?** |
-|---|----------------------------------------------------------------------|---|
-| `n/NAME` | Letters, numbers, and spaces; must not be blank. Saved in uppercase. | No |
-| `p/PHONE` | Exactly 8 digits and must begin with `8` or `9`.                     | No |
-| `a/ADDRESS` | Any non-blank text. Stored in lowercase.                             | No |
-| `e/EMAIL` | An email address with `@` and `.domain`. Stored in lowercase.            | No |
-| `gh/GITHUB` | Any text. Case-sensitive.                                            | No |
-| `li/LINKEDIN` | Any text. Stored in lowercase.                                       | No |
-| `tg/TELEGRAM` | Any text except `@`. Stored in lowercase.                            | No |
-| `g/GROUP` | Any text. Stored in lowercase.                                       | Yes |
-| `t/TAG` | Letters and numbers only. Stored in lowercase.                       | Yes |
+| **Prefix** | **Field** | **Valid input** | **Can be repeated?** |
+|---|---|---|---|
+| `n/` | Name | Letters, numbers, and spaces. Must not be blank. Stored in uppercase. | No |
+| `p/` | Phone | Exactly 8 digits and must begin with `8` or `9`. Must be unique. | No |
+| `a/` | Address | Any non-blank text except `/`. Stored in lowercase. | No |
+| `e/` | Email | A valid email address with a local part, `@`, and a valid domain. Stored in lowercase. | No |
+| `gh/` | GitHub | Any non-whitespace characters. Case-sensitive. | No |
+| `li/` | LinkedIn | Letters, numbers, and hyphens only. Stored in lowercase. | No |
+| `tg/` | Telegram | Letters, numbers, and underscores only. Stored in lowercase. | No |
+| `g/` | Group | Letters and numbers only. Stored in lowercase. | Yes |
+| `t/` | Tag | Letters and numbers only. Stored in lowercase. | Yes |
 
 ## Command summary
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... ` <br> e.g., `add n/James Ho p/82224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add**    | `add n/NAME p/PHONE [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]... ` <br> e.g., `add n/James Ho p/82224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/colleague`
 **Clear**  | `clear`
 **Delete** | `delete [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...` (at least one field)<br> e.g., `delete p/98765432`
 **Edit**   | `edit SEARCH_FLAGS >> UPDATE_FLAGS` (at least one flag on each side)<br>Supported flags: `[n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...`<br> e.g., `edit p/98765432 >> n/James Lee e/jameslee@example.com`
