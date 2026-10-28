@@ -159,25 +159,6 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
-### Command execution, undo, and persistence
-
-`LogicManager#execute` coordinates command execution and address book persistence. For an undoable command, the operations occur in this order:
-
-1. Parse the input into a `Command`.
-1. Copy the current address book before executing the command.
-1. Execute the command against the model.
-1. If execution returns normally, record the pre-execution copy using `Model#saveStateForUndo`.
-1. Attempt to save the current address book through `Storage#saveAddressBook`, then return the command result to the UI.
-
-A parse error prevents execution. A `CommandException` during execution skips undo recording and saving. For edit and delete, targeting and duplicate-phone errors occur before contact data is changed. Ambiguous targeting can still update the displayed list to show matching contacts.
-
-<box type="info" seamless>
-
-**Save failures:** Saving happens after the in-memory update and undo recording. If saving fails, `LogicManager` reports a `CommandException`, but does not roll back the update or remove its undo snapshot. The current in-memory data may therefore differ from the file on disk. A later successful save writes the current address book.
-</box>
-
-Commands for which `isUndoable()` returns `false` skip snapshot creation and undo recording. `LogicManager` still attempts to save the address book whenever their execution returns normally, including commands that only change the view. See [Undo command](#undo-command) for state restoration.
-
 ### Add command
 
 The `add` command creates a new contact from the details provided by the user. For example:
