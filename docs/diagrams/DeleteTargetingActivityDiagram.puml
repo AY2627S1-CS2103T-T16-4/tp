@@ -1,0 +1,44 @@
+@startuml
+skin rose
+skinparam ActivityFontSize 15
+skinparam ArrowFontSize 12
+
+start
+:DeleteCommand.execute(model) begins;
+note right
+  Search criteria have already been parsed.
+  LogicManager has copied the address book for undo.
+end note
+:PersonTarget.resolve applies the exact-match predicate\nto the complete address book;
+note right
+  Includes contacts hidden by the current filter.
+  All supplied criteria must match.
+end note
+
+if () then ([no contacts match])
+  :Throw CommandException\nwith the no-match message;
+  note right
+    Contact data and current filter are unchanged.
+    No undo state is recorded or save attempted.
+  end note
+else ([else])
+  if () then ([multiple contacts match])
+    :Model.updateFilteredPersonList(predicate)\ndisplays the matching contacts;
+    :Throw CommandException\nrequesting additional criteria;
+    note right
+      Contact data is unchanged; the view changes.
+      No undo state is recorded or save attempted.
+    end note
+  else ([exactly one contact match])
+    :PersonTarget.resolve returns personToDelete;
+    :Model.deletePerson(personToDelete);
+    :Return CommandResult\nwith deleted contact details;
+    :LogicManager records the pre-execution\nsnapshot for undo;
+    :LogicManager attempts to save\nthe updated address book through Storage;
+    note right
+      Storage error handling and UI updates are omitted.
+    end note
+  endif
+endif
+stop
+@enduml

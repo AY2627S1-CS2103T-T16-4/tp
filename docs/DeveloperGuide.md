@@ -4,7 +4,7 @@
   pageNav: 3
 ---
 
-# AB-3 Developer Guide
+# GitMate Developer Guide
 
 <!-- * Table of Contents -->
 <page-nav-print />
@@ -13,7 +13,7 @@
 
 ## **Acknowledgements**
 
-* _{List the sources of reused or adapted ideas, code, documentation, and third-party libraries here, with links to the originals.}_
+GitMate is based on [AddressBook-Level3](https://github.com/se-edu/addressbook-level3), created by the [SE-EDU initiative](https://se-education.org). Its architecture, infrastructure, and developer documentation have been adapted for GitMate.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -35,7 +35,7 @@ The following provides a quick overview of the main components and their interac
 
 **Main components of the architecture**
 
-**`Main`** (consisting of classes [`Main`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/Main.java) and [`MainApp`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/MainApp.java)) is in charge of the app launch and shut down.
+**`Main`** (consisting of classes [`Main`](https://github.com/AY2627S1-CS2103T-T16-4/tp/blob/master/src/main/java/seedu/address/Main.java) and [`MainApp`](https://github.com/AY2627S1-CS2103T-T16-4/tp/blob/master/src/main/java/seedu/address/MainApp.java)) is in charge of the app launch and shut down.
 * At app launch, it initializes the other components in the correct sequence, and connects them up with each other.
 * At shut down, it shuts down the other components and invokes cleanup methods where necessary.
 
@@ -67,13 +67,13 @@ The sections below give more details of each component.
 
 ### UI component
 
-The **API** of this component is specified in [`Ui.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/Ui.java)
+The **API** of this component is specified in [`Ui.java`](https://github.com/AY2627S1-CS2103T-T16-4/tp/blob/master/src/main/java/seedu/address/ui/Ui.java)
 
 <puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
 
 The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
 
-The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/MainWindow.java).
+The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T16-4/tp/blob/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T16-4/tp/blob/master/src/main/java/seedu/address/ui/MainWindow.java).
 
 The `UI` component,
 
@@ -84,7 +84,7 @@ The `UI` component,
 
 ### Logic component
 
-**API** : [`Logic.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/logic/Logic.java)
+**API** : [`Logic.java`](https://github.com/AY2627S1-CS2103T-T16-4/tp/blob/master/src/main/java/seedu/address/logic/Logic.java)
 
 Here's a (partial) class diagram of the `Logic` component:
 
@@ -117,7 +117,7 @@ How the parsing works:
 * All `XYZCommandParser` classes, such as `AddCommandParser` and `DeleteCommandParser`, implement the `Parser` interface so they can be treated similarly where appropriate, for example during testing.
 
 ### Model component
-**API** : [`Model.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/model/Model.java)
+**API** : [`Model.java`](https://github.com/AY2627S1-CS2103T-T16-4/tp/blob/master/src/main/java/seedu/address/model/Model.java)
 
 <puml src="diagrams/ModelClassDiagram.puml" width="450" />
 
@@ -126,7 +126,7 @@ The `Model` component,
 
 * stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
 * stores the `Person` objects selected by the current filter, such as search results, in a separate _filtered_ list. It exposes this list as an unmodifiable `ObservableList<Person>` that the UI can observe and bind to, so the UI updates when the list changes.
-* stores a `UserPrefs` object that represents the user’s preferences (currently, just the GUI settings). This is exposed to the outside as a `ReadOnlyUserPrefs` object.
+* stores a `UserPrefs` object containing GUI settings and the saved sort preference used at startup. This is exposed to the outside as a `ReadOnlyUserPrefs` object.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
 
 
@@ -140,7 +140,7 @@ The `Model` component,
 
 ### Storage component
 
-**API** : [`Storage.java`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/storage/Storage.java)
+**API** : [`Storage.java`](https://github.com/AY2627S1-CS2103T-T16-4/tp/blob/master/src/main/java/seedu/address/storage/Storage.java)
 
 <puml src="diagrams/StorageClassDiagram.puml" width="550" />
 
@@ -159,6 +159,25 @@ Classes used by multiple components are in the `seedu.address.commons` package.
 
 This section describes some noteworthy details on how certain features are implemented.
 
+### Command execution, undo, and persistence
+
+`LogicManager#execute` coordinates command execution and address book persistence. For an undoable command, the operations occur in this order:
+
+1. Parse the input into a `Command`.
+1. Copy the current address book before executing the command.
+1. Execute the command against the model.
+1. If execution returns normally, record the pre-execution copy using `Model#saveStateForUndo`.
+1. Attempt to save the current address book through `Storage#saveAddressBook`, then return the command result to the UI.
+
+A parse error prevents execution. A `CommandException` during execution skips undo recording and saving. For edit and delete, targeting and duplicate-phone errors occur before contact data is changed. Ambiguous targeting can still update the displayed list to show matching contacts.
+
+<box type="info" seamless>
+
+**Save failures:** Saving happens after the in-memory update and undo recording. If saving fails, `LogicManager` reports a `CommandException`, but does not roll back the update or remove its undo snapshot. The current in-memory data may therefore differ from the file on disk. A later successful save writes the current address book.
+</box>
+
+Commands for which `isUndoable()` returns `false` skip snapshot creation and undo recording. `LogicManager` still attempts to save the address book whenever their execution returns normally, including commands that only change the view. See [Undo command](#undo-command) for state restoration.
+
 ### Add command
 
 The `add` command creates a new contact from the details provided by the user. For example:
@@ -174,24 +193,6 @@ Its implementation has five main parts:
 * **Contact creation:** After parsing and validating the input, `AddCommandParser` creates a Person object containing the supplied details. Fields that were not provided are represented using their default empty values.
 * **Duplicate prevention and persistence:** When executed, `AddCommand` checks whether the phone number is already associated with an existing contact. If it is, the command is rejected with a duplicate-phone error. Otherwise, the new contact is added to the model. Since `AddCommand` is undoable, the previous address book state is saved before the change and the updated address book is saved through Storage.
 
-### Edit command
-
-The `edit` command updates exactly one contact identified by exact field criteria. The `>>` separator distinguishes the search criteria from the requested updates, for example:
-
-```text
-edit n/John Doe p/81231234 >> p/91234567 e/john@example.com
-```
-
-Its implementation has five main parts:
-
-* **Parsing:** `EditCommandParser` requires exactly one `>>`, at least one search flag, and at least one update flag. It delegates search parsing to `ExactPersonMatchParser` and stores updates in an `EditPersonDescriptor`. Supported fields are name (`n/`), phone (`p/`), email (`e/`), address (`a/`), GitHub (`gh/`), LinkedIn (`li/`), Telegram (`tg/`), groups (`g/`), and tags (`t/`). Unsupported flags, unexpected preamble text, invalid values, and repeated scalar prefixes are rejected.
-* **Shared targeting:** `PersonTarget` applies `PersonMatchesExactFieldsPredicate` to the entire address book, including contacts hidden by the current filter. All supplied scalar fields must equal the stored values; contacts must belong to every supplied group and have every supplied tag. Search values cannot be empty. If no contact matches, the command reports an error. If multiple contacts match, it displays those contacts and requests more criteria without changing contact data.
-* **Field updates:** `EditCommand` creates a replacement `Person`, preserving unspecified fields and the existing pin state. Scalar updates replace their existing values. Empty optional field values clear those fields, while empty name or phone updates are rejected. A nonempty tag or group update toggles each supplied value's membership once; a bare `t/` or `g/` clears the corresponding set. Mixing an empty value with another occurrence of the same set prefix is rejected. The descriptor defensively copies tag and group sets.
-* **Duplicate prevention:** Before calling `Model#setPerson`, the command checks whether a changed phone number already identifies another contact. Such an update is rejected without changing contact data, since phone numbers define contact identity.
-* **Persistence and undo:** `EditCommand#isUndoable` returns `true`. `LogicManager` copies the address book before execution, saves that snapshot to undo history after successful execution, and saves the updated address book through `Storage`. The command returns a success message containing the updated contact's details.
-
-Exact matching uses the field types' normalized values: names are converted to uppercase, while tags and groups are converted to lowercase, for both stored contacts and parsed criteria. Matching these fields is therefore case-insensitive, but still requires the full value rather than a partial match. The same normalization applies to `delete` targeting.
-
 ### Delete command
 
 The `delete` command removes exactly one contact identified by exact field criteria, for example:
@@ -200,12 +201,100 @@ The `delete` command removes exactly one contact identified by exact field crite
 delete n/John Doe p/81231234
 ```
 
-Its implementation has four main parts:
+#### Delete implementation
+
+The command has four main parts:
 
 * **Parsing:** `DeleteCommandParser` delegates to `ExactPersonMatchParser`, using delete-specific usage and error messages. It accepts the same search fields as `edit` and requires at least one nonempty search flag. Unsupported flags, unexpected preamble text, invalid values, and repeated scalar prefixes are rejected; group and tag prefixes may be repeated.
 * **Shared targeting:** `DeleteCommand` uses `PersonTarget` and `PersonMatchesExactFieldsPredicate` to resolve the criteria against all contacts, including those hidden by the current filter. Every supplied criterion must match. No match produces an error; multiple matches are displayed for refinement. Neither failure changes contact data.
 * **Deletion:** Once exactly one contact is resolved, `DeleteCommand` calls `Model#deletePerson` and returns a success message containing the deleted contact's details. Criteria matching multiple contacts never trigger a bulk deletion.
 * **Persistence and undo:** `DeleteCommand#isUndoable` returns `true`. `LogicManager` saves the pre-execution address book snapshot to undo history after successful execution and persists the updated address book through `Storage`. Undo can therefore restore the deleted contact with its previous details and pin state.
+
+The activity diagram below expands the targeting decision inside `PersonTarget#resolve`. A missing or ambiguous match prevents deletion and does not record an undo state. An ambiguous match changes the displayed list to show the matching contacts, while leaving contact data unchanged. The successful path shows deletion followed by undo recording and a storage save attempt; storage error handling and UI updates are omitted.
+
+<puml src="diagrams/DeleteTargetingActivityDiagram.puml" alt="Delete targeting activity showing no-match, ambiguous-match, and unique-match paths" />
+
+For the surrounding parser and command interactions, see the [Logic component sequence diagram](#logic-component).
+
+#### Delete example execution
+
+Assume the address book contains two contacts named John Doe, with phone numbers `81231234` and `91234567`.
+
+1. The user enters `delete n/John Doe`. `ExactPersonMatchParser` creates an exact-name predicate, which `DeleteCommand` passes to `PersonTarget#resolve`.
+1. Both contacts match. The resolver calls `Model#updateFilteredPersonList` to display them, then throws a `CommandException` requesting additional criteria. Neither contact is deleted, and no undo state is recorded.
+1. The user refines the request to `delete n/John Doe p/81231234`. The new predicate requires both fields to match the same contact.
+1. The resolver returns the contact with phone `81231234`. `DeleteCommand` calls `Model#deletePerson` and returns that contact's details in a `CommandResult`.
+1. `LogicManager` records the pre-execution snapshot and attempts to save the updated address book. Assuming saving succeeds, the user receives the deletion confirmation.
+
+#### Delete design considerations
+
+The following alternatives illustrate the tradeoffs of the current implementation.
+
+| Aspect | Current implementation and benefit | Alternative and tradeoff |
+| --- | --- | --- |
+| Search scope | Resolve exact criteria against all contacts. Targeting works independently of filtering and sorting. | Resolve a displayed-list index. Selection is shorter to type, but depends on the current view. Searching all contacts can affect a contact currently hidden from view. |
+| Ambiguous matches | Display matches and require refinement. This prevents an ambiguous request from deleting multiple contacts. | Delete every match. This supports bulk removal, but broad criteria could remove unintended contacts. |
+| Shared targeting | Reuse `ExactPersonMatchParser` and `PersonTarget` with edit and pin, keeping validation and ambiguity handling consistent. | Implement targeting separately in each command. This permits independent policies, but duplicates logic; shared changes currently affect every command using the mechanism. |
+
+### Edit command
+
+The `edit` command updates exactly one contact identified by exact field criteria. The `>>` separator distinguishes the search criteria from the requested updates, for example:
+
+```text
+edit n/John Doe p/81231234 >> p/91234567 e/john@example.com
+```
+
+#### Edit implementation
+
+The command has five main parts:
+
+* **Parsing:** `EditCommandParser` requires exactly one `>>`, at least one search flag, and at least one update flag. It delegates search parsing to `ExactPersonMatchParser` and stores updates in an `EditPersonDescriptor`. Supported fields are name (`n/`), phone (`p/`), email (`e/`), address (`a/`), GitHub (`gh/`), LinkedIn (`li/`), Telegram (`tg/`), groups (`g/`), and tags (`t/`). Unsupported flags, unexpected preamble text, invalid values, and repeated scalar prefixes are rejected.
+* **Shared targeting:** `EditCommand` uses `PersonTarget#resolve` with the same exact-match rules and ambiguity handling as [delete](#delete-command). Search values must be nonempty; every supplied criterion must match the same contact.
+* **Field updates:** `EditCommand#createEditedPerson` constructs a replacement `Person`, preserving unspecified fields and the existing pin state. Scalar updates replace their existing values. Empty optional field values clear those fields, while empty name or phone updates are rejected. Tags and groups use the descriptor states described below. The descriptor defensively copies tag and group sets.
+* **Duplicate prevention:** Before calling `Model#setPerson`, the command checks whether a changed phone number already identifies another contact. Such an update is rejected without changing contact data, since phone numbers define contact identity.
+* **Persistence and undo:** `EditCommand#isUndoable` returns `true`. `LogicManager` copies the address book before execution, saves that snapshot to undo history after successful execution, and saves the updated address book through `Storage`. The command returns a success message containing the updated contact's details.
+
+`EditPersonDescriptor` distinguishes three states for each tag or group update:
+
+| Descriptor state | Example update | Effect |
+| --- | --- | --- |
+| Absent (`Optional.empty()` from the getter) | No `t/` supplied | Preserve the existing set. |
+| Present, empty set | `t/` | Clear the entire set. |
+| Present, nonempty set | `t/active t/friend` | Toggle each supplied value: remove it if present, otherwise add it. |
+
+The same representation applies to `g/`. Distinguishing absence from an empty set allows the descriptor to represent both "leave unchanged" and "clear all". `applySetEdit` copies the existing set before applying an update. Parsed values are stored in sets, so repeated identical values toggle membership only once. An empty value combined with another occurrence of the same set prefix is rejected, including `t/ t/active` or `g/ g/project`.
+
+Exact matching uses the field types' normalized values: names are converted to uppercase, while tags and groups are converted to lowercase, for both stored contacts and parsed criteria. Matching these fields is therefore case-insensitive, but still requires the full value rather than a partial match. The same normalization applies to `delete` targeting.
+
+`EditCommand` uses the same targeting mechanism as `DeleteCommand`, implemented by `PersonTarget#resolve`. The [delete targeting activity diagram](#delete-command) illustrates the shared handling of zero, one, and multiple matches.
+
+The edit sequence diagram below focuses on execution after parsing, assuming exactly one contact matches the search criteria. It shows replacement creation and the duplicate-phone check, including the rejection path. `Model#hasPerson` is called only when the phone number changes. Parsing, persistence calls, and UI updates are omitted; the notes indicate where undo recording and persistence occur.
+
+<puml src="diagrams/EditExecutionSequenceDiagram.puml" alt="Edit execution sequence showing contact resolution, replacement creation, duplicate-phone rejection, and model update" />
+
+#### Edit example execution
+
+Assume John Doe has phone `81231234`, tags `{active, colleague}`, and is pinned. No other contact has phone `91234567`. The user enters:
+
+```text
+edit p/81231234 >> p/91234567 t/active t/friend
+```
+
+1. `EditCommandParser` splits the arguments at `>>`. It creates a search predicate for phone `81231234` and an `EditPersonDescriptor` containing the replacement phone and tags to toggle.
+1. `PersonTarget#resolve` searches all contacts and returns John using his original phone number, even if he is hidden by the current filter.
+1. `createEditedPerson` constructs a replacement with phone `91234567`. `applySetEdit` removes `active` and adds `friend`, producing `{colleague, friend}`. Unspecified fields and the pin state are preserved.
+1. Since the phone changes, `EditCommand` calls `Model#hasPerson` to check the replacement's identity. If the phone were already in use, it would throw a `CommandException` before replacing the contact.
+1. The new phone is available, so the command calls `Model#setPerson` and returns the updated details. `LogicManager` records the pre-execution snapshot and attempts to save the address book.
+
+#### Edit design considerations
+
+The following alternatives illustrate the tradeoffs of the current implementation. The [delete design considerations](#delete-design-considerations) also apply to edit's search scope and shared targeting.
+
+| Aspect | Current implementation and benefit | Alternative and tradeoff |
+| --- | --- | --- |
+| Updating a contact | Construct a replacement `Person` and pass it to `Model#setPerson`. The original object is preserved, and model replacement provides a single update point. | Mutate individual fields on the existing contact. This could avoid a replacement object, but would require changing the immutable field design and supporting notifications for those changes. |
+| Optional updates | Use an absent value for unchanged fields and a present empty set for clearing collections. The descriptor represents both intents explicitly. | Use separate clear commands or flags. These could make clearing more explicit, but add syntax and parsing paths. |
+| Tag and group membership | Toggle supplied values, allowing additions and removals in one edit while preserving unmentioned values. Applying the same nonempty membership update twice restores the original set membership. | Replace the whole set. Applying the same replacement repeatedly has the same result, but users would need to supply every value they want to retain. |
 
 ### Find command
 
@@ -657,8 +746,6 @@ testers are expected to do more *exploratory* testing.
 
    1. Relaunch the app by double-clicking the JAR file.<br>
        Expected: The most recent window size and location are retained.
-
-1. _{ more test cases … }_
 
 ### Deleting a person
 
