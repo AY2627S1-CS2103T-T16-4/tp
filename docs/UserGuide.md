@@ -95,7 +95,7 @@ For more information about valid input rules, click [here](#prefix-table).
 Examples:
 * `add n/John Dow p/81231234`
 * `add n/John Doe p/98765432 e/johnd@example.com a/John street, block 123, #01-01`
-* `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/1234567 t/criminal`
+* `add n/Betsy Crowe t/friend e/betsycrowe@example.com a/Newgate Prison p/91234567 t/criminal`
 
 **Expected result**
 
@@ -398,7 +398,7 @@ name,phone,email,address,groups,github,linkedin,telegram,tags,pinned
 
 Action     | Format, Examples
 -----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... ` <br> e.g., `add n/James Ho p/22224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
+**Add**    | `add n/NAME p/PHONE_NUMBER e/EMAIL a/ADDRESS [t/TAG]... ` <br> e.g., `add n/James Ho p/82224444 e/jamesho@example.com a/123, Clementi Rd, 1234665 t/friend t/colleague`
 **Clear**  | `clear`
 **Delete** | `delete [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...` (at least one field)<br> e.g., `delete p/98765432`
 **Edit**   | `edit SEARCH_FLAGS >> UPDATE_FLAGS` (at least one flag on each side)<br>Supported flags: `[n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...`<br> e.g., `edit p/98765432 >> n/James Lee e/jameslee@example.com`
