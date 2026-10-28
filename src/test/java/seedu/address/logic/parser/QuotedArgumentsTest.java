@@ -62,7 +62,7 @@ public class QuotedArgumentsTest {
 
     @Test
     public void parse_unknownFlagOutsideQuotes_rejectsWithHint() {
-        for (String command : List.of("pin", "unpin", "delete", "find")) {
+        for (String command : List.of("add n/Alice p/81110001", "pin", "unpin", "delete", "find")) {
             ParseException exception = assertThrows(ParseException.class, () ->
                     parser.parseCommand(command + ADDRESS_ARGUMENT + " x/value"));
             assertTrue(exception.getMessage().contains(MESSAGE_QUOTED_VALUE_HINT));

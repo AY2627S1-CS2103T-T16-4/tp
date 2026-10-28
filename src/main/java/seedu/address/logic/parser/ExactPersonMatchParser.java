@@ -15,8 +15,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.ExactPersonMatchDescriptor;
@@ -31,9 +29,6 @@ public class ExactPersonMatchParser {
             PREFIX_NAME, PREFIX_PHONE, PREFIX_ADDRESS, PREFIX_EMAIL,
             PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM,
             PREFIX_GROUP, PREFIX_TAG);
-
-    private static final Pattern FLAG_LIKE_TOKEN =
-            Pattern.compile("(?<=\\s)[A-Za-z]+/");
 
     private final String messageUsage;
     private final String messageEmptyFlagValue;
@@ -54,11 +49,12 @@ public class ExactPersonMatchParser {
      */
     public PersonMatchesExactFieldsPredicate parse(String args) throws ParseException {
         requireNonNull(args);
-        if (containsUnknownFlag(args)) {
+        Prefix[] prefixes = SEARCHABLE_PREFIXES.toArray(new Prefix[0]);
+        if (ArgumentTokenizer.containsUnknownFlag(args, prefixes)) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, messageUsage)
                     + "\n" + MESSAGE_QUOTED_VALUE_HINT);
         }
-        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, SEARCHABLE_PREFIXES.toArray(new Prefix[0]));
+        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, prefixes);
         validateArguments(argMultimap);
         ExactPersonMatchDescriptor descriptor = parseDescriptor(argMultimap);
         assert descriptor.isAnyFieldSet() : "Accepted criteria must constrain at least one contact field";
@@ -111,19 +107,4 @@ public class ExactPersonMatchParser {
         return descriptor;
     }
 
-    /**
-     * Detects unsupported flag-like tokens that the tokenizer would otherwise
-     * absorb into the preceding value.
-     */
-    private static boolean containsUnknownFlag(String args) throws ParseException {
-        Matcher matcher = FLAG_LIKE_TOKEN.matcher(ArgumentTokenizer.maskQuotedValues(args));
-        while (matcher.find()) {
-            String token = matcher.group();
-            if (SEARCHABLE_PREFIXES.stream()
-                    .noneMatch(prefix -> prefix.getPrefix().equals(token))) {
-                return true;
-            }
-        }
-        return false;
-    }
 }

@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.Messages.MESSAGE_QUOTED_VALUE_HINT;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_AMY;
 import static seedu.address.logic.commands.CommandTestUtil.ADDRESS_DESC_BOB;
 import static seedu.address.logic.commands.CommandTestUtil.EMAIL_DESC_AMY;
@@ -49,6 +50,19 @@ import seedu.address.testutil.PersonBuilder;
 
 public class AddCommandParserTest {
     private AddCommandParser parser = new AddCommandParser();
+
+    @Test
+    public void parse_unknownFlag_rejectsWithHint() {
+        String validArgs = NAME_DESC_BOB + PHONE_DESC_BOB;
+        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE)
+                + "\n" + MESSAGE_QUOTED_VALUE_HINT;
+        assertParseFailure(parser, " x/value" + validArgs, expectedMessage);
+        assertParseFailure(parser, NAME_DESC_BOB + " x/value" + PHONE_DESC_BOB, expectedMessage);
+        assertParseFailure(parser, validArgs + " x/value", expectedMessage);
+        assertParseFailure(parser, validArgs + " a/10 Road ph/81110001", expectedMessage);
+        assertParseFailure(parser, validArgs + " a/10 Road c/o Bob", expectedMessage);
+        assertParseFailure(parser, " N/Alice" + PHONE_DESC_BOB, expectedMessage);
+    }
 
     @Test
     public void parse_allFieldsPresent_success() {

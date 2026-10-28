@@ -21,6 +21,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 public class ArgumentTokenizer {
 
     private static final Pattern QUOTED_VALUE = Pattern.compile("\"(?:\\\\.|[^\"\\\\])*\"");
+    private static final Pattern FLAG_LIKE_TOKEN = Pattern.compile("(?<=\\s)[A-Za-z]+/");
 
     /**
      * Tokenizes an arguments string and returns an {@code ArgumentMultimap} object that maps prefixes to their
@@ -54,6 +55,22 @@ public class ArgumentTokenizer {
             throw new ParseException(Messages.MESSAGE_INVALID_QUOTES);
         }
         return unquoted.toString();
+    }
+
+    /**
+     * Returns whether the arguments contain an unsupported flag outside quoted values.
+     *
+     * @throws ParseException if any double quote is unmatched.
+     */
+    static boolean containsUnknownFlag(String args, Prefix... prefixes) throws ParseException {
+        Matcher matcher = FLAG_LIKE_TOKEN.matcher(maskQuotedValues(args));
+        while (matcher.find()) {
+            String token = matcher.group();
+            if (Arrays.stream(prefixes).noneMatch(prefix -> prefix.getPrefix().equals(token))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
