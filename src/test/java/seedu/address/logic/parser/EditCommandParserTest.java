@@ -171,7 +171,7 @@ public class EditCommandParserTest {
                 .withTags(VALID_TAG_FRIEND, VALID_TAG_HUSBAND)
                 .build();
 
-        assertParseSuccess(parser, userInput, expectedCommand(descriptor));
+        assertParseSuccess(parser, userInput, createExpectedCommand(descriptor));
     }
 
     @Test
@@ -183,29 +183,29 @@ public class EditCommandParserTest {
                 .withEmail(VALID_EMAIL_AMY)
                 .build();
 
-        assertParseSuccess(parser, userInput, expectedCommand(descriptor));
+        assertParseSuccess(parser, userInput, createExpectedCommand(descriptor));
     }
 
     @Test
     public void parse_singleUpdateField_success() {
         assertParseSuccess(parser, SEARCH_AND_SEPARATOR + NAME_DESC_AMY,
-                expectedCommand(new EditPersonDescriptorBuilder().withName(VALID_NAME_AMY).build()));
+                createExpectedCommand(new EditPersonDescriptorBuilder().withName(VALID_NAME_AMY).build()));
         assertParseSuccess(parser, SEARCH_AND_SEPARATOR + PHONE_DESC_BOB,
-                expectedCommand(new EditPersonDescriptorBuilder().withPhone(VALID_PHONE_BOB).build()));
+                createExpectedCommand(new EditPersonDescriptorBuilder().withPhone(VALID_PHONE_BOB).build()));
         assertParseSuccess(parser, SEARCH_AND_SEPARATOR + EMAIL_DESC_AMY,
-                expectedCommand(new EditPersonDescriptorBuilder().withEmail(VALID_EMAIL_AMY).build()));
+                createExpectedCommand(new EditPersonDescriptorBuilder().withEmail(VALID_EMAIL_AMY).build()));
         assertParseSuccess(parser, SEARCH_AND_SEPARATOR + ADDRESS_DESC_AMY,
-                expectedCommand(new EditPersonDescriptorBuilder().withAddress(VALID_ADDRESS_AMY).build()));
+                createExpectedCommand(new EditPersonDescriptorBuilder().withAddress(VALID_ADDRESS_AMY).build()));
         assertParseSuccess(parser, SEARCH_AND_SEPARATOR + GITHUB_DESC_AMY,
-                expectedCommand(new EditPersonDescriptorBuilder().withGithub(VALID_GITHUB_AMY).build()));
+                createExpectedCommand(new EditPersonDescriptorBuilder().withGithub(VALID_GITHUB_AMY).build()));
         assertParseSuccess(parser, SEARCH_AND_SEPARATOR + LINKEDIN_DESC_AMY,
-                expectedCommand(new EditPersonDescriptorBuilder().withLinkedin(VALID_LINKEDIN_AMY).build()));
+                createExpectedCommand(new EditPersonDescriptorBuilder().withLinkedin(VALID_LINKEDIN_AMY).build()));
         assertParseSuccess(parser, SEARCH_AND_SEPARATOR + TELEGRAM_DESC_AMY,
-                expectedCommand(new EditPersonDescriptorBuilder().withTelegram(VALID_TELEGRAM_AMY).build()));
+                createExpectedCommand(new EditPersonDescriptorBuilder().withTelegram(VALID_TELEGRAM_AMY).build()));
         assertParseSuccess(parser, SEARCH_AND_SEPARATOR + GROUP_DESC_AMY,
-                expectedCommand(new EditPersonDescriptorBuilder().withGroups(VALID_GROUP_AMY).build()));
+                createExpectedCommand(new EditPersonDescriptorBuilder().withGroups(VALID_GROUP_AMY).build()));
         assertParseSuccess(parser, SEARCH_AND_SEPARATOR + TAG_DESC_FRIEND,
-                expectedCommand(new EditPersonDescriptorBuilder().withTags(VALID_TAG_FRIEND).build()));
+                createExpectedCommand(new EditPersonDescriptorBuilder().withTags(VALID_TAG_FRIEND).build()));
     }
 
     @Test
@@ -213,7 +213,7 @@ public class EditCommandParserTest {
         String userInput = PHONE_DESC_AMY.trim() + EDIT_SEPARATOR + NAME_DESC_AMY.trim();
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName(VALID_NAME_AMY).build();
 
-        assertParseSuccess(parser, userInput, expectedCommand(descriptor));
+        assertParseSuccess(parser, userInput, createExpectedCommand(descriptor));
     }
 
     @Test
@@ -265,7 +265,7 @@ public class EditCommandParserTest {
                 .withTelegram("")
                 .build();
 
-        assertParseSuccess(parser, userInput, expectedCommand(descriptor));
+        assertParseSuccess(parser, userInput, createExpectedCommand(descriptor));
     }
 
     @Test
@@ -277,7 +277,7 @@ public class EditCommandParserTest {
                 .withTags()
                 .build();
 
-        assertParseSuccess(parser, userInput, expectedCommand(descriptor));
+        assertParseSuccess(parser, userInput, createExpectedCommand(descriptor));
     }
 
     @Test
@@ -316,7 +316,7 @@ public class EditCommandParserTest {
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder()
                 .withTags(VALID_TAG_FRIEND).withGroups(VALID_GROUP_AMY).build();
 
-        assertParseSuccess(parser, userInput, expectedCommand(descriptor));
+        assertParseSuccess(parser, userInput, createExpectedCommand(descriptor));
     }
 
     @Test
@@ -353,7 +353,7 @@ public class EditCommandParserTest {
     /**
      * Returns an expected command identifying AMY by her original phone.
      */
-    private static EditCommand expectedCommand(EditPersonDescriptor descriptor) {
+    private static EditCommand createExpectedCommand(EditPersonDescriptor descriptor) {
         ExactPersonMatchDescriptor searchDescriptor = new ExactPersonMatchDescriptor();
         searchDescriptor.setPhone(new Phone(VALID_PHONE_AMY));
 
