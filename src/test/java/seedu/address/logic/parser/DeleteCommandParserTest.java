@@ -108,23 +108,23 @@ public class DeleteCommandParserTest {
     @Test
     public void parse_singlePrefix_returnsDeleteCommand() {
         assertParseSuccess(parser, " n/Alice Pauline",
-                commandWith(d -> d.setName(new Name("Alice Pauline"))));
+                createCommandWith(d -> d.setName(new Name("Alice Pauline"))));
         assertParseSuccess(parser, " p/91234567",
-                commandWith(d -> d.setPhone(new Phone("91234567"))));
+                createCommandWith(d -> d.setPhone(new Phone("91234567"))));
         assertParseSuccess(parser, " a/123 Clementi Ave",
-                commandWith(d -> d.setAddress(new Address("123 Clementi Ave"))));
+                createCommandWith(d -> d.setAddress(new Address("123 Clementi Ave"))));
         assertParseSuccess(parser, " e/alice@example.com",
-                commandWith(d -> d.setEmail(new Email("alice@example.com"))));
+                createCommandWith(d -> d.setEmail(new Email("alice@example.com"))));
         assertParseSuccess(parser, " gh/AliceGh",
-                commandWith(d -> d.setGithub(new Github("AliceGh"))));
+                createCommandWith(d -> d.setGithub(new Github("AliceGh"))));
         assertParseSuccess(parser, " li/alice-li",
-                commandWith(d -> d.setLinkedin(new Linkedin("alice-li"))));
+                createCommandWith(d -> d.setLinkedin(new Linkedin("alice-li"))));
         assertParseSuccess(parser, " tg/alicetg",
-                commandWith(d -> d.setTelegram(new Telegram("alicetg"))));
+                createCommandWith(d -> d.setTelegram(new Telegram("alicetg"))));
         assertParseSuccess(parser, " g/T09",
-                commandWith(d -> d.setGroups(Set.of(new Group("T09")))));
+                createCommandWith(d -> d.setGroups(Set.of(new Group("T09")))));
         assertParseSuccess(parser, " t/friend",
-                commandWith(d -> d.setTags(Set.of(new Tag("friend")))));
+                createCommandWith(d -> d.setTags(Set.of(new Tag("friend")))));
     }
 
     @Test
@@ -172,7 +172,7 @@ public class DeleteCommandParserTest {
     public void parse_allPrefixes_returnsDeleteCommand() {
         String args = " n/Alice p/91234567 a/123 Clementi Ave e/alice@example.com"
                 + " gh/AliceGh li/alice-li tg/alicetg g/T09 t/friend";
-        DeleteCommand expectedCommand = commandWith(d -> {
+        DeleteCommand expectedCommand = createCommandWith(d -> {
             d.setName(new Name("Alice"));
             d.setPhone(new Phone("91234567"));
             d.setAddress(new Address("123 Clementi Ave"));
@@ -190,37 +190,37 @@ public class DeleteCommandParserTest {
     @Test
     public void parse_multipleGroups_returnsDeleteCommandWithAllGroups() {
         assertParseSuccess(parser, " g/T09 g/T10",
-                commandWith(d -> d.setGroups(Set.of(new Group("T09"), new Group("T10")))));
+                createCommandWith(d -> d.setGroups(Set.of(new Group("T09"), new Group("T10")))));
     }
 
     @Test
     public void parse_multipleTags_returnsDeleteCommandWithAllTags() {
         assertParseSuccess(parser, " t/friend t/colleague",
-                commandWith(d -> d.setTags(Set.of(new Tag("friend"), new Tag("colleague")))));
+                createCommandWith(d -> d.setTags(Set.of(new Tag("friend"), new Tag("colleague")))));
     }
 
     @Test
     public void parse_repeatedIdenticalGroup_returnsDeleteCommandWithOneGroup() {
         assertParseSuccess(parser, " g/T09 g/T09",
-                commandWith(d -> d.setGroups(Set.of(new Group("T09")))));
+                createCommandWith(d -> d.setGroups(Set.of(new Group("T09")))));
     }
 
     @Test
     public void parse_repeatedIdenticalTag_returnsDeleteCommandWithOneTag() {
         assertParseSuccess(parser, " t/friend t/friend",
-                commandWith(d -> d.setTags(Set.of(new Tag("friend")))));
+                createCommandWith(d -> d.setTags(Set.of(new Tag("friend")))));
     }
 
     @Test
     public void parse_valueWithSurroundingWhitespace_returnsDeleteCommandWithTrimmedValue() {
         assertParseSuccess(parser, " n/  Alice Pauline   ",
-                commandWith(d -> d.setName(new Name("Alice Pauline"))));
+                createCommandWith(d -> d.setName(new Name("Alice Pauline"))));
     }
 
     /**
      * Builds the expected command from exact-match criteria.
      */
-    private static DeleteCommand commandWith(
+    private static DeleteCommand createCommandWith(
             Consumer<ExactPersonMatchDescriptor> setup) {
         ExactPersonMatchDescriptor descriptor = new ExactPersonMatchDescriptor();
         setup.accept(descriptor);

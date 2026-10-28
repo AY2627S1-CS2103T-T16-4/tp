@@ -108,13 +108,13 @@ public class EditCommandTest {
     @Test
     public void execute_personHiddenByFilter_success() {
         model.addPerson(BOB);
-        PersonMatchesExactFieldsPredicate displayPredicate = predicateFor(BOB);
+        PersonMatchesExactFieldsPredicate displayPredicate = createPredicateFor(BOB);
         model.updateFilteredPersonList(displayPredicate);
         assertEquals(List.of(BOB), model.getFilteredPersonList());
 
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withName(VALID_NAME_BOB).build();
         Person editedPerson = new PersonBuilder(AMY).withName(VALID_NAME_BOB).build();
-        EditCommand command = new EditCommand(predicateFor(AMY), descriptor);
+        EditCommand command = new EditCommand(createPredicateFor(AMY), descriptor);
         Model expectedModel = new ModelManager(new AddressBook(model.getAddressBook()), new UserPrefs());
         expectedModel.setPerson(AMY, editedPerson);
         expectedModel.updateFilteredPersonList(displayPredicate);
@@ -227,7 +227,7 @@ public class EditCommandTest {
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder()
                 .withName(VALID_NAME_BOB)
                 .build();
-        EditCommand editCommand = new EditCommand(predicateFor(BOB), descriptor);
+        EditCommand editCommand = new EditCommand(createPredicateFor(BOB), descriptor);
 
         assertCommandFailure(editCommand, model, EditCommand.MESSAGE_PERSON_NOT_FOUND);
     }
@@ -239,7 +239,7 @@ public class EditCommandTest {
                 .build();
         model.addPerson(anotherAmy);
         model.addPerson(BOB);
-        model.updateFilteredPersonList(predicateFor(BOB));
+        model.updateFilteredPersonList(createPredicateFor(BOB));
         assertEquals(List.of(BOB), model.getFilteredPersonList());
 
         ExactPersonMatchDescriptor searchDescriptor = new ExactPersonMatchDescriptor();
@@ -268,7 +268,7 @@ public class EditCommandTest {
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder()
                 .withPhone(VALID_PHONE_BOB)
                 .build();
-        EditCommand editCommand = new EditCommand(predicateFor(AMY), descriptor);
+        EditCommand editCommand = new EditCommand(createPredicateFor(AMY), descriptor);
 
         assertCommandFailure(editCommand, model, EditCommand.MESSAGE_DUPLICATE_PERSON);
     }
@@ -276,10 +276,10 @@ public class EditCommandTest {
     @Test
     public void execute_duplicatePhoneHiddenByFilter_failure() {
         model.addPerson(BOB);
-        model.updateFilteredPersonList(predicateFor(AMY));
+        model.updateFilteredPersonList(createPredicateFor(AMY));
         assertEquals(List.of(AMY), model.getFilteredPersonList());
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withPhone(VALID_PHONE_BOB).build();
-        EditCommand command = new EditCommand(predicateFor(AMY), descriptor);
+        EditCommand command = new EditCommand(createPredicateFor(AMY), descriptor);
 
         assertCommandFailure(command, model, EditCommand.MESSAGE_DUPLICATE_PERSON);
     }
@@ -315,12 +315,12 @@ public class EditCommandTest {
 
     @Test
     public void equals() {
-        EditCommand standardCommand = new EditCommand(predicateFor(AMY), DESC_AMY);
+        EditCommand standardCommand = new EditCommand(createPredicateFor(AMY), DESC_AMY);
 
         // same values -> returns true
         EditPersonDescriptor copyDescriptor = new EditPersonDescriptor(DESC_AMY);
         EditCommand commandWithSameValues =
-                new EditCommand(predicateFor(AMY), copyDescriptor);
+                new EditCommand(createPredicateFor(AMY), copyDescriptor);
         assertTrue(standardCommand.equals(commandWithSameValues));
 
         // same object -> returns true
@@ -333,15 +333,15 @@ public class EditCommandTest {
         assertFalse(standardCommand.equals(new ClearCommand()));
 
         // different search criteria -> returns false
-        assertFalse(standardCommand.equals(new EditCommand(predicateFor(BOB), DESC_AMY)));
+        assertFalse(standardCommand.equals(new EditCommand(createPredicateFor(BOB), DESC_AMY)));
 
         // different updates -> returns false
-        assertFalse(standardCommand.equals(new EditCommand(predicateFor(AMY), DESC_BOB)));
+        assertFalse(standardCommand.equals(new EditCommand(createPredicateFor(AMY), DESC_BOB)));
     }
 
     @Test
     public void toStringMethod() {
-        PersonMatchesExactFieldsPredicate predicate = predicateFor(AMY);
+        PersonMatchesExactFieldsPredicate predicate = createPredicateFor(AMY);
         EditCommand editCommand = new EditCommand(predicate, DESC_BOB);
 
         String expected = EditCommand.class.getCanonicalName()
@@ -362,7 +362,7 @@ public class EditCommandTest {
      * Asserts that editing the supplied contact produces the expected person and model.
      */
     private void assertEditSuccess(Person personToEdit, EditPersonDescriptor descriptor, Person editedPerson) {
-        EditCommand editCommand = new EditCommand(predicateFor(personToEdit), descriptor);
+        EditCommand editCommand = new EditCommand(createPredicateFor(personToEdit), descriptor);
 
         String expectedMessage = String.format(
                 EditCommand.MESSAGE_EDIT_PERSON_SUCCESS, Messages.format(editedPerson));
@@ -377,7 +377,7 @@ public class EditCommandTest {
     /**
      * Returns exact search criteria identifying the person by phone.
      */
-    private static PersonMatchesExactFieldsPredicate predicateFor(Person person) {
+    private static PersonMatchesExactFieldsPredicate createPredicateFor(Person person) {
         ExactPersonMatchDescriptor descriptor = new ExactPersonMatchDescriptor();
         descriptor.setPhone(person.getPhone());
         return new PersonMatchesExactFieldsPredicate(descriptor);

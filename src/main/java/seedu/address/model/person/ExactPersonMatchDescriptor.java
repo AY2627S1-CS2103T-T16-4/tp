@@ -11,8 +11,10 @@ import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.model.tag.Tag;
 
 /**
- * Stores the values to search for when finding persons. Each non-null field must match.
- * An empty tag set places no restriction on tags.
+ * Stores exact field criteria for matching persons.
+ * Each non-null scalar field must match exactly.
+ * Persons must contain all specified groups and tags;
+ * empty sets place no restriction on the corresponding field.
  */
 public class ExactPersonMatchDescriptor {
     private Name name;
@@ -28,8 +30,8 @@ public class ExactPersonMatchDescriptor {
     public ExactPersonMatchDescriptor() {}
 
     /**
-     * Copy constructor.
-     * A defensive copy of {@code tags} is used internally.
+     * Creates a copy of the given descriptor.
+     * Defensive copies of {@code groups} and {@code tags} are used internally.
      */
     public ExactPersonMatchDescriptor(ExactPersonMatchDescriptor toCopy) {
         setName(toCopy.name);
