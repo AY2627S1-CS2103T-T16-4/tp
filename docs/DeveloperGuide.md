@@ -294,13 +294,13 @@ Its implementation has four main parts:
 
 ### Pinned contacts
 
-The `pin` command marks one matching contact as pinned.
+The `pin` command marks one matching contact as pinned; `unpin` removes its pin.
 
 Its implementation has four main parts:
-* **Shared targeting:** `PinCommandParser` uses `ExactPersonMatchParser` to validate criteria, and `PersonTarget` resolves them against all contacts using `PersonMatchesExactFieldsPredicate`. These classes are shared with `edit` and `delete`. All supplied fields must match. Ambiguous matches are displayed for refinement; unsuccessful requests leave contact data unchanged.
-* **Pin state:** `PinCommand` replaces the contact with an immutable copy whose `isPinned` flag is `true`, preserving its other details. Editing retains this flag.
-* **Display:** `ModelManager` sorts the filtered view with pinned contacts first, preserving addition order within each section. The stored list stays in addition order. `PersonCard` shows a star for pinned contacts. 
-* **Persistence and undo:** `JsonAdaptedPerson` stores `isPinned`, defaulting to `false` for older files. Successful pins save an undo snapshot through `LogicManager`, allowing the existing undo mechanism to restore the previous state.
+* **Shared targeting:** `PinCommandParser` uses `ExactPersonMatchParser` to validate criteria, and `PersonTarget` resolves them against all contacts using `PersonMatchesExactFieldsPredicate`. These classes are shared with `unpin`, `edit`, and `delete`. All supplied fields must match. Ambiguous matches are displayed for refinement; unsuccessful requests leave contact data unchanged.
+* **Pin state:** `PinCommand` replaces the contact with an immutable copy whose `isPinned` flag is `true`, preserving its other details. `UnpinCommand` uses the same approach with `false` and rejects already-unpinned contacts. Editing retains the flag.
+* **Display:** `ModelManager` sorts the filtered view with pinned contacts first, then by the active sort within each section, using stored addition order to break ties. Without an active sort, each section follows addition order. The stored list stays in addition order, so unpinning returns a contact to its original position among unpinned contacts unless sorting is active. `PersonCard` shows a star for pinned contacts.
+* **Persistence and undo:** `JsonAdaptedPerson` stores `isPinned`, defaulting to `false` for older files. Successful pin and unpin commands save an undo snapshot through `LogicManager`, allowing the existing undo mechanism to restore the previous state.
 
 The activity diagram summarizes the flow, grouping unsuccessful requests into one path.
 

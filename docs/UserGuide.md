@@ -183,14 +183,28 @@ Format: `pin [n/NAME] [p/PHONE_NUMBER] [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LIN
 
 * Provide at least one field. All supplied values must match in full, ignoring letter case except for GitHub usernames (`gh/`).
 * If several contacts match, GitMate displays them and requests more details. No contact is pinned unless exactly one matches. An already-pinned contact produces an error.
-* Pinned contacts stay in the order they were added, above unpinned contacts.
+* Pinned contacts appear above unpinned contacts. Within each section, contacts follow the active sort order, or addition order if no sort is active.
 * Searches all contacts without clearing the current search after success. Use `list` to see a pinned contact hidden by the search.
-* Pins are saved automatically and retained after editing or restarting. There is no `unpin` command.
+* Pins are saved automatically and retained after editing or restarting. Use `unpin` to remove a pin.
 
 Examples:
 
 * `pin p/98765432` pins the contact with phone number `98765432`.
 * `pin n/John Doe p/98765432` pins the contact matching both the full name and phone number.
+
+### Unpinning a contact: `unpin`
+
+Removes a contact's star and returns it to the unpinned section.
+
+Format: `unpin [n/NAME] [p/PHONE_NUMBER] [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...`
+
+* Uses the same [matching rules as `pin`](#pinning-a-contact-pin): provide at least one field identifying exactly one contact. An already-unpinned contact produces an error.
+* The contact follows the active sort order, or returns to its original addition order among unpinned contacts if no sort is active. Remaining pinned contacts stay above it.
+* The current search filter stays active. Changes are saved automatically and can be reversed with `undo`.
+
+Example:
+
+* `unpin p/98765432` unpins the contact with phone number `98765432`.
 
 ### Deleting a person: `delete`
 
@@ -408,4 +422,5 @@ Action     | Format, Examples
 **Export** | `export`
 **Sort**   | `sort name\|group\|tag [asc\|desc] [cont\|none]`<br> e.g., `sort name asc cont`, `sort tag`
 **Pin**    | `pin [n/NAME] [p/PHONE_NUMBER] [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...` (at least one field)<br> e.g., `pin p/98765432`
+**Unpin**  | `unpin [n/NAME] [p/PHONE_NUMBER] [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/TELEGRAM] [g/GROUP]... [t/TAG]...` (at least one field)<br> e.g., `unpin p/98765432`
 **Help**   | `help`
