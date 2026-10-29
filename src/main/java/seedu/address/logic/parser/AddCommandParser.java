@@ -1,6 +1,7 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.parser.CliSyntax.FIELD_PREFIXES;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GITHUB;
@@ -14,8 +15,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import seedu.address.logic.commands.AddCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
@@ -42,10 +41,9 @@ public class AddCommandParser implements Parser<AddCommand> {
      */
     public AddCommand parse(String args) throws ParseException {
         ArgumentMultimap argMultimap =
-                ArgumentTokenizer.tokenize(args, PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS,
-                        PREFIX_GROUP, PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM, PREFIX_TAG);
+                ArgumentTokenizer.tokenize(args, FIELD_PREFIXES.toArray(new Prefix[0]));
 
-        List<String> unknownPrefixes = findUnknownPrefixes(args);
+        List<String> unknownPrefixes = ParserUtil.findUnknownFlags(args, FIELD_PREFIXES);
 
         // Reject prefixes that are not supported by the add command.
         if (!unknownPrefixes.isEmpty()) {
@@ -60,20 +58,9 @@ public class AddCommandParser implements Parser<AddCommand> {
                     String.format(MESSAGE_INVALID_COMMAND_FORMAT, AddCommand.MESSAGE_USAGE));
         }
 
-        List<Prefix> allPrefixes = List.of(
-                PREFIX_NAME,
-                PREFIX_PHONE,
-                PREFIX_EMAIL,
-                PREFIX_ADDRESS,
-                PREFIX_GROUP,
-                PREFIX_GITHUB,
-                PREFIX_LINKEDIN,
-                PREFIX_TELEGRAM,
-                PREFIX_TAG);
-
         List<String> emptyPrefixes = new ArrayList<>();
 
-        for (Prefix prefix : allPrefixes) {
+        for (Prefix prefix : FIELD_PREFIXES) {
             if (argMultimap.getAllValues(prefix).stream().anyMatch(String::isBlank)) {
                 emptyPrefixes.add(prefix.getPrefix());
             }
@@ -111,43 +98,6 @@ public class AddCommandParser implements Parser<AddCommand> {
         Person person = new Person(name, phone, email, address, groupList, github, linkedin, telegram, tagList);
 
         return new AddCommand(person);
-    }
-
-    /**
-     * Finds distinct flag-like tokens that are not supported by the add command.
-     *
-     * @param args The arguments supplied to the add command.
-     * @return A list of unsupported prefixes, in the order they appear.
-     */
-    private static List<String> findUnknownPrefixes(String args) {
-        Pattern flagPattern = Pattern.compile("(?<=\\s)[A-Za-z]+/");
-        Matcher matcher = flagPattern.matcher(args);
-
-        List<Prefix> supportedPrefixes = List.of(
-                PREFIX_NAME,
-                PREFIX_PHONE,
-                PREFIX_EMAIL,
-                PREFIX_ADDRESS,
-                PREFIX_GROUP,
-                PREFIX_GITHUB,
-                PREFIX_LINKEDIN,
-                PREFIX_TELEGRAM,
-                PREFIX_TAG);
-
-        List<String> unknownPrefixes = new ArrayList<>();
-
-        while (matcher.find()) {
-            String token = matcher.group();
-
-            boolean isSupported = supportedPrefixes.stream()
-                    .anyMatch(prefix -> prefix.getPrefix().equals(token));
-
-            if (!isSupported && !unknownPrefixes.contains(token)) {
-                unknownPrefixes.add(token);
-            }
-        }
-
-        return unknownPrefixes;
     }
 
 }

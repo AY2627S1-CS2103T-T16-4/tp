@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static seedu.address.logic.commands.CommandTestUtil.showPersonAtIndex;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
@@ -35,7 +36,7 @@ public class ExportCommandTest {
 
     private static final Clock FIXED_CLOCK = Clock.fixed(Instant.parse("2026-10-25T14:30:12Z"), ZoneOffset.UTC);
     private static final String EXPECTED_FILENAME = "contacts-20261025-143012.csv";
-    private static final String BOM = "﻿";
+    private static final String BOM = "\uFEFF";
 
     @TempDir
     public Path testFolder;
@@ -141,6 +142,23 @@ public class ExportCommandTest {
                 new ExportCommand(notADirectory, FIXED_CLOCK).execute(model));
 
         assertTrue(exception.getMessage().startsWith("Could not export contacts due to the following error:"));
+    }
+
+    @Test
+    public void execute_unwritableDirectory_throwsCommandExceptionWithPermissionMessage() throws Exception {
+        Path readOnly = Files.createDirectory(testFolder.resolve("readonly"));
+        // Skipped where folder permissions are not enforced, such as on Windows or when running as root.
+        assumeTrue(readOnly.toFile().setWritable(false) && !Files.isWritable(readOnly),
+                "Folder permissions cannot be restricted on this system");
+        try {
+            CommandException exception = assertThrows(CommandException.class, () ->
+                    new ExportCommand(readOnly, FIXED_CLOCK).execute(model));
+
+            assertEquals(String.format(ExportCommand.MESSAGE_PERMISSION_DENIED,
+                    readOnly.resolve(EXPECTED_FILENAME).toAbsolutePath().normalize()), exception.getMessage());
+        } finally {
+            readOnly.toFile().setWritable(true);
+        }
     }
 
     @Test

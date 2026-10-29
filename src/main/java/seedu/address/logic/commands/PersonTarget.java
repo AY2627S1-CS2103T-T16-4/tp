@@ -27,7 +27,7 @@ public record PersonTarget(PersonMatchesExactFieldsPredicate predicate) {
     public static final String MESSAGE_PARAMETERS =
             "Parameters: "
             + "[" + PREFIX_NAME + "NAME] "
-            + "[" + PREFIX_PHONE + "PHONE] "
+            + "[" + PREFIX_PHONE + "PHONE_NUMBER] "
             + "[" + PREFIX_ADDRESS + "ADDRESS] "
             + "[" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_GITHUB + "GITHUB] "

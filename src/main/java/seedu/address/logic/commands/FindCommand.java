@@ -34,18 +34,18 @@ public class FindCommand extends Command {
             + "The search is case-insensitive, except for GITHUB, which is case-sensitive.\n"
             + "Parameters: "
             + "[" + PREFIX_NAME + "NAME] "
-            + "[" + PREFIX_PHONE + "PHONE] "
+            + "[" + PREFIX_PHONE + "PHONE_NUMBER] "
             + "[" + PREFIX_ADDRESS + "ADDRESS] "
             + "[" + PREFIX_EMAIL + "EMAIL] "
             + "[" + PREFIX_GITHUB + "GITHUB] "
             + "[" + PREFIX_LINKEDIN + "LINKEDIN] "
             + "[" + PREFIX_TELEGRAM + "TELEGRAM] "
-            + "[" + PREFIX_GROUP + "GROUP] "
+            + "[" + PREFIX_GROUP + "GROUP]... "
             + "[" + PREFIX_TAG + "TAG]...\n"
             + "At least one flag must be provided.\n"
             + "Example: " + COMMAND_WORD + " " + PREFIX_NAME + "LIM JUN HAN " + PREFIX_GROUP + "T09";
 
-    public static final String MESSAGE_SUCCESS = "Here is the contact that matches your search.";
+    public static final String MESSAGE_SUCCESS = "%1$d contact(s) found.";
 
     public static final String MESSAGE_NOT_FOUND = "No contact was found. Please check the %1$s provided.";
 
@@ -73,14 +73,15 @@ public class FindCommand extends Command {
         requireNonNull(model);
         logger.info("Executing find with flags: " + usedPrefixes);
         model.updateFilteredPersonList(predicate);
-        assert model.getFilteredPersonList() != null;
+        assert model.getFilteredPersonList().stream().allMatch(predicate)
+                : "every listed contact must match the search";
         int matchCount = model.getFilteredPersonList().size();
         logger.fine("Find matched " + matchCount + " person(s)");
         if (matchCount == 0) {
             String flags = usedPrefixes.stream().map(Prefix::toString).collect(Collectors.joining(" "));
             return new CommandResult(String.format(MESSAGE_NOT_FOUND, flags));
         }
-        return new CommandResult(MESSAGE_SUCCESS);
+        return new CommandResult(String.format(MESSAGE_SUCCESS, matchCount));
     }
 
     @Override

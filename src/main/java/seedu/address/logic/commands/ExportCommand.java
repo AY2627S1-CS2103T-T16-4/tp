@@ -3,6 +3,7 @@ package seedu.address.logic.commands;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,6 +32,8 @@ public class ExportCommand extends Command {
 
     public static final String MESSAGE_SUCCESS = "Exported %1$d contact(s) to %2$s";
     public static final String MESSAGE_FILE_EXISTS = "Could not export because %1$s already exists. Please try again.";
+    public static final String MESSAGE_PERMISSION_DENIED =
+            "Could not export contacts to %1$s due to insufficient permissions to write to the file or the folder.";
     public static final String MESSAGE_FAILURE = "Could not export contacts due to the following error: %1$s";
 
     private static final DateTimeFormatter FILENAME_FORMAT =
@@ -63,6 +66,8 @@ public class ExportCommand extends Command {
 
         try {
             CsvExporter.write(persons, file);
+        } catch (AccessDeniedException e) {
+            throw new CommandException(String.format(MESSAGE_PERMISSION_DENIED, file), e);
         } catch (FileAlreadyExistsException e) {
             // The same exception is thrown when the export folder is actually a regular file.
             if (Files.exists(file)) {

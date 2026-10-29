@@ -2,6 +2,7 @@ package seedu.address.model.person;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import seedu.address.commons.util.ToStringBuilder;
@@ -26,24 +27,25 @@ public class PersonMatchesFlagsPredicate implements Predicate<Person> {
     @Override
     public boolean test(Person person) {
         assert person != null;
-        return descriptor.getName().map(search -> startsWithIgnoreCase(person.getName().fullName, search))
-                        .orElse(true)
-                && descriptor.getPhone().map(search -> startsWithIgnoreCase(person.getPhone().value, search))
-                        .orElse(true)
-                && descriptor.getEmail().map(search -> startsWithIgnoreCase(person.getEmail().value, search))
-                        .orElse(true)
-                && descriptor.getAddress().map(search -> startsWithIgnoreCase(person.getAddress().value, search))
-                        .orElse(true)
+        return matchesIgnoringCase(descriptor.getName(), person.getName().fullName)
+                && matchesIgnoringCase(descriptor.getPhone(), person.getPhone().value)
+                && matchesIgnoringCase(descriptor.getEmail(), person.getEmail().value)
+                && matchesIgnoringCase(descriptor.getAddress(), person.getAddress().value)
                 && descriptor.getGithub().map(search -> person.getGithub().value.startsWith(search))
                         .orElse(true)
-                && descriptor.getLinkedin().map(search -> startsWithIgnoreCase(person.getLinkedin().value, search))
-                        .orElse(true)
-                && descriptor.getTelegram().map(search -> startsWithIgnoreCase(person.getTelegram().value, search))
-                        .orElse(true)
+                && matchesIgnoringCase(descriptor.getLinkedin(), person.getLinkedin().value)
+                && matchesIgnoringCase(descriptor.getTelegram(), person.getTelegram().value)
                 && descriptor.getGroups().stream().allMatch(search -> person.getGroups().stream()
                         .anyMatch(group -> startsWithIgnoreCase(group.value, search)))
                 && descriptor.getTags().stream().allMatch(search -> person.getTags().stream()
                         .anyMatch(tag -> startsWithIgnoreCase(tag.tagName, search)));
+    }
+
+    /**
+     * Returns true if nothing is searched for, or if the searched text is a prefix of {@code value}, ignoring case.
+     */
+    private static boolean matchesIgnoringCase(Optional<String> search, String value) {
+        return search.map(text -> startsWithIgnoreCase(value, text)).orElse(true);
     }
 
     private static boolean startsWithIgnoreCase(String value, String search) {
