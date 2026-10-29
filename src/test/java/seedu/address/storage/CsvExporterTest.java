@@ -21,7 +21,7 @@ import seedu.address.testutil.PersonBuilder;
 
 public class CsvExporterTest {
 
-    private static final String BOM = "﻿";
+    private static final String BOM = "\uFEFF";
     private static final String EOL = "\r\n";
 
     @TempDir

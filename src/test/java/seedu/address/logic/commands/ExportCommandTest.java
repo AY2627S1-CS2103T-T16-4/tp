@@ -36,7 +36,7 @@ public class ExportCommandTest {
 
     private static final Clock FIXED_CLOCK = Clock.fixed(Instant.parse("2026-10-25T14:30:12Z"), ZoneOffset.UTC);
     private static final String EXPECTED_FILENAME = "contacts-20261025-143012.csv";
-    private static final String BOM = "﻿";
+    private static final String BOM = "\uFEFF";
 
     @TempDir
     public Path testFolder;
