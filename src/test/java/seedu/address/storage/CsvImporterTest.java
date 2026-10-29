@@ -38,10 +38,10 @@ public class CsvImporterTest {
     @Test
     public void read_paddedFields_trimsEdgesAndPreservesInternalSpaces() throws Exception {
         String row = "\" \tAlice  Tan \t\", 81234567 , alice@example.com ,\" 123  Main, Street \","
-                + " team ; project  alpha , alice , alice tan , alice , friends ; work , true ";
+                + " team ; projectalpha , alice , alice-tan , alice , friends ; work , true ";
         Person expected = new Person(new PersonBuilder().withName("Alice  Tan").withPhone("81234567")
                 .withEmail("alice@example.com").withAddress("123  Main, Street")
-                .withGroups("team", "project  alpha").withGithub("alice").withLinkedin("alice tan")
+                .withGroups("team", "projectalpha").withGithub("alice").withLinkedin("alice-tan")
                 .withTelegram("alice").withTags("friends", "work").build(), true);
 
         assertEquals(List.of(expected), read(CsvExporter.HEADER + EOL + row));
