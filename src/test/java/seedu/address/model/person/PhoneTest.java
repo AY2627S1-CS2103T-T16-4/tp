@@ -9,6 +9,28 @@ import org.junit.jupiter.api.Test;
 public class PhoneTest {
 
     @Test
+    public void fieldValues_validAndInvalidInputs() {
+        assertTrue(Phone.isValidPhone("80000000"));
+        assertTrue(Phone.isValidPhone("89999999"));
+        assertTrue(Phone.isValidPhone("90000000"));
+        assertTrue(Phone.isValidPhone("99999999"));
+        assertFalse(Phone.isValidPhone(""));
+        assertFalse(Phone.isValidPhone(" "));
+        assertFalse(Phone.isValidPhone("71234567"));
+        assertFalse(Phone.isValidPhone("8123456"));
+        assertFalse(Phone.isValidPhone("812345678"));
+        assertFalse(Phone.isValidPhone("+6581234567"));
+        assertFalse(Phone.isValidPhone("8123 4567"));
+        assertFalse(Phone.isValidPhone("8123abcd"));
+    }
+
+    @Test
+    public void constructor_invalidFieldValue_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> new Phone("71234567"));
+    }
+
+
+    @Test
     public void constructor_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new Phone(null));
     }

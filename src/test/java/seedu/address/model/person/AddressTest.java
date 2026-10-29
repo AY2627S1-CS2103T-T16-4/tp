@@ -9,6 +9,26 @@ import org.junit.jupiter.api.Test;
 public class AddressTest {
 
     @Test
+    public void fieldValues_validAndInvalidInputs() {
+        assertTrue(Address.isValidAddress(""));
+        assertTrue(Address.isValidAddress("123 Main Street"));
+        assertTrue(Address.isValidAddress("Block 12, #03-45 (North)"));
+        assertFalse(Address.isValidAddress(" "));
+        assertFalse(Address.isValidAddress(" 123 Street"));
+        assertFalse(Address.isValidAddress("123/45 Street"));
+        assertFalse(Address.isValidAddress("Street; Block"));
+        assertFalse(Address.isValidAddress("Street_1"));
+        assertFalse(Address.isValidAddress("123\tStreet"));
+        assertFalse(Address.isValidAddress("123\nStreet"));
+        assertFalse(Address.isValidAddress("街道"));
+    }
+
+    @Test
+    public void constructor_invalidFieldValue_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> new Address(" 123 Street"));
+    }
+
+    @Test
     public void constructor_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new Address(null));
     }
