@@ -396,17 +396,17 @@ name,phone,email,address,groups,github,linkedin,telegram,tags,pinned
 
 ## Prefix table
 
-| **Prefix** | **Field** | **Valid input**                                                                                                                | **Unique across contacts?** |**Multiple values per contact?** |
-|---|---|--------------------------------------------------------------------------------------------------------------------------------|---|---|
-| `n/` | Name | Letters, numbers, and spaces. Must not be blank. Stored in uppercase.                                                          | No | No |
-| `p/` | Phone | Exactly 8 digits and must begin with `8` or `9`.                                                                               | Yes | No |
-| `a/` | Address | Letters, numbers, spaces, `,`, `#`, `-`, `(` and `)` only. Stored in lowercase. | No | No |
-| `e/` | Email | A valid email address with a local part, `@`, and a valid domain. Stored in lowercase.                                         | No | No |
-| `gh/` | GitHub | Any non-whitespace characters. Case-sensitive.                                                                                 | No | No |
-| `li/` | LinkedIn | Letters, numbers, and hyphens only. Stored in lowercase.                                                                       | No | No |
-| `tg/` | Telegram | Letters, numbers, and underscores only. Stored in lowercase.                                                                   | No | No |
-| `g/` | Group | Letters and numbers only. Stored in lowercase.                                                                                 | No | Yes |
-| `t/` | Tag | Letters and numbers only. Stored in lowercase.                                                                                 | No | Yes |
+| **Prefix** | **Field** | **Valid input**                                                                        | **Unique across contacts?** |**Multiple values per contact?** |
+|---|---|----------------------------------------------------------------------------------------|---|---|
+| `n/` | Name | Letters, numbers, and spaces. Must not be blank. Stored in uppercase.                  | No | No |
+| `p/` | Phone | Exactly 8 digits and must begin with `8` or `9`.                                       | Yes | No |
+| `a/` | Address | Letters, numbers, spaces, `,`, `#`, `-`, `(` and `)` only. Stored in lowercase.        | No | No |
+| `e/` | Email | A valid email address with a local part, `@`, and a valid domain. Stored in lowercase. | No | No |
+| `gh/` | GitHub | Any characters except whitespace or `'`. Case-sensitive.                               | No | No |
+| `li/` | LinkedIn | Letters, numbers, and hyphens only. Stored in lowercase.                               | No | No |
+| `tg/` | Telegram | Letters, numbers, and underscores only. Stored in lowercase.                           | No | No |
+| `g/` | Group | Letters and numbers only. Stored in lowercase.                                         | No | Yes |
+| `t/` | Tag | Letters and numbers only. Stored in lowercase.                                         | No | Yes |
 
 ## Command summary
 
