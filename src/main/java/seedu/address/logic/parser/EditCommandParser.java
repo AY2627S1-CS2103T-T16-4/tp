@@ -3,6 +3,7 @@ package seedu.address.logic.parser;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
 import static seedu.address.logic.commands.EditCommand.EDIT_SEPARATOR;
+import static seedu.address.logic.parser.CliSyntax.FIELD_PREFIXES;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GITHUB;
@@ -18,8 +19,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import seedu.address.logic.commands.EditCommand;
 import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
@@ -33,14 +32,7 @@ import seedu.address.model.tag.Tag;
  */
 public class EditCommandParser implements Parser<EditCommand> {
 
-    private static final List<Prefix> EDITABLE_PREFIXES = List.of(
-            PREFIX_NAME, PREFIX_PHONE, PREFIX_EMAIL, PREFIX_ADDRESS,
-            PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM,
-            PREFIX_GROUP, PREFIX_TAG);
-
     private static final List<Prefix> UNCLEARABLE_PREFIXES = List.of(PREFIX_NAME, PREFIX_PHONE);
-
-    private static final Pattern FLAG_LIKE_TOKEN = Pattern.compile("(?<=\\s)[A-Za-z]+/");
 
     private final ExactPersonMatchParser targetParser =
             new ExactPersonMatchParser(EditCommand.MESSAGE_USAGE, EditCommand.MESSAGE_EMPTY_FLAG_VALUE);
@@ -62,7 +54,7 @@ public class EditCommandParser implements Parser<EditCommand> {
         PersonMatchesExactFieldsPredicate predicate = targetParser.parse(searchArgs);
 
         ArgumentMultimap updates = ArgumentTokenizer.tokenize(
-                updateArgs, EDITABLE_PREFIXES.toArray(new Prefix[0]));
+                updateArgs, FIELD_PREFIXES.toArray(new Prefix[0]));
 
         validateUpdates(updateArgs, updates);
 
@@ -84,7 +76,7 @@ public class EditCommandParser implements Parser<EditCommand> {
      */
     private static void validateUpdates(
             String args, ArgumentMultimap updates) throws ParseException {
-        if (!updates.getPreamble().isEmpty() || containsUnknownFlag(args)) {
+        if (!updates.getPreamble().isEmpty() || !ParserUtil.findUnknownFlags(args, FIELD_PREFIXES).isEmpty()) {
             throw createInvalidFormatException();
         }
 
@@ -212,24 +204,6 @@ public class EditCommandParser implements Parser<EditCommand> {
             throw new ParseException(
                     String.format(EditCommand.MESSAGE_MIXED_CLEAR_AND_TOGGLE, prefix));
         }
-    }
-
-    /**
-     * Returns true if the arguments contain an unsupported flag-like token absorbed into a field value.
-     * Uses the same detection rule as {@link ExactPersonMatchParser}.
-     */
-    private static boolean containsUnknownFlag(String args) {
-        Matcher matcher = FLAG_LIKE_TOKEN.matcher(args);
-
-        while (matcher.find()) {
-            String token = matcher.group();
-            if (EDITABLE_PREFIXES.stream()
-                    .noneMatch(prefix -> prefix.getPrefix().equals(token))) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**

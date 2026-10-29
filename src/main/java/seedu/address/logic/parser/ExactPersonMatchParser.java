@@ -3,6 +3,7 @@ package seedu.address.logic.parser;
 import static java.util.Objects.requireNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.parser.CliSyntax.FIELD_PREFIXES;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_GITHUB;
@@ -14,8 +15,6 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.ExactPersonMatchDescriptor;
@@ -25,14 +24,6 @@ import seedu.address.model.person.PersonMatchesExactFieldsPredicate;
  * Parses exact field criteria shared by commands that require one matching contact.
  */
 public class ExactPersonMatchParser {
-
-    private static final List<Prefix> SEARCHABLE_PREFIXES = List.of(
-            PREFIX_NAME, PREFIX_PHONE, PREFIX_ADDRESS, PREFIX_EMAIL,
-            PREFIX_GITHUB, PREFIX_LINKEDIN, PREFIX_TELEGRAM,
-            PREFIX_GROUP, PREFIX_TAG);
-
-    private static final Pattern FLAG_LIKE_TOKEN =
-            Pattern.compile("(?<=\\s)[A-Za-z]+/");
 
     private final String messageUsage;
     private final String messageEmptyFlagValue;
@@ -53,7 +44,7 @@ public class ExactPersonMatchParser {
      */
     public PersonMatchesExactFieldsPredicate parse(String args) throws ParseException {
         requireNonNull(args);
-        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, SEARCHABLE_PREFIXES.toArray(new Prefix[0]));
+        ArgumentMultimap argMultimap = ArgumentTokenizer.tokenize(args, FIELD_PREFIXES.toArray(new Prefix[0]));
         validateArguments(args, argMultimap);
         ExactPersonMatchDescriptor descriptor = parseDescriptor(argMultimap);
         assert descriptor.isAnyFieldSet() : "Accepted criteria must constrain at least one contact field";
@@ -61,10 +52,11 @@ public class ExactPersonMatchParser {
     }
 
     private void validateArguments(String args, ArgumentMultimap argMultimap) throws ParseException {
-        List<Prefix> usedPrefixes = SEARCHABLE_PREFIXES.stream()
+        List<Prefix> usedPrefixes = FIELD_PREFIXES.stream()
                 .filter(prefix -> !argMultimap.getAllValues(prefix).isEmpty())
                 .toList();
-        if (!argMultimap.getPreamble().isEmpty() || usedPrefixes.isEmpty() || containsUnknownFlag(args)) {
+        if (!argMultimap.getPreamble().isEmpty() || usedPrefixes.isEmpty()
+                || !ParserUtil.findUnknownFlags(args, FIELD_PREFIXES).isEmpty()) {
             throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, messageUsage));
         }
 
@@ -104,21 +96,5 @@ public class ExactPersonMatchParser {
         descriptor.setGroups(ParserUtil.parseGroups(argMultimap.getAllValues(PREFIX_GROUP)));
         descriptor.setTags(ParserUtil.parseTags(argMultimap.getAllValues(PREFIX_TAG)));
         return descriptor;
-    }
-
-    /**
-     * Detects unsupported flag-like tokens that the tokenizer would otherwise
-     * absorb into the preceding value.
-     */
-    private static boolean containsUnknownFlag(String args) {
-        Matcher matcher = FLAG_LIKE_TOKEN.matcher(args);
-        while (matcher.find()) {
-            String token = matcher.group();
-            if (SEARCHABLE_PREFIXES.stream()
-                    .noneMatch(prefix -> prefix.getPrefix().equals(token))) {
-                return true;
-            }
-        }
-        return false;
     }
 }

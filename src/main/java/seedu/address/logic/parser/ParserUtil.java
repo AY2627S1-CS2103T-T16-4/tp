@@ -2,9 +2,13 @@ package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import seedu.address.commons.core.index.Index;
 import seedu.address.commons.util.StringUtil;
@@ -25,6 +29,9 @@ import seedu.address.model.tag.Tag;
 public class ParserUtil {
 
     public static final String MESSAGE_INVALID_INDEX = "Index must be a positive integer.";
+
+    /** Matches a word followed by '/' that starts after whitespace, i.e. something that looks like a flag. */
+    private static final Pattern FLAG_LIKE_TOKEN = Pattern.compile("(?<=\\s)[A-Za-z]+/");
 
     /**
      * Parses {@code oneBasedIndex} into an {@code Index} and returns it. Leading and trailing whitespaces will be
@@ -194,5 +201,25 @@ public class ParserUtil {
             tagSet.add(parseTag(tagName));
         }
         return tagSet;
+    }
+
+    /**
+     * Returns the distinct flag-like tokens (e.g. {@code x/}) in {@code args} that are not in {@code supported},
+     * in the order they appear. The tokenizer only splits on known prefixes, so such a token would otherwise be
+     * absorbed into the value of the preceding flag.
+     */
+    public static List<String> findUnknownFlags(String args, Collection<Prefix> supported) {
+        requireNonNull(args);
+        requireNonNull(supported);
+        List<String> unknownFlags = new ArrayList<>();
+        Matcher matcher = FLAG_LIKE_TOKEN.matcher(args);
+        while (matcher.find()) {
+            String token = matcher.group();
+            boolean isSupported = supported.stream().anyMatch(prefix -> prefix.getPrefix().equals(token));
+            if (!isSupported && !unknownFlags.contains(token)) {
+                unknownFlags.add(token);
+            }
+        }
+        return unknownFlags;
     }
 }

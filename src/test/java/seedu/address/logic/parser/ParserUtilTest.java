@@ -2,6 +2,8 @@ package seedu.address.logic.parser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static seedu.address.logic.parser.CliSyntax.FIELD_PREFIXES;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.ParserUtil.MESSAGE_INVALID_INDEX;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
@@ -185,5 +187,42 @@ public class ParserUtilTest {
         Set<Tag> expectedTagSet = Set.of(new Tag(VALID_TAG_1), new Tag(VALID_TAG_2));
 
         assertEquals(expectedTagSet, actualTagSet);
+    }
+
+    @Test
+    public void findUnknownFlags_nullArguments_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.findUnknownFlags(null, FIELD_PREFIXES));
+        assertThrows(NullPointerException.class, () -> ParserUtil.findUnknownFlags(" n/Alice", null));
+    }
+
+    @Test
+    public void findUnknownFlags_onlySupportedFlags_returnsEmptyList() {
+        assertEquals(List.of(), ParserUtil.findUnknownFlags("", FIELD_PREFIXES));
+        assertEquals(List.of(),
+                ParserUtil.findUnknownFlags(" n/Alice p/91234567 t/friend t/work", FIELD_PREFIXES));
+    }
+
+    @Test
+    public void findUnknownFlags_unknownFlags_returnsDistinctTokensInOrderOfAppearance() {
+        assertEquals(List.of("x/"), ParserUtil.findUnknownFlags(" n/Alice x/foo", FIELD_PREFIXES));
+        assertEquals(List.of("y/", "x/"), ParserUtil.findUnknownFlags(" y/1 n/Alice x/foo y/2", FIELD_PREFIXES));
+    }
+
+    @Test
+    public void findUnknownFlags_wrongCaseOrLongerWord_returnsToken() {
+        // flags are case-sensitive
+        assertEquals(List.of("N/"), ParserUtil.findUnknownFlags(" N/Alice", FIELD_PREFIXES));
+        // a longer word is not the supported flag it ends with
+        assertEquals(List.of("ph/"), ParserUtil.findUnknownFlags(" ph/91234567", FIELD_PREFIXES));
+    }
+
+    @Test
+    public void findUnknownFlags_slashNotAfterWhitespaceOrLetters_ignored() {
+        assertEquals(List.of(), ParserUtil.findUnknownFlags(" a/Blk 5/6 li/in/alice", FIELD_PREFIXES));
+    }
+
+    @Test
+    public void findUnknownFlags_flagOutsideSuppliedSet_returnsToken() {
+        assertEquals(List.of("p/"), ParserUtil.findUnknownFlags(" n/Alice p/91234567", List.of(PREFIX_NAME)));
     }
 }
