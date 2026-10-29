@@ -81,7 +81,7 @@ public class FindCommandParser implements Parser<FindCommand> {
         descriptor.setGroups(new HashSet<>(argMultimap.getAllValues(PREFIX_GROUP)));
         descriptor.setTags(new HashSet<>(argMultimap.getAllValues(PREFIX_TAG)));
 
-        assert !usedPrefixes.isEmpty();
+        assert descriptor.isAnyFieldSet() : "find must search by at least one field";
         logger.fine("Parsed find with flags: " + usedPrefixes);
         return new FindCommand(new PersonMatchesFlagsPredicate(descriptor), usedPrefixes);
     }

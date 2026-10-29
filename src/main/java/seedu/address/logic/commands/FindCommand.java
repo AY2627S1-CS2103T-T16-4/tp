@@ -73,7 +73,8 @@ public class FindCommand extends Command {
         requireNonNull(model);
         logger.info("Executing find with flags: " + usedPrefixes);
         model.updateFilteredPersonList(predicate);
-        assert model.getFilteredPersonList() != null;
+        assert model.getFilteredPersonList().stream().allMatch(predicate)
+                : "every listed contact must match the search";
         int matchCount = model.getFilteredPersonList().size();
         logger.fine("Find matched " + matchCount + " person(s)");
         if (matchCount == 0) {
