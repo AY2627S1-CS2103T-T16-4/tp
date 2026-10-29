@@ -142,7 +142,7 @@ public class FindCommandTest {
         FindCommand command = new FindCommand(predicate, usedPrefixes);
         expectedModel.updateFilteredPersonList(predicate);
         assertCommandSuccess(command, model,
-                FindCommand.MESSAGE_SUCCESS, expectedModel);
+                String.format(FindCommand.MESSAGE_SUCCESS, expectedPersons.size()), expectedModel);
         assertEquals(expectedPersons, model.getFilteredPersonList());
     }
 

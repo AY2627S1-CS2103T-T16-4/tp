@@ -45,7 +45,7 @@ public class FindCommand extends Command {
             + "At least one flag must be provided.\n"
             + "Example: " + COMMAND_WORD + " " + PREFIX_NAME + "LIM JUN HAN " + PREFIX_GROUP + "T09";
 
-    public static final String MESSAGE_SUCCESS = "Here is the contact that matches your search.";
+    public static final String MESSAGE_SUCCESS = "%1$d contact(s) found.";
 
     public static final String MESSAGE_NOT_FOUND = "No contact was found. Please check the %1$s provided.";
 
@@ -81,7 +81,7 @@ public class FindCommand extends Command {
             String flags = usedPrefixes.stream().map(Prefix::toString).collect(Collectors.joining(" "));
             return new CommandResult(String.format(MESSAGE_NOT_FOUND, flags));
         }
-        return new CommandResult(MESSAGE_SUCCESS);
+        return new CommandResult(String.format(MESSAGE_SUCCESS, matchCount));
     }
 
     @Override
