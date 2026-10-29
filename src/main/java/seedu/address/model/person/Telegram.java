@@ -6,7 +6,8 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 /** Represents a contact's Telegram username. */
 public class Telegram {
     public static final String MESSAGE_CONSTRAINTS =
-            "Telegram usernames must not contain @";
+            "Telegram usernames should contain only letters, numbers, and underscores";
+    public static final String VALIDATION_REGEX = "[A-Za-z0-9_]*";
 
     public final String value;
 
@@ -22,7 +23,7 @@ public class Telegram {
     }
 
     public static boolean isValidTelegram(String telegram) {
-        return !telegram.contains("@");
+        return telegram.matches(VALIDATION_REGEX);
     }
 
     @Override

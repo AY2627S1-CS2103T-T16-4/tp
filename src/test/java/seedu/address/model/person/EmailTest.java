@@ -9,6 +9,23 @@ import org.junit.jupiter.api.Test;
 public class EmailTest {
 
     @Test
+    public void fieldValues_validAndInvalidInputs() {
+        assertTrue(Email.isValidEmail(""));
+        assertTrue(Email.isValidEmail("john@example.com"));
+        assertTrue(Email.isValidEmail("john.doe+1@example.com"));
+        assertFalse(Email.isValidEmail("john;doe@example.com"));
+        assertFalse(Email.isValidEmail("john@example/com"));
+        assertFalse(Email.isValidEmail("john\tdoe@example.com"));
+        assertFalse(Email.isValidEmail("john\ndoe@example.com"));
+    }
+
+    @Test
+    public void constructor_invalidFieldValue_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> new Email("john;doe@example.com"));
+    }
+
+
+    @Test
     public void constructor_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new Email(null));
     }

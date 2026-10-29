@@ -9,6 +9,27 @@ import org.junit.jupiter.api.Test;
 public class NameTest {
 
     @Test
+    public void fieldValues_validAndInvalidInputs() {
+        assertTrue(Name.isValidName("John Doe"));
+        assertTrue(Name.isValidName("John123"));
+        assertTrue(Name.isValidName("A"));
+        assertFalse(Name.isValidName(""));
+        assertFalse(Name.isValidName(" "));
+        assertFalse(Name.isValidName(" John"));
+        assertFalse(Name.isValidName("John-Doe"));
+        assertFalse(Name.isValidName("John_Doe"));
+        assertFalse(Name.isValidName("John;Doe"));
+        assertFalse(Name.isValidName("John\tDoe"));
+        assertFalse(Name.isValidName("John\nDoe"));
+    }
+
+    @Test
+    public void constructor_invalidFieldValue_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> new Name(" John"));
+    }
+
+
+    @Test
     public void constructor_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new Name(null));
     }

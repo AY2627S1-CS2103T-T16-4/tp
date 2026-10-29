@@ -1,9 +1,12 @@
 package seedu.address.model.person;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.commons.util.AppUtil.checkArgument;
 
 /** Represents a contact's group label. */
 public class Group {
+    public static final String MESSAGE_CONSTRAINTS = "Group names should be alphanumeric without spaces";
+    public static final String VALIDATION_REGEX = "\\p{Alnum}+";
     public final String value;
 
     /**
@@ -13,7 +16,13 @@ public class Group {
      */
     public Group(String group) {
         requireNonNull(group);
+        checkArgument(isValidGroup(group), MESSAGE_CONSTRAINTS);
         value = group.toLowerCase();
+    }
+
+    /** Returns true if a given string is a valid group name. */
+    public static boolean isValidGroup(String test) {
+        return test.matches(VALIDATION_REGEX);
     }
 
     @Override
