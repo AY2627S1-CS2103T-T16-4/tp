@@ -593,7 +593,7 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
 * 1b. User does a non-persistent sort after a previous persistent sort
 
-    * 1b1. GM replaces previous persistent sort with non-persistent
+    * 1b1. GM replaces the previous persistent sort with non-persistent
 
     * 1b2. Sort preference is overridden, no longer persisting between sessions
 
