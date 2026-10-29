@@ -10,6 +10,7 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 public class Address {
 
     public static final String MESSAGE_CONSTRAINTS =
+            "Addresses may contain only letters, digits, spaces, #, -, ( and ),and must not contain only spaces.";
             "Addresses can take any values except '/', and should not be blank";
 
     /*
