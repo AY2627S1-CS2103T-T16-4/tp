@@ -5,8 +5,8 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 
 /** Represents a contact's GitHub username. */
 public class Github {
-    public static final String MESSAGE_CONSTRAINTS = "GitHub usernames should not contain whitespace";
-    public static final String VALIDATION_REGEX = "\\S*";
+    public static final String MESSAGE_CONSTRAINTS = "GitHub usernames should not contain whitespace or apostrophes";
+    public static final String VALIDATION_REGEX = "[^\\s']*";
     public final String value;
 
     /**
@@ -20,7 +20,7 @@ public class Github {
         value = github;
     }
 
-    /** Returns true if the GitHub username contains no whitespace. */
+    /** Returns true if the GitHub username contains no whitespace or apostrophes. */
     public static boolean isValidGithub(String github) {
         return github.matches(VALIDATION_REGEX);
     }

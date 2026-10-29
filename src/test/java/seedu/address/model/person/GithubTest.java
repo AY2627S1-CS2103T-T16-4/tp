@@ -20,6 +20,8 @@ public class GithubTest {
         assertFalse(Github.isValidGithub("john doe"));
         assertFalse(Github.isValidGithub("john\tdoe"));
         assertFalse(Github.isValidGithub("john\ndoe"));
+        assertFalse(Github.isValidGithub("john'doe"));
+        assertFalse(Github.isValidGithub("'"));
     }
 
     @Test
