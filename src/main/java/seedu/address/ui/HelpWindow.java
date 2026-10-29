@@ -16,7 +16,7 @@ import seedu.address.logic.commands.HelpCommand;
  */
 public class HelpWindow extends UiPart<Stage> {
 
-    public static final String USERGUIDE_URL = "https://se-education.org/addressbook-level3/UserGuide.html";
+    public static final String USERGUIDE_URL = "https://ay2627s1-cs2103t-t16-4.github.io/tp/UserGuide.html";
     public static final String HELP_MESSAGE = HelpCommand.SHOWING_HELP_MESSAGE + "\nRefer to the user guide: "
                                                                                 + USERGUIDE_URL;
 
