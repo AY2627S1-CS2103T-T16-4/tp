@@ -25,7 +25,7 @@ public class CsvExporter {
     private static final String UTF8_BOM = "﻿";
     private static final String RECORD_SEPARATOR = "\r\n";
     private static final String MULTI_VALUE_SEPARATOR = ";";
-    private static final String FORMULA_TRIGGERS = "=+-@\t\r";
+    static final String FORMULA_TRIGGERS = "=+-@\t\r";
 
     private CsvExporter() {}
 

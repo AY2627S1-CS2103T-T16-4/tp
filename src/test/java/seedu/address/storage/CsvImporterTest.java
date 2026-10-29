@@ -95,10 +95,36 @@ public class CsvImporterTest {
     }
 
     @Test
-    public void read_formulaProtection_preservesApostrophe() throws Exception {
+    public void read_formulaProtection_restoresExportedValues() throws Exception {
         Path file = folder.resolve("formula.csv");
-        CsvExporter.write(List.of(new PersonBuilder(ALICE).withAddress("sum(a1)").build()), file);
-        assertEquals("sum(a1)", CsvImporter.read(file).getFirst().getAddress().value);
+        List<Person> persons = List.of("=cmd", "+cmd", "-cmd", "@cmd").stream()
+                .map(value -> new PersonBuilder(ALICE).withGithub(value)
+                        .withLinkedin("-alice").withAddress("-123, main street").build())
+                .toList();
+        CsvExporter.write(persons, file);
+        assertEquals(persons, CsvImporter.read(file));
+    }
+
+    @Test
+    public void read_formulaProtection_removesApostropheAfterTrimming() throws Exception {
+        for (String value : List.of("=cmd", "+cmd", "-cmd", "@cmd")) {
+            String row = "Alice,81234567,,,, '" + value + " ,,,,false";
+            assertEquals(value, read(CsvExporter.HEADER + EOL + row).getFirst().getGithub().value);
+        }
+    }
+
+    @Test
+    public void read_otherApostrophes_preservesValues() throws Exception {
+        for (String value : List.of("'", "'alice", "''=cmd", "a'lice", "'#cmd")) {
+            String row = "Alice,81234567,,,," + value + ",,,,false";
+            assertEquals(value, read(CsvExporter.HEADER + EOL + row).getFirst().getGithub().value);
+        }
+    }
+
+    @Test
+    public void read_formulaProtection_stillValidatesRestoredValues() {
+        String row = "Alice,'+81234567,,,,,,,,false";
+        assertThrows(IllegalValueException.class, () -> read(CsvExporter.HEADER + EOL + row));
     }
 
     @Test
