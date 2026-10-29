@@ -10,7 +10,7 @@ import static seedu.address.commons.util.AppUtil.checkArgument;
 public class Address {
 
     public static final String MESSAGE_CONSTRAINTS =
-            "Addresses may contain only letters, digits, spaces, #, -, ( and ),and must not contain only spaces.";
+            "Addresses may contain only letters, digits, spaces, commas, hashtag, hyphens and parentheses.";
 
     /*
      * The first character of the address must not be a whitespace,
