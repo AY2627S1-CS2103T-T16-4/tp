@@ -36,6 +36,34 @@ public class CsvImporterTest {
     }
 
     @Test
+    public void read_paddedFields_trimsEdgesAndPreservesInternalSpaces() throws Exception {
+        String row = "\" \tAlice  Tan \t\", 81234567 , alice@example.com ,\" 123  Main, Street \","
+                + " team ; project  alpha , alice , alice tan , alice , friends ; work , true ";
+        Person expected = new Person(new PersonBuilder().withName("Alice  Tan").withPhone("81234567")
+                .withEmail("alice@example.com").withAddress("123  Main, Street")
+                .withGroups("team", "project  alpha").withGithub("alice").withLinkedin("alice tan")
+                .withTelegram("alice").withTags("friends", "work").build(), true);
+
+        assertEquals(List.of(expected), read(CsvExporter.HEADER + EOL + row));
+    }
+
+    @Test
+    public void read_whitespaceOnlyOptionalFields_treatsAsEmpty() throws Exception {
+        assertEquals(read(CsvExporter.HEADER + EOL + SIMPLE_ROW),
+                read(CsvExporter.HEADER + EOL + "Alice,81234567, ,\t, , , , , ,false"));
+    }
+
+    @Test
+    public void read_blankListMember_rejectsRecord() {
+        for (String row : List.of("Alice,81234567,,,alpha; ;beta,,,,,false",
+                "Alice,81234567,,,,,,,friends; \t;work,false")) {
+            IllegalValueException error = assertThrows(IllegalValueException.class, () ->
+                    read(CsvExporter.HEADER + EOL + row));
+            assertTrue(error.getMessage().contains(CsvImporter.MESSAGE_EMPTY_MEMBER));
+        }
+    }
+
+    @Test
     public void read_optionalBomAndLineEndings_acceptsBoth() throws Exception {
         for (String bom : List.of("", "\ufeff")) {
             for (String separator : List.of("\n", EOL)) {

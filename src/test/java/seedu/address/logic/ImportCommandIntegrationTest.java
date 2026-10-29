@@ -8,6 +8,7 @@ import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
 import static seedu.address.testutil.TypicalPersons.CARL;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -55,6 +56,19 @@ public class ImportCommandIntegrationTest {
         assertEquals(List.of(CARL), model.getAddressBook().getPersonList());
         assertEquals(model.getAddressBook(), storage.readAddressBook().orElseThrow());
         assertFalse(model.undo());
+    }
+
+    @Test
+    public void execute_importPaddedGroup_findMatchesTrimmedGroup() throws Exception {
+        Path file = folder.resolve("padded.csv");
+        Files.writeString(file, CsvExporter.HEADER + "\nAlice,81234567,,, team ; other ,,,,,false");
+
+        logic.execute(ImportCommand.COMMAND_WORD + " " + file);
+        logic.execute("find g/team");
+
+        assertEquals(1, model.getFilteredPersonList().size());
+        assertEquals("ALICE", model.getFilteredPersonList().getFirst().getName().fullName);
+        assertEquals(model.getAddressBook(), storage.readAddressBook().orElseThrow());
     }
 
     @Test

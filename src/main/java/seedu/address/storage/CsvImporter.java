@@ -56,6 +56,7 @@ public final class CsvImporter {
 
     /**
      * Reads and validates every CSV record. A header-only file returns an empty list.
+     * Leading and trailing whitespace is trimmed from fields and individual group/tag entries.
      * Leading spreadsheet-protection apostrophes are preserved because their origin is ambiguous.
      *
      * @throws IOException if the file cannot be read as UTF-8.
@@ -99,7 +100,7 @@ public final class CsvImporter {
 
     private static <T> T value(List<String> row, Column column, Function<String, T> constructor) {
         try {
-            return constructor.apply(row.get(column.ordinal()));
+            return constructor.apply(row.get(column.ordinal()).trim());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(column + ": " + e.getMessage(), e);
         }
@@ -114,7 +115,7 @@ public final class CsvImporter {
             if (member.isBlank()) {
                 throw new IllegalArgumentException(MESSAGE_EMPTY_MEMBER);
             }
-            result.add(constructor.apply(member));
+            result.add(constructor.apply(member.trim()));
         }
         return result;
     }

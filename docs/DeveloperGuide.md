@@ -591,6 +591,14 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 
     * Use case ends.
 
+* 1b. User does a non-persistent sort after a previous persistent sort
+
+    * 1b1. GM replaces previous persistent sort with non-persistent
+
+    * 1b2. Sort preference is overridden, no longer persisting between sessions
+
+    * Use case ends.
+
 **System:** GitMate (GM)  
 **Use case:** U8. Edit a contact  
 **Actor:** User
