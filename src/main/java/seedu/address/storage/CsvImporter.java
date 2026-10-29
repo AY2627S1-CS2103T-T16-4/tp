@@ -57,7 +57,7 @@ public final class CsvImporter {
     /**
      * Reads and validates every CSV record. A header-only file returns an empty list.
      * Leading and trailing whitespace is trimmed from fields and individual group/tag entries.
-     * Leading spreadsheet-protection apostrophes are preserved because their origin is ambiguous.
+     * One leading spreadsheet-protection apostrophe is removed when followed by an export formula trigger.
      *
      * @throws IOException if the file cannot be read as UTF-8.
      * @throws IllegalValueException if the CSV structure or a contact field is invalid.
@@ -100,10 +100,20 @@ public final class CsvImporter {
 
     private static <T> T value(List<String> row, Column column, Function<String, T> constructor) {
         try {
-            return constructor.apply(row.get(column.ordinal()).trim());
+            return constructor.apply(normalizeField(row.get(column.ordinal())));
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(column + ": " + e.getMessage(), e);
         }
+    }
+
+    /** Trims a CSV field and removes at most one export spreadsheet-protection apostrophe. */
+    static String normalizeField(String field) {
+        String cell = field.trim();
+        if (cell.length() > 1 && cell.charAt(0) == '\''
+                && CsvExporter.FORMULA_TRIGGERS.indexOf(cell.charAt(1)) >= 0) {
+            return cell.substring(1);
+        }
+        return cell;
     }
 
     private static <T> Set<T> members(String cell, Function<String, T> constructor) {

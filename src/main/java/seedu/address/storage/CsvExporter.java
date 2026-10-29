@@ -22,10 +22,11 @@ public class CsvExporter {
     public static final String HEADER =
             "name,phone,email,address,groups,github,linkedin,telegram,tags,pinned";
 
+    static final String FORMULA_TRIGGERS = "=+-@\t\r";
+
     private static final String UTF8_BOM = "﻿";
     private static final String RECORD_SEPARATOR = "\r\n";
     private static final String MULTI_VALUE_SEPARATOR = ";";
-    private static final String FORMULA_TRIGGERS = "=+-@\t\r";
 
     private CsvExporter() {}
 

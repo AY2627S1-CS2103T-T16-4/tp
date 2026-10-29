@@ -390,8 +390,10 @@ name,phone,email,address,groups,github,linkedin,telegram,tags,pinned
   Use `list` if imported contacts are hidden by the current filter.
 * One `undo` reverses the entire successful import. Contacts are saved through the normal address-book save path.
   As with other data-changing commands, a disk-save failure can leave changes in memory; validation failures do not.
-* Export compatibility limitations: leading spreadsheet-protection apostrophes are preserved, because they cannot
-  be distinguished from literal apostrophes. Semicolons in the groups column always separate groups, so a group
+* After trimming each field, import removes one leading apostrophe if the next character is `=`, `+`, `-`, `@`,
+  a tab, or a carriage return, reversing export's spreadsheet protection before validation. Other apostrophes
+  are preserved. A literal apostrophe followed by one of these characters is also removed.
+* Export compatibility limitations: semicolons in the groups column always separate groups, so a group
   name containing a semicolon cannot be restored unambiguously from the current export format.
 
 ## Prefix table
