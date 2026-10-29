@@ -121,11 +121,13 @@ public final class CsvImporter {
     }
 
     private static boolean parsePinned(String cell) {
-        return switch (cell) {
-            case PINNED_TRUE -> true;
-            case PINNED_FALSE -> false;
-            default -> throw new IllegalArgumentException(MESSAGE_PINNED);
-        };
+        if (PINNED_TRUE.equalsIgnoreCase(cell)) {
+            return true;
+        }
+        if (PINNED_FALSE.equalsIgnoreCase(cell)) {
+            return false;
+        }
+        throw new IllegalArgumentException(MESSAGE_PINNED);
     }
 
     /** Reads logical records, retaining commas and line breaks inside quoted cells. */

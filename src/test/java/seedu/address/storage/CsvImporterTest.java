@@ -48,6 +48,18 @@ public class CsvImporterTest {
     }
 
     @Test
+    public void read_pinnedValues_acceptsAnyCase() throws Exception {
+        for (String value : List.of("true", "TRUE", "TrUe", " true ", " TRUE ")) {
+            assertEquals(true, read(CsvExporter.HEADER + EOL + SIMPLE_ROW.replace("false", value))
+                    .getFirst().isPinned());
+        }
+        for (String value : List.of("false", "FALSE", "FaLsE", " false ", " FALSE ")) {
+            assertEquals(false, read(CsvExporter.HEADER + EOL + SIMPLE_ROW.replace("false", value))
+                    .getFirst().isPinned());
+        }
+    }
+
+    @Test
     public void read_whitespaceOnlyOptionalFields_treatsAsEmpty() throws Exception {
         assertEquals(read(CsvExporter.HEADER + EOL + SIMPLE_ROW),
                 read(CsvExporter.HEADER + EOL + "Alice,81234567, ,\t, , , , , ,false"));
