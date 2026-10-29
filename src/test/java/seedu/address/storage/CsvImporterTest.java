@@ -114,11 +114,27 @@ public class CsvImporterTest {
     }
 
     @Test
-    public void read_otherApostrophes_preservesValues() throws Exception {
+    public void normalizeField_otherApostrophes_preservesValues() {
         for (String value : List.of("'", "'alice", "''=cmd", "a'lice", "'#cmd")) {
-            String row = "Alice,81234567,,,," + value + ",,,,false";
-            assertEquals(value, read(CsvExporter.HEADER + EOL + row).getFirst().getGithub().value);
+            assertEquals(value, CsvImporter.normalizeField(value));
         }
+    }
+
+    @Test
+    public void normalizeField_formulaProtection_removesOnlyOneApostrophe() {
+        for (String value : List.of("=cmd", "+cmd", "-cmd", "@cmd", "\tcmd", "\rcmd")) {
+            assertEquals(value, CsvImporter.normalizeField(" '" + value + " "));
+            assertEquals("''" + value, CsvImporter.normalizeField("''" + value));
+        }
+        assertEquals("", CsvImporter.normalizeField(" \t "));
+    }
+
+    @Test
+    public void read_literalApostrophe_stillValidatesField() {
+        String row = "Alice,81234567,,,,,'alice,,,false";
+        IllegalValueException error = assertThrows(IllegalValueException.class, () ->
+                read(CsvExporter.HEADER + EOL + row));
+        assertTrue(error.getMessage().contains("LINKEDIN:"));
     }
 
     @Test

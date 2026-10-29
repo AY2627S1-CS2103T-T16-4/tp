@@ -100,15 +100,20 @@ public final class CsvImporter {
 
     private static <T> T value(List<String> row, Column column, Function<String, T> constructor) {
         try {
-            String cell = row.get(column.ordinal()).trim();
-            if (cell.length() > 1 && cell.charAt(0) == '\''
-                    && CsvExporter.FORMULA_TRIGGERS.indexOf(cell.charAt(1)) >= 0) {
-                cell = cell.substring(1);
-            }
-            return constructor.apply(cell);
+            return constructor.apply(normalizeField(row.get(column.ordinal())));
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException(column + ": " + e.getMessage(), e);
         }
+    }
+
+    /** Trims a CSV field and removes at most one export spreadsheet-protection apostrophe. */
+    static String normalizeField(String field) {
+        String cell = field.trim();
+        if (cell.length() > 1 && cell.charAt(0) == '\''
+                && CsvExporter.FORMULA_TRIGGERS.indexOf(cell.charAt(1)) >= 0) {
+            return cell.substring(1);
+        }
+        return cell;
     }
 
     private static <T> Set<T> members(String cell, Function<String, T> constructor) {
