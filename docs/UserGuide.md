@@ -43,6 +43,25 @@ GitMate is a **desktop application that helps NUS students manage contacts acros
 
 --------------------------------------------------------------------------------------------------------------------
 
+## Understanding the interface
+
+The main window has a command box and feedback area above two contact panels, with the data file path at the bottom.
+
+* **Command box:** Type a command and press Enter. Successful commands clear the box. If a command is rejected, its text remains so you can correct it, and the box shows an error style until you change the text.
+* **Feedback area:** Shows command results, error messages, and guidance for correcting commands.
+* **Contacts panel (left):** Shows each contact's initials, name, group badges, and current list number. The count beside **Contacts** is the number currently displayed, so it changes when you search. A `★` beside a name indicates a pinned contact; use `pin` and `unpin` to change its pin status.
+* **Contact details panel (right):** Click a contact in the list to view its phone, email, address, GitHub, LinkedIn, Telegram, groups, and tags. An unspecified field appears as `—`. Group and tag sections are hidden when the contact has none. Scroll within this panel to see details that do not fit, and hover over a field value or a truncated name in the list to see its full text.
+
+You can resize the window and drag the divider between the contact panels to adjust their widths.
+
+**Selection and command targets:**
+
+* On startup, the first visible contact is selected. After a successful contact or view command, such as `find`, `list`, `edit`, `sort`, `pin`, or `unpin`, selection returns to the first visible contact. Its details are displayed even if the command changed a different contact. `help` and `export` keep your selection.
+* Selecting a row is for viewing details. Commands such as `edit`, `delete`, `pin`, and `unpin` identify contacts using the field values you supply, rather than the selected row or its list number.
+* When no contacts are displayed, the count is `0`, the list shows `No contacts to display.`, and the details panel shows `No contact selected`. Use `list` to clear a search filter, or `add` to create a contact if the address book is empty.
+
+--------------------------------------------------------------------------------------------------------------------
+
 ## Features
 
 <box type="info" seamless>

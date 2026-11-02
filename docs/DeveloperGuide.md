@@ -71,7 +71,7 @@ The **API** of this component is specified in [`Ui.java`](https://github.com/AY2
 
 <puml src="diagrams/UiClassDiagram.puml" alt="Structure of the UI Component"/>
 
-The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
+The UI consists of a `MainWindow` and its parts, such as `CommandBox`, `ResultDisplay`, `PersonListPanel`, `PersonDetailsPanel`, and `StatusBarFooter`. All of these, including `MainWindow`, inherit from the abstract `UiPart` class, which captures common behavior among classes that represent visible GUI parts.
 
 The `UI` component uses the JavaFX UI framework. The layouts of these UI parts are defined in matching `.fxml` files in `src/main/resources/view`. For example, [`MainWindow.fxml`](https://github.com/AY2627S1-CS2103T-T16-4/tp/blob/master/src/main/resources/view/MainWindow.fxml) specifies the layout of [`MainWindow`](https://github.com/AY2627S1-CS2103T-T16-4/tp/blob/master/src/main/java/seedu/address/ui/MainWindow.java).
 
@@ -81,6 +81,28 @@ The `UI` component,
 * listens for changes to `Model` data so that the UI can be updated with the modified data.
 * keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
 * depends on some classes in the `Model` component because it displays `Person` objects from the model.
+
+#### Contact list and details panel
+
+`MainWindow.fxml` places `PersonListPanel` and `PersonDetailsPanel` side by side in a resizable `SplitPane`. The command box and result display sit above them, while the status bar below shows the data file path. `GitMateTheme.css` styles the contact cards, selection highlight, badges, and details panel alongside the existing stylesheets.
+
+The two contact panels have separate responsibilities:
+
+| UI part | Responsibility |
+| --- | --- |
+| `PersonListPanel` | Displays the observable contact list supplied by `Logic#getFilteredPersonList`, binds the contact count to its size, and exposes the selected contact through `getSelectedPersonProperty()`. |
+| `PersonCard` | Renders a compact row with the displayed index, initials, name, group badges, and a star when the contact is pinned. |
+| `PersonDetailsPanel` | Displays the selected contact's full details, groups, and tags. Missing scalar values appear as `—`; empty group and tag sections are hidden. |
+
+`MainWindow#fillInnerParts` registers a listener on `PersonListPanel#getSelectedPersonProperty`. Whenever the selected contact changes, `MainWindow` passes the new value to `PersonDetailsPanel#showPerson`. Passing `null` shows the `No contact selected` state. The panels do not directly control each other; `MainWindow` coordinates their interaction.
+
+The details panel rebuilds group and tag badges in alphabetical order and resets its scroll position when a contact is shown. Tooltips expose the full contact name in the list and nonempty scalar details in the details panel. When the displayed list is empty, `PersonListPanel` shows `No contacts to display.` and its count is zero.
+
+#### Selection after commands
+
+On startup, `MainWindow` selects the first visible contact. After command execution, `LogicManager` sets `CommandResult#shouldResetContactSelection` for `add`, `import`, `clear`, `delete`, `edit`, `find`, `list`, `pin`, `unpin`, `sort`, and `undo`. When this result reaches `MainWindow#executeCommand`, the window calls `PersonListPanel#selectFirstContact`, which clears the previous selection, selects the first visible contact, and scrolls the list to it. An empty list leaves the selection cleared.
+
+This policy keeps the details panel aligned with the resulting list, but does not necessarily select the contact changed by the command. For example, unpinning a contact can move it below another pinned contact; the first visible contact is then selected and shown in the details panel. `help` and `export` do not request a selection reset. Commands that throw an exception do not reach this explicit reset step, although a changed list, such as the matches displayed for ambiguous criteria, can still affect selection.
 
 ### Logic component
 
@@ -781,6 +803,59 @@ testers are expected to do more *exploratory* testing.
 
    1. Relaunch the app by double-clicking the JAR file.<br>
        Expected: The most recent window size and location are retained.
+
+### Viewing contacts and details
+
+Run these tests in a separate test copy of the app. Ensure that phone numbers `81119901` and `81119902` and names beginning with `UI Review` are unused, then add these contacts:
+
+```text
+add n/UI Review Alex p/81119901 e/uireview@example.com a/123 Test Road, Block 456, #07-89 gh/uireviewalex li/uireviewalex tg/uireviewalex g/zeta g/alpha t/testing t/frontend
+add n/UI Review Beth p/81119902
+```
+
+Run the cases in order. These tests change the displayed list and sort order, so use the test copy rather than your normal data.
+
+1. Viewing contacts and their details
+
+   1. Run `sort name asc`, then `find n/UI Review`.<br>
+      Expected: The Contacts count is `2`. Alex is selected first and Alex's details appear on the right. Both contacts have initials and a displayed index.
+
+   1. Click Beth's row.<br>
+      Expected: The selection highlight moves to Beth, and the details panel shows Beth's name and phone. Unspecified scalar fields display `—`, and the Groups and Tags sections are hidden.
+
+   1. Click Alex's row.<br>
+      Expected: Alex's full details replace Beth's. Group badges appear in alphabetical order (`alpha`, `zeta`), as do tags (`frontend`, `testing`). Hover over the address to see its full value in a tooltip.
+
+1. Resetting selection after a view command
+
+   1. Click Beth, then run `find n/UI Review` again.<br>
+      Expected: Alex, the first visible contact, is selected again and Alex's details are shown. The count remains `2`.
+
+1. Updating the UI after pinning and unpinning
+
+   1. Run `pin p/81119902`.<br>
+      Expected: Beth moves above Alex, gains a star beside the name, and is selected. The details panel shows Beth and the count remains `2`.
+
+   1. Run `unpin p/81119902`.<br>
+      Expected: Beth's star disappears. With the active ascending name sort, Alex is first and selected again, and the details panel shows Alex.
+
+1. Showing and leaving an empty state
+
+   1. Run `find n/UI Review Missing`.<br>
+      Expected: The count becomes `0`, the list shows `No contacts to display.`, and the details panel shows `No contact selected` instead of the previous contact's details.
+
+   1. Run `find n/UI Review`.<br>
+      Expected: Both contacts reappear, the count returns to `2`, and Alex is selected with the correct details.
+
+1. Resizing and scrolling
+
+   1. Select Alex, resize the window, and drag the divider between the contact list and details panel.<br>
+      Expected: The panels resize with the available space. Long detail values wrap, and the details panel can be scrolled when its contents exceed the available height. If a list name is truncated, hovering over it reveals the full name.
+
+   1. Scroll down in Alex's details if scrolling is available, then select Beth and Alex again.<br>
+      Expected: The details panel returns to the top when each contact is shown.
+
+After testing, run `delete p/81119901`, `delete p/81119902`, and `list` to remove the fixtures and show all remaining contacts.
 
 ### Deleting a person
 
