@@ -4,6 +4,9 @@ import static java.util.Objects.requireNonNull;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 
+import java.util.logging.Logger;
+
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.Messages;
 import seedu.address.logic.commands.exceptions.CommandException;
@@ -29,6 +32,8 @@ public class PinCommand extends Command {
     public static final String MESSAGE_ALREADY_PINNED = "This contact is already pinned.";
     public static final String MESSAGE_PIN_PERSON_SUCCESS = "Pinned contact: %1$s";
 
+    private static final Logger logger = LogsCenter.getLogger(PinCommand.class);
+
     private final PersonTarget target;
 
     /**
@@ -43,12 +48,14 @@ public class PinCommand extends Command {
         requireNonNull(model);
         Person personToPin = target.resolve(model, MESSAGE_PERSON_NOT_FOUND, MESSAGE_AMBIGUOUS_PERSON);
         if (personToPin.isPinned()) {
+            logger.fine("Pin rejected: contact is already pinned.");
             throw new CommandException(MESSAGE_ALREADY_PINNED);
         }
 
         Person pinnedPerson = new Person(personToPin, true);
         assert personToPin.isSamePerson(pinnedPerson) : "Pinning must preserve contact identity";
         model.setPerson(personToPin, pinnedPerson);
+        logger.info("Pinned one contact.");
         return new CommandResult(String.format(MESSAGE_PIN_PERSON_SUCCESS,
                 Messages.format(pinnedPerson)));
     }

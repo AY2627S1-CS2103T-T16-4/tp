@@ -1,6 +1,6 @@
 package seedu.address.ui;
 
-import java.util.Comparator;
+import java.util.stream.Stream;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -70,16 +70,7 @@ public class PersonDetailsPanel extends UiPart<Region> {
 
         initials.setText(PersonCard.getInitials(person));
         name.setText(person.getName().fullName);
-        groups.getChildren().clear();
-        person.getGroups().stream()
-                .sorted(Comparator.comparing(group -> group.value))
-                .forEach(group -> {
-                    Label badge = new Label(group.value);
-                    badge.getStyleClass().add("team-badge");
-                    groups.getChildren().add(badge);
-                });
-        groupsSection.setVisible(!person.getGroups().isEmpty());
-        groupsSection.setManaged(groupsSection.isVisible());
+        showBadges(groups, groupsSection, person.getGroups().stream().map(group -> group.value), "team-badge");
         setDetail(phone, person.getPhone().value);
         setDetail(email, person.getEmail().value);
         setDetail(address, person.getAddress().value);
@@ -87,17 +78,20 @@ public class PersonDetailsPanel extends UiPart<Region> {
         setDetail(linkedin, person.getLinkedin().value);
         setDetail(telegram, person.getTelegram().value);
 
-        tags.getChildren().clear();
-        person.getTags().stream()
-                .sorted(Comparator.comparing(tag -> tag.tagName))
-                .forEach(tag -> {
-                    Label badge = new Label(tag.tagName);
-                    badge.getStyleClass().add("tag-badge");
-                    tags.getChildren().add(badge);
-                });
-        tagsSection.setVisible(!person.getTags().isEmpty());
-        tagsSection.setManaged(tagsSection.isVisible());
+        showBadges(tags, tagsSection, person.getTags().stream().map(tag -> tag.tagName), "tag-badge");
         detailsScroll.setVvalue(0);
+    }
+
+    private void showBadges(FlowPane pane, VBox section, Stream<String> values, String styleClass) {
+        pane.getChildren().clear();
+        values.sorted().forEach(value -> {
+            Label badge = new Label(value);
+            badge.getStyleClass().add(styleClass);
+            pane.getChildren().add(badge);
+        });
+        boolean hasBadges = !pane.getChildren().isEmpty();
+        section.setVisible(hasBadges);
+        section.setManaged(hasBadges);
     }
 
     private void setDetail(Label label, String value) {
