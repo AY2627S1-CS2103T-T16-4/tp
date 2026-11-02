@@ -68,6 +68,7 @@
         "glossary": "Glossary",
         "appendix-instructions-for-manual-testing": "Appendix: Instructions for manual testing",
         "launch-and-shutdown": "Launch and shutdown",
+        "viewing-contacts-and-details": "Viewing contacts and details",
         "deleting-a-person": "Deleting a person",
         "editing-a-person": "Editing a person",
         "finding-a-person": "Finding a person",
@@ -118,6 +119,7 @@
       "headings": {
         "gitmate-user-guide": "GitMate User Guide",
         "quick-start": "Quick start",
+        "understanding-the-interface": "Understanding the interface",
         "features": "Features",
         "viewing-help-help": "Viewing help: help",
         "adding-a-person-add": "Adding a person: add",
