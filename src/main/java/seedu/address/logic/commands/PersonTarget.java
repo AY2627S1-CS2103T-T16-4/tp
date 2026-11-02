@@ -13,7 +13,9 @@ import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TELEGRAM;
 
 import java.util.List;
+import java.util.logging.Logger;
 
+import seedu.address.commons.core.LogsCenter;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.Model;
 import seedu.address.model.person.Person;
@@ -42,6 +44,8 @@ public record PersonTarget(PersonMatchesExactFieldsPredicate predicate) {
                     + "Please provide additional prefixes to identify exactly one contact.\n"
                     + MESSAGE_PARAMETERS;
 
+    private static final Logger logger = LogsCenter.getLogger(PersonTarget.class);
+
     public PersonTarget {
         requireNonNull(predicate);
     }
@@ -55,12 +59,15 @@ public record PersonTarget(PersonMatchesExactFieldsPredicate predicate) {
         requireAllNonNull(model, messageNotFound, messageAmbiguous);
         List<Person> matches = model.getAddressBook().getPersonList().stream().filter(predicate).toList();
         if (matches.isEmpty()) {
+            logger.fine("Target resolution rejected: no contacts match.");
             throw new CommandException(messageNotFound);
         }
         if (matches.size() > 1) {
+            logger.fine(() -> "Target resolution rejected: " + matches.size() + " contacts match.");
             model.updateFilteredPersonList(predicate);
             throw new CommandException(messageAmbiguous);
         }
+        logger.fine("Resolved exact criteria to one contact.");
         return matches.getFirst();
     }
 }
