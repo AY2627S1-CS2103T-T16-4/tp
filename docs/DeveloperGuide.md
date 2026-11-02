@@ -15,6 +15,12 @@
 
 GitMate is based on [AddressBook-Level3](https://github.com/se-edu/addressbook-level3), created by the [SE-EDU initiative](https://se-education.org). Its architecture, infrastructure, and developer documentation have been adapted for GitMate.
 
+**Notable uses of AI:**
+- Codex was used to explain the existing codebase, suggest implementation approaches, and assist with generating and refining code.
+- Codex was used to assist with debugging, reviewing changes, and developing test cases.
+- Codex was used to draft and refine project documentation, including the User Guide and Developer Guide.
+- @mannymacman used Codex to assist with implementing and refining code related to the `edit` and `delete` commands.
+
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Setting up, getting started**
