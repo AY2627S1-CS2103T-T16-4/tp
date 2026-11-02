@@ -163,10 +163,12 @@ public class ModelManagerTest {
         modelManager.saveStateForUndo(new AddressBook(modelManager.getAddressBook()));
         modelManager.deletePerson(BENSON);
 
+        // undo deleting Benson
         assertTrue(modelManager.undo());
         assertTrue(modelManager.hasPerson(ALICE));
         assertTrue(modelManager.hasPerson(BENSON));
 
+        // undo adding Benson
         assertTrue(modelManager.undo());
         assertTrue(modelManager.hasPerson(ALICE));
         assertFalse(modelManager.hasPerson(BENSON));

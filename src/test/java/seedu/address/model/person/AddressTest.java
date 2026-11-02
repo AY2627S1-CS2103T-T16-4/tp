@@ -10,9 +10,13 @@ public class AddressTest {
 
     @Test
     public void fieldValues_validAndInvalidInputs() {
+
+        // valid addresses
         assertTrue(Address.isValidAddress(""));
         assertTrue(Address.isValidAddress("123 Main Street"));
         assertTrue(Address.isValidAddress("Block 12, #03-45 (North)"));
+
+        // invalid addresses
         assertFalse(Address.isValidAddress(" "));
         assertFalse(Address.isValidAddress(" 123 Street"));
         assertFalse(Address.isValidAddress("123/45 Street"));

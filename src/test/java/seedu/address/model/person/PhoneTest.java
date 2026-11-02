@@ -10,10 +10,14 @@ public class PhoneTest {
 
     @Test
     public void fieldValues_validAndInvalidInputs() {
+
+        // valid phone number
         assertTrue(Phone.isValidPhone("80000000"));
         assertTrue(Phone.isValidPhone("89999999"));
         assertTrue(Phone.isValidPhone("90000000"));
         assertTrue(Phone.isValidPhone("99999999"));
+
+        // invalid phone number
         assertFalse(Phone.isValidPhone(""));
         assertFalse(Phone.isValidPhone(" "));
         assertFalse(Phone.isValidPhone("71234567"));

@@ -10,9 +10,13 @@ public class NameTest {
 
     @Test
     public void fieldValues_validAndInvalidInputs() {
+
+        // valid Name
         assertTrue(Name.isValidName("John Doe"));
         assertTrue(Name.isValidName("John123"));
         assertTrue(Name.isValidName("A"));
+
+        // invalid Name
         assertFalse(Name.isValidName(""));
         assertFalse(Name.isValidName(" "));
         assertFalse(Name.isValidName(" John"));
