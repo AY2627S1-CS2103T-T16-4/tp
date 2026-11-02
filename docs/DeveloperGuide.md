@@ -264,7 +264,7 @@ edit p/81231234 >> p/91234567 t/active t/friend
 1. `EditCommandParser` splits the arguments at `>>`. It creates a search predicate for phone `81231234` and an `EditPersonDescriptor` containing the replacement phone and tags to toggle.
 1. `PersonTarget#resolve` searches all contacts and returns John using his original phone number, even if he is hidden by the current filter.
 1. `createEditedPerson` constructs a replacement with phone `91234567`. `applySetEdit` removes `active` and adds `friend`, producing `{colleague, friend}`. Unspecified fields and the pin state are preserved.
-1. Since the phone changes, `EditCommand` calls `Model#hasPerson` to check the replacement's identity. If the phone were already in use, it would throw a `CommandException` before replacing the contact.
+1. `EditCommand` uses `Person#isSamePerson` to determine whether the phone number changed. Since it changed, the command calls `Model#hasPerson` to check whether another contact already has the new phone number. If so, it throws a `CommandException` before replacing the contact.
 1. The new phone is available, so the command calls `Model#setPerson` and returns the updated details. `LogicManager` records the pre-execution snapshot and attempts to save the address book.
 
 #### Edit design considerations
