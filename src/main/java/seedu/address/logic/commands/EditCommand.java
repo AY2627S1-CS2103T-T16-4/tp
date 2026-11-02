@@ -191,6 +191,11 @@ public class EditCommand extends Command {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(target, editPersonDescriptor);
+    }
+
+    @Override
     public boolean isUndoable() {
         return true;
     }

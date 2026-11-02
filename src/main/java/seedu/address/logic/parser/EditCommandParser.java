@@ -43,7 +43,10 @@ public class EditCommandParser implements Parser<EditCommand> {
 
         String[] sections = args.split(EDIT_SEPARATOR, -1);
 
-        if (sections.length != 2 || sections[0].isBlank()) {
+        boolean hasInvalidSectionCount = sections.length != 2;
+        boolean isSearchSectionBlank = sections[0].isBlank();
+
+        if (hasInvalidSectionCount || isSearchSectionBlank) {
             throw createInvalidFormatException();
         }
 
@@ -76,7 +79,10 @@ public class EditCommandParser implements Parser<EditCommand> {
      */
     private static void validateUpdates(
             String args, ArgumentMultimap updates) throws ParseException {
-        if (!updates.getPreamble().isEmpty() || !ParserUtil.findUnknownFlags(args, FIELD_PREFIXES).isEmpty()) {
+        boolean hasPreamble = !updates.getPreamble().isEmpty();
+        boolean hasUnknownFlags = !ParserUtil.findUnknownFlags(args, FIELD_PREFIXES).isEmpty();
+
+        if (hasPreamble || hasUnknownFlags) {
             throw createInvalidFormatException();
         }
 
