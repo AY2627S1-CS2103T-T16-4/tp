@@ -191,7 +191,7 @@ The command has four main parts:
 * **Deletion:** Once exactly one contact is resolved, `DeleteCommand` calls `Model#deletePerson` and returns a success message containing the deleted contact's details. Criteria matching multiple contacts never trigger a bulk deletion.
 * **Persistence and undo:** `DeleteCommand#isUndoable` returns `true`. `LogicManager` saves the pre-execution address book snapshot to undo history after successful execution and persists the updated address book through `Storage`. Undo can therefore restore the deleted contact with its previous details and pin state.
 
-The activity diagram below expands the targeting decision inside `PersonTarget#resolve`. A missing or ambiguous match prevents deletion and does not record an undo state. An ambiguous match changes the displayed list to show the matching contacts, while leaving contact data unchanged. The successful path shows deletion followed by undo recording and a storage save attempt; storage error handling and UI updates are omitted.
+The activity diagram below summarises the delete command’s targeting and deletion flow. No matching contacts or multiple matching contacts prevent deletion, and neither case records an undo state. Multiple matches are displayed so the user can refine the search criteria. Undo recording, saving changes, and subsequent UI updates are omitted for simplicity.
 
 <puml src="diagrams/DeleteTargetingActivityDiagram.puml" alt="Delete targeting activity showing no-match, ambiguous-match, and unique-match paths" />
 

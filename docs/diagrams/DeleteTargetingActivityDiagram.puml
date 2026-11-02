@@ -4,19 +4,17 @@ skinparam ActivityFontSize 15
 skinparam ArrowFontSize 12
 
 start
-:DeleteCommand.execute(model) begins;
-:PersonTarget.resolve applies the exact-match predicate\nto the complete address book;
+:Find contacts matching all supplied criteria;
 
 if () then ([no contacts match])
-  :Throw CommandException\nwith the no-match message;
+  :Report that no contacts match;
 else ([else])
   if () then ([multiple contacts match])
-    :Model.updateFilteredPersonList(predicate)\ndisplays the matching contacts;
-    :Throw CommandException\nrequesting additional criteria;
-  else ([exactly one contact match])
-    :PersonTarget.resolve returns personToDelete;
-    :Model.deletePerson(personToDelete);
-    :Return CommandResult\nwith deleted contact details;
+    :Display matching contacts;
+    :Request additional search criteria;
+  else ([exactly one contact matches])
+    :Delete the matching contact;
+    :Return a success message\nwith deleted contact details;
   endif
 endif
 stop
