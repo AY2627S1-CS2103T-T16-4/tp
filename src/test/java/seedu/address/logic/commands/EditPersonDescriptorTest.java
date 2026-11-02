@@ -46,6 +46,8 @@ public class EditPersonDescriptorTest {
 
     private static final String EMPTY_FIELD_VALUE = "";
 
+    // EP: all updates omitted; getters are absent and no field is considered edited.
+    // Boundary value: 0 supplied updates.
     @Test
     public void constructor_noUpdates_allFieldsAbsent() {
         EditPersonDescriptor descriptor = new EditPersonDescriptor();
@@ -62,6 +64,8 @@ public class EditPersonDescriptorTest {
         assertTrue(descriptor.getTags().isEmpty());
     }
 
+    // EPs: one populated field supplied, then reset to null; each field is checked independently.
+    // Boundary values: 1 supplied update enables editing; resetting it leaves 0 updates.
     @Test
     public void setters_singleFieldEdited_detectsUpdateAndAllowsReset() {
         assertFieldUpdate(EditPersonDescriptor::setName, EditPersonDescriptor::getName, AMY.getName());
@@ -75,6 +79,8 @@ public class EditPersonDescriptorTest {
         assertFieldUpdate(EditPersonDescriptor::setTags, EditPersonDescriptor::getTags, AMY.getTags());
     }
 
+    // EPs: explicit clear versus omitted update; equivalent clearing requests compare equal.
+    // Boundary values: empty scalar value or empty set still counts as 1 supplied update.
     @Test
     public void setters_explicitClear_detectsUpdateAndDistinguishesAbsentField() {
         assertClearUpdate(EditPersonDescriptor::setEmail, EditPersonDescriptor::getEmail, new Email(EMPTY_FIELD_VALUE));
@@ -90,6 +96,7 @@ public class EditPersonDescriptorTest {
         assertClearUpdate(EditPersonDescriptor::setTags, EditPersonDescriptor::getTags, Set.<Tag>of());
     }
 
+    // EP: caller mutates the supplied tag set after assignment; stored membership must remain independent.
     @Test
     public void setTags_mutableInput_defensivelyCopied() {
         Set<Tag> suppliedTags = new HashSet<>(AMY.getTags());
@@ -102,6 +109,7 @@ public class EditPersonDescriptorTest {
         assertEquals(Optional.of(AMY.getTags()), descriptor.getTags());
     }
 
+    // EP: caller mutates the supplied group set after assignment; stored membership must remain independent.
     @Test
     public void setGroups_mutableInput_defensivelyCopied() {
         Set<Group> suppliedGroups = new HashSet<>(AMY.getGroups());
@@ -114,6 +122,7 @@ public class EditPersonDescriptorTest {
         assertEquals(Optional.of(AMY.getGroups()), descriptor.getGroups());
     }
 
+    // EPs: attempted addition and removal through a returned tag set; both must reject external mutation.
     @Test
     public void getTags_nonemptySet_unmodifiable() {
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder(AMY).build();
@@ -124,6 +133,7 @@ public class EditPersonDescriptorTest {
         assertEquals(Optional.of(AMY.getTags()), descriptor.getTags());
     }
 
+    // EPs: attempted addition and removal through a returned group set; both must reject external mutation.
     @Test
     public void getGroups_nonemptySet_unmodifiable() {
         EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder(AMY).build();
@@ -134,6 +144,7 @@ public class EditPersonDescriptorTest {
         assertEquals(Optional.of(AMY.getGroups()), descriptor.getGroups());
     }
 
+    // EPs: absent, partially supplied, fully supplied, and explicit-clear updates; copying preserves each state.
     @Test
     public void copyConstructor_differentUpdateStates_preservesAllFields() {
         for (EditPersonDescriptor original : createDescriptorStates()) {
@@ -147,11 +158,13 @@ public class EditPersonDescriptorTest {
         }
     }
 
+    // EP: null source descriptor; copying requires an existing descriptor.
     @Test
     public void copyConstructor_null_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new EditPersonDescriptor(null));
     }
 
+    // EPs: mutate the source after copying, or mutate the copy; the other descriptor retains every field.
     @Test
     public void copyConstructor_subsequentChanges_areIndependent() {
         for (Consumer<EditPersonDescriptor> update : createBobFieldUpdates()) {
@@ -170,6 +183,7 @@ public class EditPersonDescriptorTest {
         }
     }
 
+    // EP: exactly one populated field differs; every field must participate in equality.
     @Test
     public void equals_differentPopulatedField_returnsFalse() {
         for (Consumer<EditPersonDescriptor> update : createBobFieldUpdates()) {
@@ -182,6 +196,7 @@ public class EditPersonDescriptorTest {
         }
     }
 
+    // EPs: independently constructed empty descriptors and fully populated descriptors with equal values.
     @Test
     public void equalsAndHashCode_independentlyConstructedDescriptors_match() {
         assertEquals(new EditPersonDescriptor(), new EditPersonDescriptor());
@@ -193,6 +208,7 @@ public class EditPersonDescriptorTest {
         assertEquals(first.hashCode(), second.hashCode());
     }
 
+    // EP: equal membership sets inserted in different orders; order must not affect equality or hash code.
     @Test
     public void equalsAndHashCode_differentSetInsertionOrders_match() {
         Tag friend = new Tag(VALID_TAG_FRIEND);
@@ -210,61 +226,63 @@ public class EditPersonDescriptorTest {
         assertEquals(first.hashCode(), second.hashCode());
     }
 
+    // EPs: same instance, equal values, null, different type, and differing field values (labelled below).
     @Test
     public void equals() {
-        // same values -> returns true
+        // EP: distinct descriptors with equal values -> true.
         EditPersonDescriptor descriptorWithSameValues = new EditPersonDescriptor(DESC_AMY);
         assertTrue(DESC_AMY.equals(descriptorWithSameValues));
 
-        // same object -> returns true
+        // EP: same descriptor instance -> true.
         assertTrue(DESC_AMY.equals(DESC_AMY));
 
-        // null -> returns false
+        // EP: comparison with null -> false.
         assertFalse(DESC_AMY.equals(null));
 
-        // different types -> returns false
+        // EP: comparison with another type -> false.
         assertFalse(DESC_AMY.equals(5));
 
-        // different values -> returns false
+        // EP: multiple supplied field values differ -> false.
         assertFalse(DESC_AMY.equals(DESC_BOB));
 
-        // different name -> returns false
+        // EP: only the supplied name differs -> false.
         EditPersonDescriptor editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withName(VALID_NAME_BOB).build();
         assertFalse(DESC_AMY.equals(editedAmy));
 
-        // different phone -> returns false
+        // EP: only the supplied phone differs -> false.
         editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withPhone(VALID_PHONE_BOB).build();
         assertFalse(DESC_AMY.equals(editedAmy));
 
-        // different email -> returns false
+        // EP: only the supplied email differs -> false.
         editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withEmail(VALID_EMAIL_BOB).build();
         assertFalse(DESC_AMY.equals(editedAmy));
 
-        // different address -> returns false
+        // EP: only the supplied address differs -> false.
         editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withAddress(VALID_ADDRESS_BOB).build();
         assertFalse(DESC_AMY.equals(editedAmy));
 
-        // different github -> returns false
+        // EP: GitHub update omitted in one descriptor but supplied in the other -> false.
         editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withGithub(VALID_GITHUB_BOB).build();
         assertFalse(DESC_AMY.equals(editedAmy));
 
-        // different linkedin -> returns false
+        // EP: LinkedIn update omitted in one descriptor but supplied in the other -> false.
         editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withLinkedin(VALID_LINKEDIN_BOB).build();
         assertFalse(DESC_AMY.equals(editedAmy));
 
-        // different telegram -> returns false
+        // EP: Telegram update omitted in one descriptor but supplied in the other -> false.
         editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withTelegram(VALID_TELEGRAM_BOB).build();
         assertFalse(DESC_AMY.equals(editedAmy));
 
-        // different group -> returns false
+        // EP: group update omitted in one descriptor but supplied in the other -> false.
         editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withGroups(VALID_GROUP_BOB).build();
         assertFalse(DESC_AMY.equals(editedAmy));
 
-        // different tags -> returns false
+        // EP: only the supplied tag membership differs -> false.
         editedAmy = new EditPersonDescriptorBuilder(DESC_AMY).withTags(VALID_TAG_HUSBAND).build();
         assertFalse(DESC_AMY.equals(editedAmy));
     }
 
+    // EP: descriptor with both supplied and omitted fields; text includes their stored values.
     @Test
     public void toStringMethod() {
         EditPersonDescriptor descriptor = DESC_AMY;

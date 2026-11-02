@@ -71,42 +71,46 @@ public class EditCommandParserTest {
 
     private final EditCommandParser parser = new EditCommandParser();
 
+    // EPs: missing command sections or incorrect separator count (individual cases labelled below).
     @Test
     public void parse_missingParts_failure() {
-        // no search criteria or updates
+        // EP: empty input. Boundary value: 0 search flags and 0 update flags.
         assertParseFailure(parser, "", MESSAGE_INVALID_FORMAT);
 
-        // no separator
+        // EP: missing separator. Boundary value: 0 separators, immediately below the required count of 1.
         assertParseFailure(parser, PHONE_DESC_AMY + NAME_DESC_AMY,
                 MESSAGE_INVALID_FORMAT);
 
-        // no search criteria
+        // EP: empty search section. Boundary value: 0 search flags, below the required minimum of 1.
         assertParseFailure(parser, SEPARATOR + NAME_DESC_AMY,
                 MESSAGE_INVALID_FORMAT);
 
-        // no updates
+        // EP: empty update section. Boundary value: 0 update flags, below the required minimum of 1.
         assertParseFailure(parser, SEARCH_AND_SEPARATOR,
                 EditCommand.MESSAGE_NOT_EDITED);
 
-        // multiple separators
+        // EP: excess separators. Boundary value: 2 separators, immediately above the required count of 1.
         assertParseFailure(parser,
                 SEARCH_AND_SEPARATOR + NAME_DESC_AMY + SEPARATOR + EMAIL_DESC_AMY,
                 MESSAGE_INVALID_FORMAT);
     }
 
+    // EPs: unexpected text before search flags or before update flags; neither section accepts a preamble.
     @Test
     public void parse_invalidPreamble_failure() {
-        // preamble before search criteria
+        // EP: nonempty preamble in the search section.
         assertParseFailure(parser,
                 PREAMBLE_NON_EMPTY + SEARCH_AND_SEPARATOR + NAME_DESC_AMY,
                 MESSAGE_INVALID_FORMAT);
 
-        // preamble before update fields
+        // EP: nonempty preamble in the update section.
         assertParseFailure(parser,
                 SEARCH_AND_SEPARATOR + " " + PREAMBLE_NON_EMPTY + NAME_DESC_AMY,
                 MESSAGE_INVALID_FORMAT);
     }
 
+    // EP: a search flag has no value; even optional fields require nonempty search criteria.
+    // Boundary value: search value length 0.
     @Test
     public void parse_emptySearchValue_failure() {
         // Unlike updates, every search field requires a nonempty value.
@@ -118,6 +122,7 @@ public class EditCommandParserTest {
         }
     }
 
+    // EPs: unsupported flag after a known search or update flag; it must not be absorbed into the value.
     @Test
     public void parse_unknownFlag_failure() {
         assertParseFailure(parser,
@@ -126,31 +131,37 @@ public class EditCommandParserTest {
                 SEARCH_AND_SEPARATOR + NAME_DESC_AMY + " x/value", MESSAGE_INVALID_FORMAT);
     }
 
+    // EPs: invalid search phone or invalid update value; all other arguments are valid in each case.
     @Test
     public void parse_invalidValue_failure() {
-        // invalid search value
+        // EP: search phone violates the phone format constraint.
         assertParseFailure(parser,
                 INVALID_PHONE_DESC + SEPARATOR + NAME_DESC_AMY,
                 Phone.MESSAGE_CONSTRAINTS);
 
-        // invalid update values
+        // EP: update name contains a forbidden character.
         assertParseFailure(parser,
                 SEARCH_AND_SEPARATOR + INVALID_NAME_DESC,
                 Name.MESSAGE_CONSTRAINTS);
+        // EP: update phone violates the phone format constraint.
         assertParseFailure(parser,
                 SEARCH_AND_SEPARATOR + INVALID_PHONE_DESC,
                 Phone.MESSAGE_CONSTRAINTS);
+        // EP: update email has an invalid format.
         assertParseFailure(parser,
                 SEARCH_AND_SEPARATOR + INVALID_EMAIL_DESC,
                 Email.MESSAGE_CONSTRAINTS);
+        // EP: update Telegram handle contains a forbidden character.
         assertParseFailure(parser,
                 SEARCH_AND_SEPARATOR + INVALID_TELEGRAM_DESC,
                 Telegram.MESSAGE_CONSTRAINTS);
+        // EP: update tag contains a forbidden character.
         assertParseFailure(parser,
                 SEARCH_AND_SEPARATOR + INVALID_TAG_DESC,
                 Tag.MESSAGE_CONSTRAINTS);
     }
 
+    // EP: all supported update fields supplied with valid values, including multiple distinct tags.
     @Test
     public void parse_allFieldsSpecified_success() {
         String userInput = SEARCH_AND_SEPARATOR
@@ -174,6 +185,7 @@ public class EditCommandParserTest {
         assertParseSuccess(parser, userInput, createExpectedCommand(descriptor));
     }
 
+    // EP: a nonempty proper subset of update fields supplied; omitted fields remain absent in the descriptor.
     @Test
     public void parse_someFieldsSpecified_success() {
         String userInput = SEARCH_AND_SEPARATOR + PHONE_DESC_BOB + EMAIL_DESC_AMY;
@@ -186,6 +198,8 @@ public class EditCommandParserTest {
         assertParseSuccess(parser, userInput, createExpectedCommand(descriptor));
     }
 
+    // EP: each supported update field supplied alone; parsing must not depend on another update.
+    // Boundary value: 1 update field, the minimum required after the separator.
     @Test
     public void parse_singleUpdateField_success() {
         assertParseSuccess(parser, SEARCH_AND_SEPARATOR + NAME_DESC_AMY,
@@ -208,6 +222,8 @@ public class EditCommandParserTest {
                 createExpectedCommand(new EditPersonDescriptorBuilder().withTags(VALID_TAG_FRIEND).build()));
     }
 
+    // EP: valid separator with no surrounding spaces; whitespace is not required for splitting sections.
+    // Boundary value: 0 spaces on either side of the separator.
     @Test
     public void parse_separatorWithoutSurroundingSpaces_success() {
         String userInput = PHONE_DESC_AMY.trim() + EDIT_SEPARATOR + NAME_DESC_AMY.trim();
@@ -216,6 +232,7 @@ public class EditCommandParserTest {
         assertParseSuccess(parser, userInput, createExpectedCommand(descriptor));
     }
 
+    // EP: multiple search fields and an update to a searched field; search and replacement values stay separate.
     @Test
     public void parse_multipleSearchFields_success() {
         String userInput = NAME_DESC_AMY + PHONE_DESC_AMY
@@ -235,6 +252,8 @@ public class EditCommandParserTest {
         assertParseSuccess(parser, userInput, expectedCommand);
     }
 
+    // EP: explicit empty update for a required field (name or phone); clearing must be rejected.
+    // Boundary value: required update value length 0.
     @Test
     public void parse_clearRequiredField_failure() {
         assertParseFailure(parser,
@@ -248,6 +267,8 @@ public class EditCommandParserTest {
                         PREFIX_PHONE));
     }
 
+    // EP: explicit empty optional scalar updates; empty values request clearing rather than omission.
+    // Boundary value: optional update value length 0.
     @Test
     public void parse_clearOptionalFields_success() {
         String userInput = SEARCH_AND_SEPARATOR
@@ -268,6 +289,8 @@ public class EditCommandParserTest {
         assertParseSuccess(parser, userInput, createExpectedCommand(descriptor));
     }
 
+    // EP: one empty occurrence of each collection flag requests clearing rather than toggling.
+    // Boundary value: 0 members supplied in each collection update.
     @Test
     public void parse_clearTagsAndGroups_success() {
         String userInput = SEARCH_AND_SEPARATOR + GROUP_EMPTY + TAG_EMPTY;
@@ -280,6 +303,7 @@ public class EditCommandParserTest {
         assertParseSuccess(parser, userInput, createExpectedCommand(descriptor));
     }
 
+    // EP: an empty and a nonempty occurrence of the same collection flag, tested in both orders.
     @Test
     public void parse_mixedClearAndToggle_failure() {
         assertParseFailure(parser,
@@ -299,6 +323,8 @@ public class EditCommandParserTest {
                 String.format(EditCommand.MESSAGE_MIXED_CLEAR_AND_TOGGLE, PREFIX_GROUP));
     }
 
+    // EP: the same empty collection flag repeated; clearing is only valid when that flag occurs alone.
+    // Boundary value: 2 empty occurrences, the first count exceeding the permitted single clear flag.
     @Test
     public void parse_repeatedEmptySetFields_failure() {
         assertParseFailure(parser,
@@ -309,6 +335,7 @@ public class EditCommandParserTest {
                 String.format(EditCommand.MESSAGE_MIXED_CLEAR_AND_TOGGLE, PREFIX_GROUP));
     }
 
+    // EP: identical nonempty collection flags repeated; duplicate values collapse to one requested member.
     @Test
     public void parse_repeatedNonemptySetFields_success() {
         String userInput = SEARCH_AND_SEPARATOR + TAG_DESC_FRIEND + TAG_DESC_FRIEND
@@ -319,6 +346,8 @@ public class EditCommandParserTest {
         assertParseSuccess(parser, userInput, createExpectedCommand(descriptor));
     }
 
+    // EP: identical scalar flag repeated in search or updates; equal values do not make repetition valid.
+    // Boundary value: 2 occurrences, the first count exceeding the permitted single scalar flag per section.
     @Test
     public void parse_repeatedScalarFields_failure() {
         Map<Prefix, String> scalarFields = Map.of(
@@ -340,6 +369,8 @@ public class EditCommandParserTest {
         });
     }
 
+    // EP: scalar flag repeated with conflicting values in search or updates; neither value silently wins.
+    // Boundary value: 2 occurrences, the first count exceeding the permitted single scalar flag per section.
     @Test
     public void parse_repeatedScalarFieldWithDifferentValues_failure() {
         assertParseFailure(parser,
