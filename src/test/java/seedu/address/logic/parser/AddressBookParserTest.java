@@ -57,7 +57,6 @@ public class AddressBookParserTest {
         assertTrue(parser.parseCommand(ClearCommand.COMMAND_WORD + " 3") instanceof ClearCommand);
     }
 
-
     @Test
     public void parseCommand_delete() throws Exception {
         ExactPersonMatchDescriptor descriptor = new ExactPersonMatchDescriptor();
