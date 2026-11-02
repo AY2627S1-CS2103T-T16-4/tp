@@ -213,7 +213,7 @@ The command has four main parts:
 * **Deletion:** Once exactly one contact is resolved, `DeleteCommand` calls `Model#deletePerson` and returns a success message containing the deleted contact's details. Criteria matching multiple contacts never trigger a bulk deletion.
 * **Persistence and undo:** `DeleteCommand#isUndoable` returns `true`. `LogicManager` saves the pre-execution address book snapshot to undo history after successful execution and persists the updated address book through `Storage`. Undo can therefore restore the deleted contact with its previous details and pin state.
 
-The activity diagram below expands the targeting decision inside `PersonTarget#resolve`. A missing or ambiguous match prevents deletion and does not record an undo state. An ambiguous match changes the displayed list to show the matching contacts, while leaving contact data unchanged. The successful path shows deletion followed by undo recording and a storage save attempt; storage error handling and UI updates are omitted.
+The activity diagram below summarises the delete command’s targeting and deletion flow. No matching contacts or multiple matching contacts prevent deletion, and neither case records an undo state. Multiple matches are displayed so the user can refine the search criteria. Undo recording, saving changes, and subsequent UI updates are omitted for simplicity.
 
 <puml src="diagrams/DeleteTargetingActivityDiagram.puml" alt="Delete targeting activity showing no-match, ambiguous-match, and unique-match paths" />
 
@@ -286,7 +286,7 @@ edit p/81231234 >> p/91234567 t/active t/friend
 1. `EditCommandParser` splits the arguments at `>>`. It creates a search predicate for phone `81231234` and an `EditPersonDescriptor` containing the replacement phone and tags to toggle.
 1. `PersonTarget#resolve` searches all contacts and returns John using his original phone number, even if he is hidden by the current filter.
 1. `createEditedPerson` constructs a replacement with phone `91234567`. `applySetEdit` removes `active` and adds `friend`, producing `{colleague, friend}`. Unspecified fields and the pin state are preserved.
-1. Since the phone changes, `EditCommand` calls `Model#hasPerson` to check the replacement's identity. If the phone were already in use, it would throw a `CommandException` before replacing the contact.
+1. `EditCommand` uses `Person#isSamePerson` to determine whether the phone number changed. Since it changed, the command calls `Model#hasPerson` to check whether another contact already has the new phone number. If so, it throws a `CommandException` before replacing the contact.
 1. The new phone is available, so the command calls `Model#setPerson` and returns the updated details. `LogicManager` records the pre-execution snapshot and attempts to save the address book.
 
 #### Edit design considerations
