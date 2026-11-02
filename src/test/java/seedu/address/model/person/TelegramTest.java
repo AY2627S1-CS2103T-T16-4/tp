@@ -10,9 +10,13 @@ public class TelegramTest {
 
     @Test
     public void fieldValues_validAndInvalidInputs() {
+
+        // valid telegram
         assertTrue(Telegram.isValidTelegram(""));
         assertTrue(Telegram.isValidTelegram("John123"));
         assertTrue(Telegram.isValidTelegram("john_doe"));
+
+        // invalid telegram
         assertFalse(Telegram.isValidTelegram(" "));
         assertFalse(Telegram.isValidTelegram("john-doe"));
         assertFalse(Telegram.isValidTelegram("john.doe"));
@@ -30,10 +34,15 @@ public class TelegramTest {
 
     @Test
     public void isValidTelegram() {
+
+        // null value
         assertThrows(NullPointerException.class, () -> Telegram.isValidTelegram(null));
 
+        // valid value
         assertTrue(Telegram.isValidTelegram("john_doe123"));
         assertTrue(Telegram.isValidTelegram(""));
+
+        // invalid value
         assertFalse(Telegram.isValidTelegram("john-doe"));
         assertFalse(Telegram.isValidTelegram("john.doe"));
         assertFalse(Telegram.isValidTelegram("john doe"));

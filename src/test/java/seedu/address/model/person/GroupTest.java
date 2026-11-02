@@ -10,9 +10,13 @@ public class GroupTest {
 
     @Test
     public void fieldValues_validAndInvalidInputs() {
+
+        // valid group
         assertTrue(Group.isValidGroup("CS2103"));
         assertTrue(Group.isValidGroup("a"));
         assertTrue(Group.isValidGroup("123"));
+
+        // invalid group
         assertFalse(Group.isValidGroup(""));
         assertFalse(Group.isValidGroup(" "));
         assertFalse(Group.isValidGroup("alpha beta"));
@@ -31,13 +35,18 @@ public class GroupTest {
 
     @Test
     public void isValidGroup() {
+
+        // null value
         assertThrows(NullPointerException.class, () -> Group.isValidGroup(null));
 
+        // invalid value
         assertFalse(Group.isValidGroup(""));
         assertFalse(Group.isValidGroup("alpha beta"));
         assertFalse(Group.isValidGroup("alpha-beta"));
         assertFalse(Group.isValidGroup("alpha_beta"));
         assertFalse(Group.isValidGroup("alpha;beta"));
+
+        // valid value
         assertTrue(Group.isValidGroup("CS2103"));
     }
 }

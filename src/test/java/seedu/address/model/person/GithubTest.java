@@ -10,10 +10,14 @@ public class GithubTest {
 
     @Test
     public void fieldValues_validAndInvalidInputs() {
+
+        // valid Github name
         assertTrue(Github.isValidGithub(""));
         assertTrue(Github.isValidGithub("John123"));
         assertTrue(Github.isValidGithub("john-doe_123"));
         assertTrue(Github.isValidGithub("john;doe"));
+
+        // invalid Github name
         assertFalse(Github.isValidGithub(" "));
         assertFalse(Github.isValidGithub(" john"));
         assertFalse(Github.isValidGithub("john "));
@@ -31,10 +35,16 @@ public class GithubTest {
 
     @Test
     public void isValidGithub() {
+
+        // null
         assertThrows(NullPointerException.class, () -> Github.isValidGithub(null));
+
+        // valid
         assertTrue(Github.isValidGithub("john-doe_123"));
         assertTrue(Github.isValidGithub("john;doe"));
         assertTrue(Github.isValidGithub(""));
+
+        // invalid
         assertFalse(Github.isValidGithub("john doe"));
         assertFalse(Github.isValidGithub("john\tdoe"));
     }

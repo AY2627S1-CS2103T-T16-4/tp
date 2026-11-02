@@ -10,9 +10,13 @@ public class EmailTest {
 
     @Test
     public void fieldValues_validAndInvalidInputs() {
+
+        // valid email
         assertTrue(Email.isValidEmail(""));
         assertTrue(Email.isValidEmail("john@example.com"));
         assertTrue(Email.isValidEmail("john.doe+1@example.com"));
+
+        // invalid email
         assertFalse(Email.isValidEmail("john;doe@example.com"));
         assertFalse(Email.isValidEmail("john@example/com"));
         assertFalse(Email.isValidEmail("john\tdoe@example.com"));

@@ -10,9 +10,13 @@ public class LinkedinTest {
 
     @Test
     public void fieldValues_validAndInvalidInputs() {
+
+        // valid Linkedin name
         assertTrue(Linkedin.isValidLinkedin(""));
         assertTrue(Linkedin.isValidLinkedin("John123"));
         assertTrue(Linkedin.isValidLinkedin("john-doe"));
+
+        // invalid Linkedin name
         assertFalse(Linkedin.isValidLinkedin(" "));
         assertFalse(Linkedin.isValidLinkedin("john_doe"));
         assertFalse(Linkedin.isValidLinkedin("john.doe"));
@@ -30,10 +34,15 @@ public class LinkedinTest {
 
     @Test
     public void isValidLinkedin() {
+
+        // null value
         assertThrows(NullPointerException.class, () -> Linkedin.isValidLinkedin(null));
 
+        // valid value
         assertTrue(Linkedin.isValidLinkedin("john-doe123"));
         assertTrue(Linkedin.isValidLinkedin(""));
+
+        //invalid value
         assertFalse(Linkedin.isValidLinkedin("john_doe"));
         assertFalse(Linkedin.isValidLinkedin("john.doe"));
         assertFalse(Linkedin.isValidLinkedin("john doe"));
