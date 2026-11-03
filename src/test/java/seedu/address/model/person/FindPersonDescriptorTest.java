@@ -100,10 +100,10 @@ public class FindPersonDescriptorTest {
         assertEquals(descriptor, descriptor);
 
         // null -> returns false
-        assertNotEquals(null, descriptor);
+        assertFalse(descriptor.equals(null));
 
         // different types -> returns false
-        assertNotEquals(1, descriptor);
+        assertFalse(descriptor.equals(1));
 
         // different name -> returns false
         FindPersonDescriptor other = new FindPersonDescriptor(descriptor);

@@ -145,6 +145,20 @@ public class ExportCommandTest {
     }
 
     @Test
+    public void execute_directoryBeneathRegularFile_throwsCommandExceptionWithGeneralMessage() throws Exception {
+        Path notADirectory = testFolder.resolve("data");
+        Files.writeString(notADirectory, "not a folder");
+
+        CommandException exception = assertThrows(CommandException.class, () ->
+                new ExportCommand(notADirectory.resolve("exports"), FIXED_CLOCK).execute(model));
+
+        // The folder cannot be created because its parent is a file. That is neither a permission error nor an
+        // already-existing-file error, so the general failure message is used.
+        assertTrue(exception.getMessage().startsWith("Could not export contacts due to the following error:"));
+        assertTrue(exception.getCause() instanceof IOException);
+    }
+
+    @Test
     public void execute_unwritableDirectory_throwsCommandExceptionWithPermissionMessage() throws Exception {
         Path readOnly = Files.createDirectory(testFolder.resolve("readonly"));
         // Skipped where folder permissions are not enforced, such as on Windows or when running as root.
