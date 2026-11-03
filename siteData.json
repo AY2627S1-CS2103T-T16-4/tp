@@ -58,6 +58,9 @@
         "pinned-contacts": "Pinned contacts",
         "undo-command": "Undo command",
         "export-command": "Export command",
+        "import-command": "Import command",
+        "sort-command": "Sort command",
+        "help-and-list-commands": "Help and list commands",
         "command-history": "Command history",
         "documentation-logging-testing-dev-ops": "Documentation, logging, testing, dev-ops",
         "appendix-requirements": "Appendix: Requirements",
@@ -73,7 +76,13 @@
         "editing-a-person": "Editing a person",
         "finding-a-person": "Finding a person",
         "saving-data": "Saving data",
-        "exporting-contacts": "Exporting contacts"
+        "exporting-contacts": "Exporting contacts",
+        "setup-for-import-help-list-unpin-and-sort-manual-checks": "Setup for import, help, list, unpin and sort manual checks",
+        "importing-contacts": "Importing contacts",
+        "viewing-help": "Viewing help",
+        "listing-contacts": "Listing contacts",
+        "unpinning-contacts": "Unpinning contacts",
+        "sorting-contacts": "Sorting contacts"
       },
       "headingKeywords": {}
     },
@@ -109,7 +118,8 @@
       "headings": {
         "testing-guide": "Testing guide",
         "running-tests": "Running tests",
-        "types-of-tests": "Types of tests"
+        "types-of-tests": "Types of tests",
+        "command-interaction-coverage": "Command interaction coverage"
       },
       "headingKeywords": {}
     },
