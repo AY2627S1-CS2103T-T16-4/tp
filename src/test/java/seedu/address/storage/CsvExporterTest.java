@@ -79,6 +79,19 @@ public class CsvExporterTest {
     }
 
     @Test
+    public void toCsv_githubWithCommaOrQuote_quotedAndEscaped() {
+        Person withComma = new PersonBuilder().withGithub("a,b").build();
+        Person withQuote = new PersonBuilder().withGithub("x\"y").build();
+
+        String csv = CsvExporter.toCsv(List.of(withComma, withQuote));
+
+        // a comma makes the cell quoted
+        assertTrue(csv.contains(",\"a,b\","));
+        // a quote makes the cell quoted, and the quote itself is doubled
+        assertTrue(csv.contains(",\"x\"\"y\","));
+    }
+
+    @Test
     public void write_validList_writesUtf8FileWithBom() throws IOException {
         Path file = testFolder.resolve("contacts.csv");
         List<Person> persons = List.of(new PersonBuilder().withAddress("junhan funky street").build());
