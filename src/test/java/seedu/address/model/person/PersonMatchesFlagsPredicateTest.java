@@ -200,10 +200,10 @@ public class PersonMatchesFlagsPredicateTest {
         assertEquals(firstPredicate, new PersonMatchesFlagsPredicate(firstDescriptor));
 
         // different types -> returns false
-        assertNotEquals(1, firstPredicate);
+        assertFalse(firstPredicate.equals(1));
 
         // null -> returns false
-        assertNotEquals(null, firstPredicate);
+        assertFalse(firstPredicate.equals(null));
 
         // different descriptor -> returns false
         assertNotEquals(firstPredicate, secondPredicate);
