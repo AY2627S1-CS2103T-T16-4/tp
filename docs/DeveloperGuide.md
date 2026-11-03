@@ -21,6 +21,7 @@ GitMate is based on [AddressBook-Level3](https://github.com/se-edu/addressbook-l
 - Codex was used to draft and refine project documentation, including the User Guide and Developer Guide.
 - @mannymacman used Codex to assist with implementing and refining code related to the `edit` and `delete` commands.
 - @junh4nn used Claude to assist with implementing and refining code related to the `find` and `export` commands.
+- @jonaskke used ChatGPT to assist with implementing and refining code related to navigating command history, `add` and `undo` commands.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -195,6 +196,9 @@ The `add` command creates a new contact from the details provided by the user. F
 ```text
 add n/John Doe p/81231234 a/123 Clementi Ave 3 e/john.doe@example.com gh/johndoe li/john-doe tg/johndoe g/ProjectTeam t/active t/colleague
 ```
+
+#### Add implementation
+
 Its implementation has five main parts:
 
 * **Parsing:** `AddCommandParser` tokenizes the input using the supported prefixes: name `n/`, phone `p/`, address `a/`, email `e/`, GitHub `gh/`, LinkedIn `li/`, Telegram `tg/`, group `g/`, and tag `t/`. The name and phone prefixes are required. Unsupported text, missing required fields, invalid values, and repeated single-value prefixes are rejected.
@@ -338,11 +342,12 @@ The activity diagram summarizes pinning, grouping unsuccessful requests into one
 
 ### Undo command
 
-The `undo` command restores the address book to the state before the most recent undoable command.
+The `undo` command restores the address book to the state before the most recent successful undoable command.
 
 ```text
 undo
 ```
+#### Undo implementation
 
 Its implementation has four main parts:
 
@@ -419,6 +424,8 @@ Neither command records an undo snapshot. An undo after help or list still targe
 ### Command history
 
 The command history feature allows users to reuse successfully executed commands with the `↑` and `↓` arrow keys.
+
+#### Command history implementation
 
 Its implementation has three main parts:
 

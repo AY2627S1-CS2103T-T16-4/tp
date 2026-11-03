@@ -105,6 +105,7 @@ Format: `add n/NAME p/PHONE [a/ADDRESS] [e/EMAIL] [gh/GITHUB] [li/LINKEDIN] [tg/
 <box type="tip" seamless>
 
 **Notes:**
+* A contact must have a unique phone number.
 * A person can have any number of groups and tags, including zero.
 * Prefixes are case-sensitive. For example, use `n/`, not `N/`.
 </box>
@@ -247,8 +248,7 @@ Each example is independent and assumes the specified contact exists.
 
 ### Undoing previous command: `undo`
 
-Restores the address book to the state before the most recent data-changing
-command.
+Restores the address book to the state before the most recent successful data-changing command.
 
 Format: `undo`
 
