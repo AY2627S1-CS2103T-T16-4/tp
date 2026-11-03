@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static seedu.address.logic.commands.CommandTestUtil.PHONE_DESC_AMY;
 import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.AMY;
+import static seedu.address.testutil.TypicalPersons.BENSON;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -19,10 +20,12 @@ import seedu.address.logic.commands.UndoCommand;
 import seedu.address.logic.commands.UnpinCommand;
 import seedu.address.logic.commands.exceptions.CommandException;
 import seedu.address.model.ModelManager;
+import seedu.address.model.UserPrefs;
 import seedu.address.model.person.Person;
 import seedu.address.storage.JsonAddressBookStorage;
 import seedu.address.storage.JsonUserPrefsStorage;
 import seedu.address.storage.StorageManager;
+import seedu.address.testutil.PersonBuilder;
 
 /** Verifies unpin through command dispatch, undo history, and real JSON storage. */
 public class UnpinCommandIntegrationTest {
@@ -73,5 +76,60 @@ public class UnpinCommandIntegrationTest {
                 logic.execute(UnpinCommand.COMMAND_WORD + PHONE_DESC_AMY));
         assertFalse(model.undo());
         assertEquals(List.of(AMY), model.getAddressBook().getPersonList());
+    }
+
+    @Test
+    public void execute_ambiguousUnpin_preservesPreviousUndoEntry() throws Exception {
+        Person other = new PersonBuilder(BENSON).withName(AMY.getName().fullName).build();
+        assertRejectedUnpinPreservesUndo("unpin n/" + AMY.getName().fullName,
+                UnpinCommand.MESSAGE_AMBIGUOUS_PERSON, other, List.of(new Person(other, true), AMY));
+    }
+
+    @Test
+    public void execute_alreadyUnpinned_preservesPreviousUndoEntry() throws Exception {
+        assertRejectedUnpinPreservesUndo("unpin" + PHONE_DESC_AMY,
+                UnpinCommand.MESSAGE_ALREADY_UNPINNED, BENSON, List.of(AMY));
+    }
+
+    @Test
+    public void execute_noMatch_preservesPreviousUndoEntry() throws Exception {
+        assertRejectedUnpinPreservesUndo("unpin n/Missing Person",
+                UnpinCommand.MESSAGE_PERSON_NOT_FOUND, BENSON, List.of(AMY));
+    }
+
+    @Test
+    public void execute_unpin_reloadPreservesDetailsAndPinnedPriority() throws Exception {
+        Person pinnedBenson = new Person(BENSON, true);
+        model.addPerson(new Person(AMY, true));
+        model.addPerson(pinnedBenson);
+
+        logic.execute("unpin" + PHONE_DESC_AMY);
+
+        ModelManager reloaded = new ModelManager(addressBookStorage.readAddressBook().orElseThrow(), new UserPrefs());
+        assertEquals(List.of(AMY, pinnedBenson), reloaded.getAddressBook().getPersonList());
+        assertEquals(List.of(pinnedBenson, AMY), reloaded.getFilteredPersonList());
+    }
+
+    /** Checks a rejected request against a nonempty undo stack and the JSON saved by the preceding unpin. */
+    private void assertRejectedUnpinPreservesUndo(String command, String message, Person other,
+            List<Person> expectedVisible) throws Exception {
+        Person pinnedAmy = new Person(AMY, true);
+        Person pinnedOther = new Person(other, true);
+        model.addPerson(pinnedAmy);
+        model.addPerson(pinnedOther);
+        logic.execute("unpin" + PHONE_DESC_AMY);
+        logic.execute("find p/" + AMY.getPhone().value);
+        assertEquals(List.of(AMY), model.getFilteredPersonList());
+
+        // Matching uses all contacts: the ambiguous case must include the hidden, still-pinned contact.
+        assertThrows(CommandException.class, message, () -> logic.execute(command));
+
+        assertEquals(List.of(AMY, pinnedOther), model.getAddressBook().getPersonList());
+        assertEquals(model.getAddressBook(), addressBookStorage.readAddressBook().orElseThrow());
+        assertEquals(expectedVisible, model.getFilteredPersonList());
+        assertEquals(UndoCommand.MESSAGE_SUCCESS, logic.execute("undo").getFeedbackToUser());
+        assertEquals(List.of(pinnedAmy, pinnedOther), model.getAddressBook().getPersonList());
+        assertEquals(model.getAddressBook(), addressBookStorage.readAddressBook().orElseThrow());
+        assertEquals(UndoCommand.MESSAGE_NO_UNDO, logic.execute("undo").getFeedbackToUser());
     }
 }

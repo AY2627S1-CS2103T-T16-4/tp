@@ -42,6 +42,7 @@ public class ListCommandTest {
 
     @Test
     public void execute_emptyAddressBook_showsEmptyMessage() {
+        // This partition has no stored contacts, so removing a filter cannot reveal any results.
         model = new ModelManager();
         expectedModel = new ModelManager();
 
@@ -51,6 +52,7 @@ public class ListCommandTest {
 
     @Test
     public void execute_listHasNoMatches_showsEverything() {
+        // Zero visible matches is different from zero stored contacts: list must reveal the hidden contacts.
         model.updateFilteredPersonList(person -> false);
         assertTrue(model.getFilteredPersonList().isEmpty());
 

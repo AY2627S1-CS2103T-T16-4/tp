@@ -22,6 +22,7 @@ import seedu.address.model.SortSettings;
 import seedu.address.model.SortSettings.Field;
 import seedu.address.model.person.Person;
 import seedu.address.storage.CsvExporter;
+import seedu.address.testutil.PersonBuilder;
 
 public class ImportCommandTest {
     @TempDir
@@ -53,7 +54,9 @@ public class ImportCommandTest {
         model.addPerson(ALICE);
         AddressBook before = new AddressBook(model.getAddressBook());
         Path file = write(List.of(BENSON, ALICE));
+        // BENSON is valid, but must not be committed before the duplicate is discovered.
         CommandException error = assertThrows(CommandException.class, () -> new ImportCommand(file).execute(model));
+        // The header is record 1, BENSON is record 2, and the duplicate ALICE is record 3.
         assertEquals(String.format(ImportCommand.MESSAGE_DUPLICATE, 3, ALICE.getPhone().value), error.getMessage());
         assertEquals(before, model.getAddressBook());
     }
@@ -68,6 +71,7 @@ public class ImportCommandTest {
     @Test
     public void execute_invalidLaterRecord_rejectsWholeBatch() throws Exception {
         Path file = write(List.of(ALICE, BENSON));
+        // The later invalid record must reject the valid first row as well: imports are atomic.
         Files.writeString(file, Files.readString(file).replace(BENSON.getPhone().value, "invalid"));
         assertThrows(CommandException.class, () -> new ImportCommand(file).execute(model));
         assertTrue(model.getAddressBook().getPersonList().isEmpty());
@@ -75,9 +79,25 @@ public class ImportCommandTest {
 
     @Test
     public void execute_headerOnly_rejectsEmptyBatch() throws Exception {
+        // CSV reading permits zero records, but the command rejects a batch with nothing to import.
+        // Such a rejection must not create a meaningless undo step.
         Path file = write(List.of());
         assertEquals(ImportCommand.MESSAGE_EMPTY,
                 assertThrows(CommandException.class, () -> new ImportCommand(file).execute(model)).getMessage());
+        assertFalse(model.undo());
+    }
+
+    @Test
+    public void execute_samePhoneDifferentDetails_rejectsWholeBatch() throws Exception {
+        model.addPerson(ALICE);
+        Person duplicate = new PersonBuilder(BENSON).withPhone(ALICE.getPhone().value).build();
+        Path file = write(List.of(BENSON, duplicate));
+
+        // Identity is determined by phone, not full-object equality or matching names.
+        CommandException error = assertThrows(CommandException.class, () -> new ImportCommand(file).execute(model));
+
+        assertEquals(String.format(ImportCommand.MESSAGE_DUPLICATE, 3, ALICE.getPhone().value), error.getMessage());
+        assertEquals(List.of(ALICE), model.getAddressBook().getPersonList());
         assertFalse(model.undo());
     }
 

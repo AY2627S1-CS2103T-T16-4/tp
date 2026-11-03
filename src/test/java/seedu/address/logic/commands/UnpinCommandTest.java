@@ -59,18 +59,22 @@ public class UnpinCommandTest {
 
     @Test
     public void execute_noMatch_leavesModelUnchanged() {
+        // Boundary: zero matches is below the one exact match required to change a pin state.
         assertCommandFailure(commandWith(d -> d.setName(new Name("Unknown Person"))), model,
                 UnpinCommand.MESSAGE_PERSON_NOT_FOUND);
     }
 
     @Test
     public void execute_alreadyUnpinned_leavesModelUnchanged() {
+        // A unique match is insufficient when it is already unpinned; this is not a successful no-op.
         assertCommandFailure(commandWith(d -> d.setPhone(ALICE.getPhone())), model,
                 UnpinCommand.MESSAGE_ALREADY_UNPINNED);
     }
 
     @Test
     public void execute_ambiguousMatch_displaysAllMatchesWithoutUnpinning() {
+        // All matching contacts count, including already-unpinned ones. Failure may replace the display
+        // filter to show the ambiguity, but must leave every stored contact unchanged.
         Person pinnedJack = new Person(JACK, true);
         model.setPerson(JACK, pinnedJack);
         AddressBook original = new AddressBook(model.getAddressBook());
@@ -83,6 +87,7 @@ public class UnpinCommandTest {
 
     @Test
     public void execute_hiddenContact_preservesFilter() throws Exception {
+        // A unique match may be outside the displayed list; unpin searches the whole address book.
         model.setPerson(ALICE, new Person(ALICE, true));
         model.updateFilteredPersonList(person -> person.equals(BENSON));
         commandWith(d -> d.setPhone(ALICE.getPhone())).execute(model);
@@ -92,6 +97,7 @@ public class UnpinCommandTest {
 
     @Test
     public void execute_sortedView_movesContactIntoSortedUnpinnedSection() throws Exception {
+        // Unpin changes section membership, then the active comparator determines the new position.
         Model sortedModel = new ModelManager();
         sortedModel.addPerson(new Person(ALICE, true));
         Person pinnedBenson = new Person(BENSON, true);
