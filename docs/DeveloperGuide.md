@@ -20,7 +20,7 @@ GitMate is based on [AddressBook-Level3](https://github.com/se-edu/addressbook-l
 - Codex was used to assist with debugging, reviewing changes, and developing test cases.
 - Codex was used to draft and refine project documentation, including the User Guide and Developer Guide.
 - @mannymacman used Codex to assist with implementing and refining code related to the `edit` and `delete` commands.
-- @Rio-maker used Codex to assist with implementing and refining code related to the `unpin`, `sort` and `import` commands.
+- @junh4nn used Claude to assist with implementing and refining code related to the `find` and `export` commands.
 
 --------------------------------------------------------------------------------------------------------------------
 
@@ -819,6 +819,10 @@ Priorities: High (must have) - `* * *`, Medium (nice to have) - `* *`, Low (unli
 * **Fast typist**: A user who types at least 60 words per minute.
 * **Local storage**: The data file on the user's own computer where GitMate saves contacts, so no internet connection or server is needed.
 * **Mainstream OS**: Windows, Linux, and macOS.
+* **Flag (prefix)**: A short marker such as `n/` or `p/` that identifies a contact field in a command, for example `n/John Doe` supplies the name. The User Guide calls these flags and the Developer Guide also calls them prefixes.
+* **Prefix matching**: How `find` compares a search value with a field: the value must match the start of the field, ignoring case (except GitHub usernames). `n/Al` matches `Alex Yeoh`, but `n/Yeoh` does not.
+* **Filter**: The search that decides which contacts the list currently shows. `find` sets it and it stays active until `list` is run. Commands that identify a contact by its details, such as `delete` and `edit`, ignore it.
+* **CSV (comma-separated values)**: A plain-text table format where each line is a row and cells are separated by commas. `export` writes contacts in this format, and spreadsheet applications can open it.
 --------------------------------------------------------------------------------------------------------------------
 
 ## **Appendix: Instructions for manual testing**
