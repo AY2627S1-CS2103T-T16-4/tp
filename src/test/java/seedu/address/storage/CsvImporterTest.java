@@ -145,6 +145,8 @@ public class CsvImporterTest {
 
     @Test
     public void read_headerOnly_returnsEmptyList() throws Exception {
+        // The storage layer accepts a structurally valid CSV with no data rows.
+        // ImportCommand separately decides that an empty batch is not an actionable import.
         assertEquals(List.of(), read(CsvExporter.HEADER + EOL));
     }
 

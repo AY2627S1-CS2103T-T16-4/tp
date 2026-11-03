@@ -37,6 +37,8 @@ public class SortCommandTest {
     @Test
     public void execute_name_sortsLiveViewWithoutChangingStoredOrder() {
         addContacts();
+        // Keep the original reference to prove that sorting updates the existing observable view.
+        // Stored order is checked separately because display sorting must not rearrange saved contacts.
         ObservableList<Person> view = model.getFilteredPersonList();
         CommandResult result = new SortCommand(Field.NAME, false).execute(model);
         assertEquals("Sorted contacts by name (ascending)." + SortCommand.MESSAGE_SESSION_ONLY,
@@ -60,6 +62,7 @@ public class SortCommandTest {
         new SortCommand(Field.GROUP, false).execute(model);
         assertEquals(List.of(multipleGroups, BENSON, CARL, ungrouped), model.getFilteredPersonList());
         new SortCommand(Field.GROUP, true).execute(model);
+        // Descending reverses the group key only: name ties stay ascending and missing groups stay last.
         assertEquals(List.of(CARL, multipleGroups, BENSON, ungrouped), model.getFilteredPersonList());
     }
 
@@ -72,6 +75,24 @@ public class SortCommandTest {
         assertEquals(List.of(lowercaseAlice, BENSON), model.getFilteredPersonList());
         new SortCommand(Field.NAME, true).execute(model);
         assertEquals(List.of(BENSON, lowercaseAlice), model.getFilteredPersonList());
+    }
+
+    @Test
+    public void execute_equalNames_preservesStoredOrderWithinEachPinSection() {
+        Person first = new PersonBuilder(BENSON).withName("Same Name").build();
+        Person second = new PersonBuilder(ALICE).withName("Same Name").build();
+        Person pinnedFirst = new Person(new PersonBuilder(CARL).withName("Same Name").build(), true);
+        Person pinnedSecond = new Person(new PersonBuilder(DANIEL).withName("Same Name").build(), true);
+        List<Person> stored = List.of(first, pinnedFirst, second, pinnedSecond);
+        stored.forEach(model::addPerson);
+
+        // Interleave pin states and use phone values in descending order within each section.
+        // Neither reversing all ties nor sorting equal names by phone may change their stored order.
+        for (boolean descending : List.of(false, true)) {
+            new SortCommand(Field.NAME, descending).execute(model);
+            assertEquals(List.of(pinnedFirst, pinnedSecond, first, second), model.getFilteredPersonList());
+            assertEquals(stored, model.getAddressBook().getPersonList());
+        }
     }
 
     @Test
@@ -180,6 +201,8 @@ public class SortCommandTest {
         CommandResult result = parser.parseCommand("sort tag desc cont").execute(model);
         assertEquals("Sorted contacts by tag (descending)." + SortCommand.MESSAGE_PERSISTENT,
                 result.getFeedbackToUser());
+        // The alphabetically first tag is the key even in descending order; missing tags remain last.
+        // Equal tag keys still use ascending names, so ALICE remains ahead of BENSON.
         assertEquals(List.of(carl, alice, benson, daniel), model.getFilteredPersonList());
         assertEquals(new SortSettings(Field.TAG, true), model.getUserPrefs().getSavedSortSettings());
 

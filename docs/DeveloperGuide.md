@@ -380,6 +380,42 @@ Its implementation has four main parts:
 * **Writing:** `CsvExporter#write` creates any missing parent folder, then opens the file with `CREATE_NEW`, so an existing file is never overwritten. `ExportCommand` names the file `contacts-yyyyMMdd-HHmmss.csv` from a `Clock`, which tests replace with a fixed one. `CsvExporter` writes a byte order mark, the header row, and one CRLF-terminated row per contact. Groups and tags are sorted alphabetically and joined with semicolons. A cell starting with `=`, `+`, `-`, `@`, a tab, or a carriage return gets a leading apostrophe to prevent spreadsheet formula injection, and a cell containing a comma, quote, or line break is quoted. `CsvImporter` checks its header against `CsvExporter.HEADER`, so the two stay in step.
 * **Errors and no undo:** `CsvExporter#write` throws `FileAlreadyExistsException` both when the file exists (from `CREATE_NEW`) and when the export folder is actually a regular file (from creating the folder), so `ExportCommand` checks `Files.exists` to choose between the file-exists message and the general failure message. Other `IOException`s also give the failure message. `ExportCommand` does not override `Command#isUndoable`, which returns `false`, and leaves the model unchanged. The new file is its only effect.
 
+### Import command
+
+The `import` command appends a batch of contacts from the CSV format produced by `export`:
+
+```text
+import data/contacts.csv
+```
+
+Its implementation has four main parts:
+
+* **Parsing and reading:** `ImportCommandParser` treats the entire trimmed argument as a file path, preserving embedded spaces. It rejects an absent or invalid path. `CsvImporter#read` reads UTF-8, accepts an optional byte order mark, and checks the header against `CsvExporter.HEADER`. It handles quoted cells and validates each contact field before returning the records. Fields and group/tag members are trimmed; one leading spreadsheet-protection apostrophe is removed when followed by an export formula trigger. Pin values accept `true` and `false` without regard to case.
+* **Batch validation:** `ImportCommand` rejects a header-only file because there are no contacts to import. It adds the parsed contacts to a copy of the current address book, checking phone-number identity against both existing contacts and earlier records in the batch. Different names or other details do not make a repeated phone number valid. Duplicate errors identify the CSV record, counting the header as record 1.
+* **Model update:** Only after the entire batch passes validation does the command replace the live address book with the updated copy. Invalid records and duplicates therefore cannot leave an earlier valid row partially imported. The active filter and sort remain in effect, and imported pin states are retained; a successfully imported contact may remain hidden by the current filter.
+* **Persistence and undo:** After successful command execution, `LogicManager` records one snapshot for the whole batch and saves the address book through `Storage`. Each undo removes one successful batch, rather than one contact. Read or validation failures occur before this snapshot is recorded and preserve existing undo history. This guarantee does not imply rollback after a later JSON-save failure: saving occurs after the model update and undo snapshot.
+
+### Sort command
+
+The `sort` command changes the order of the displayed contacts without rearranging the stored address-book list:
+
+```text
+sort name desc cont
+```
+
+* **Parsing:** `SortCommandParser` accepts `name`, `group`, or `tag`, followed by an optional `asc` or `desc` direction and an optional `cont` or `none` persistence mode. Keywords are case-sensitive. The defaults are ascending and session-only. Invalid keywords, extra tokens, or tokens in the wrong order are rejected before the model is changed.
+* **Live display:** `SortCommand` supplies a `SortSettings` value to `ModelManager#sortFilteredPersonList`. The model applies a comparator to the observable sorted view while retaining the current filter. Additions, edits and restored contacts are ordered by that comparator without another sort command. Pinned contacts remain first, with sorting applied separately within each pin section.
+* **Comparison rules:** Name comparison ignores case. For group/tag sorting, the alphabetically first value is the contact's key, even in descending order. Contacts without a value remain last within their pin section in either direction. Equal group/tag keys use ascending name order; remaining ties use stored position. Descending sorting does not reverse these tie-breakers.
+* **Preferences and undo:** `cont` stores the sort setting in `UserPrefs` for reuse at startup. A session-only sort, including explicit `none`, clears any earlier saved sort preference but continues to order the current session's live view. Preferences are saved when the app shuts down and applied by `ModelManager` when it is constructed at startup. Sorting does not create an undo entry; undoing an earlier contact mutation retains the active sort.
+
+### Help and list commands
+
+`AddressBookParser` creates `HelpCommand` and `ListCommand` directly. `HelpCommand` joins the supported command usage sections into feedback for the result display. Its `CommandResult` does not request a separate help window or exit, and `LogicManager` does not request a contact-selection reset for help. Calling help repeatedly leaves the filter and contact data unchanged.
+
+`ListCommand` sets the filter to `Model.PREDICATE_SHOW_ALL_PERSONS`. It restores all contacts to the view while retaining pin priority, the active comparator and the saved sort preference. An empty filtered view is not necessarily an empty address book: the empty-list message is returned only when there are no contacts after removing the filter. Repeating list has the same result, and `LogicManager` requests selection of the first visible contact.
+
+Neither command records an undo snapshot. An undo after help or list still targets the preceding undoable contact mutation; it does not restore an earlier filter. Successful executions still pass through `LogicManager`'s address-book saving step, although these commands do not modify contact data.
+
 ### Command history
 
 The command history feature allows users to reuse successfully executed commands with the `↑` and `↓` arrow keys.
@@ -1152,3 +1188,91 @@ Run the cases in order. Exported files are not removed by the app, so delete the
       Expected: Each reports an invalid command format and displays usage guidance. No new file appears in the `data` folder.
 
 The errors for a file name that already exists and for a folder that cannot be written to are hard to trigger by hand. `ExportCommandTest` covers them.
+
+### Setup for import, help, list, unpin and sort manual checks
+
+Use a separate test copy of the app in its own folder. Before **each** of the five sections below, run the following commands in that copy. `clear` deletes its contacts, so do not use your normal address book. The two Alex contacts intentionally share a name but have different phone numbers.
+
+```text
+clear
+sort name asc none
+add n/Check Alex p/81110201 g/checkteam
+add n/Check Alex p/81110202 g/checkteam
+add n/Check Beth p/81110203 g/otherteam
+list
+```
+
+The initial displayed order is Alex (`81110201`), Alex (`81110202`), then Beth (`81110203`). Undo history already contains the setup commands; do not expect an empty undo stack in these manual checks. After finishing, close the test app and discard its test folder, including any CSV fixtures created below.
+
+### Importing contacts
+
+Create `data/manual-import.csv` in the test app's working directory as a UTF-8 text file with exactly this content:
+
+```csv
+name,phone,email,address,groups,github,linkedin,telegram,tags,pinned
+Check New,81110204,,,checkteam,,,,,false
+Check Duplicate,81110201,,,checkteam,,,,,false
+```
+
+1. Rejecting a duplicate after a valid row
+
+   Run `add n/Check Previous p/81110205`, `sort name desc cont`, then `find p/81110203`. Run `import data/manual-import.csv`.<br>
+   Expected: The error identifies record 3 and phone `81110201`. Only Beth remains visible. Run `list`: Check Previous is still present, Check New was not partially imported, and descending sorting remains active. Run `undo`: Check Previous is removed, demonstrating that the failed import did not replace its undo entry.
+
+1. Rejecting an invalid later row
+
+   In the same CSV, replace the second row's phone `81110201` with `invalid`. Run `import data/manual-import.csv`.<br>
+   Expected: The error identifies invalid record 3. No Check New contact is added and the three setup contacts remain unchanged. Do not undo this rejected operation.
+
+1. Importing and undoing a whole batch
+
+   Change `invalid` to the unused phone `81110206`, then run `find p/81110203` and `import data/manual-import.csv`.<br>
+   Expected: Two contacts are imported, while only Beth remains visible. Run `list` to see all five contacts, then `undo`. Both imported contacts disappear together; the three setup contacts remain and descending sorting is retained.
+
+### Viewing help
+
+Run the shared setup first. Run `add n/Check Temporary p/81110204`, then `find p/81110203`.
+
+1. Run `help` twice.<br>
+   Expected: Usage instructions appear in the result display, including import, unpin, sort and list. No separate help window opens. Only Beth remains visible and the selected contact does not reset because of help.
+
+1. Run `undo`, then `list`.<br>
+   Expected: Check Temporary is removed and the three setup contacts remain. The help calls did not add an undo entry.
+
+### Listing contacts
+
+Run the shared setup first, then run `pin p/81110201`, `sort name desc cont`, and `find n/No Such Contact`.
+
+1. Run `list` twice.<br>
+   Expected: Both calls show Alex (`81110201`, pinned), Beth (`81110203`), then Alex (`81110202`). A search with no matches does not mean the address book is empty. Repeating list leaves the order unchanged.
+
+1. Run `add n/Check Temporary p/81110204`, `find p/81110204`, `list`, then `undo`.<br>
+   Expected: Check Temporary is removed, and all three setup contacts remain visible in the order above. List did not add an undo entry, and undo does not restore the earlier filter for Check Temporary.
+
+### Unpinning contacts
+
+Run the shared setup first. Run `pin p/81110201`, `pin p/81110202`, `unpin p/81110201`, then `find p/81110201`.
+
+1. Run `unpin n/Check Alex`.<br>
+   Expected: The request is ambiguous even though only one Alex was visible. Both Alex contacts are now displayed, with pinned Alex (`81110202`) first. Alex (`81110201`) remains unpinned; the rejected request changes neither contact's pin state.
+
+1. Run `undo`.<br>
+   Expected: Alex (`81110201`) becomes pinned again, undoing the earlier successful unpin. Both Alex contacts remain visible. The ambiguous request did not replace the previous undo entry.
+
+1. Run `unpin p/81110201` again, exit normally, relaunch the same test copy, then run `list`.<br>
+   Expected: Alex (`81110202`) remains pinned and appears first. Alex (`81110201`) remains unpinned, followed by Beth. The contacts retain their original names, phones and groups after reload.
+
+### Sorting contacts
+
+Run the shared setup first. These checks start with no pinned contacts.
+
+1. Run `sort name desc cont`, then exit normally and relaunch the same test copy.<br>
+   Expected: Beth appears first, followed by Alex (`81110201`) and Alex (`81110202`). The saved descending preference is applied at startup; the equal-name contacts retain their addition order.
+
+1. Run `find g/checkteam`, then `sort name sideways cont`.<br>
+   Expected: An invalid-format error is shown. Both Alex contacts remain visible in their previous order. Run `list`: Beth is first again, proving that the invalid request did not replace the active comparator.
+
+1. Run `sort name asc none`, then exit normally and relaunch.<br>
+   Expected: The current session sorts ascending and clears the previously saved descending preference. After restart, contacts follow addition order: Alex (`81110201`), Alex (`81110202`), Beth. The equivalent command without `none`, `sort name asc`, also clears the saved preference.
+
+The automated `SortPreferencesStorageTest` additionally checks the serialized preference value, distinguishing an explicitly saved ascending sort from having no saved sort at all.

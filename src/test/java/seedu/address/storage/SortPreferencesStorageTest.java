@@ -52,6 +52,8 @@ public class SortPreferencesStorageTest {
 
     @Test
     public void sessionOnlySort_reload_clearsEarlierPreference() throws Exception {
+        // Both omitted persistence and explicit "none" replace an earlier saved preference.
+        // The current session stays sorted, but restart returns to stored order.
         for (String command : List.of("sort name asc", "sort name asc none")) {
             ModelManager model = new ModelManager();
             model.addPerson(DANIEL);
