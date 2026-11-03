@@ -181,7 +181,7 @@ Format: `find [n/NAME] [p/PHONE_NUMBER] [e/EMAIL] [a/ADDRESS] [gh/GITHUB] [li/LI
 
 **Viewing results:**
 
-* The contact list shows only the matching contacts, with pinned contacts first. If no contact matches, an error names the flags searched.
+* The contact list shows only the matching contacts, with pinned contacts first. If no contact matches, the list is empty and a message names the flags searched.
 * The filter stays active when you run other commands, such as `sort`. Use `list` to show all contacts again.
 * `find` only changes the contacts shown, so it cannot be reversed with `undo`.
 
